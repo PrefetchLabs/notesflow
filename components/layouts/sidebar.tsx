@@ -4,12 +4,14 @@ import { ChevronRight, FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/components/layouts/user-profile';
-import { FolderTree } from '@/components/layouts/folder-tree';
+import { DraggableFolderTree } from '@/components/layouts/draggable-folder-tree';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useFolders } from '@/hooks/useFolders';
+import { useState } from 'react';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -18,6 +20,8 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter();
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const { folders, isLoading, createFolder, updateFolder, deleteFolder, updateFolderPositions } = useFolders();
 
   const handleCreateNote = async () => {
     try {
@@ -39,6 +43,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         body: JSON.stringify({
           title: 'Untitled Note',
           content: defaultContent,
+          folderId: selectedFolderId,
         }),
       });
       
@@ -147,7 +152,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Folder Tree Section */}
       <ScrollArea className="flex-1">
         <div className="p-4">
-          <FolderTree collapsed={collapsed} />
+          {isLoading ? (
+            <div className="space-y-2">
+              <div className="h-4 w-full animate-pulse rounded bg-muted" />
+              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+            </div>
+          ) : (
+            <DraggableFolderTree
+              folders={folders}
+              collapsed={collapsed}
+              onCreateFolder={createFolder}
+              onUpdateFolder={updateFolder}
+              onDeleteFolder={deleteFolder}
+              onUpdatePositions={updateFolderPositions}
+              onSelectFolder={setSelectedFolderId}
+              selectedFolderId={selectedFolderId}
+            />
+          )}
         </div>
       </ScrollArea>
 

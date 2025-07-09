@@ -161,21 +161,22 @@ export default function NotesPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="group relative cursor-pointer rounded-lg border bg-card p-4 transition-all hover:shadow-md"
+                className="group relative cursor-pointer rounded-lg border bg-card p-4 transition-all hover:border-muted-foreground/20"
                 onClick={() => handleNoteClick(note.id)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <h3 className="font-medium">{note.title}</h3>
-                    </div>
+                    <h3 className="font-medium">{note.title}</h3>
                     <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                       {getExcerpt(note.content)}
                     </p>
                     <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>{note.folder?.name || 'No folder'}</span>
-                      <span>•</span>
+                      {note.folder?.name && (
+                        <>
+                          <span>{note.folder.name}</span>
+                          <span>·</span>
+                        </>
+                      )}
                       <RelativeTime date={note.updatedAt} />
                     </div>
                   </div>

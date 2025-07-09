@@ -61,57 +61,57 @@
   /* Border radius - minimal and clean */
   --radius: 0.375rem;
 
-  /* Minimalist color palette - pure black and white with single accent */
+  /* Minimalist color palette - clean grays and blacks */
   --background: #ffffff;
-  --foreground: #000000;
+  --foreground: #1a1a1a;
 
-  /* Single accent color - calm blue */
-  --accent: #0066ff;
-  --accent-foreground: #ffffff;
+  /* Single accent color - subtle blue */
+  --accent: #f4f4f5;
+  --accent-foreground: #1a1a1a;
 
-  /* Primary uses black */
-  --primary: #000000;
-  --primary-foreground: #ffffff;
+  /* Primary uses dark gray */
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
 
   /* Secondary uses light gray */
-  --secondary: #f5f5f5;
-  --secondary-foreground: #000000;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #1a1a1a;
 
   /* Muted colors for less emphasis */
-  --muted: #f9f9f9;
-  --muted-foreground: #666666;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
 
   /* Borders and inputs - very subtle */
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #0066ff;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
 
   /* Cards and popovers */
   --card: #ffffff;
-  --card-foreground: #000000;
+  --card-foreground: #1a1a1a;
   --popover: #ffffff;
-  --popover-foreground: #000000;
+  --popover-foreground: #1a1a1a;
 
   /* Destructive actions - subtle red */
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
 
   /* Sidebar - clean separation */
   --sidebar: #fafafa;
-  --sidebar-foreground: #000000;
-  --sidebar-primary: #0066ff;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f5f5f5;
-  --sidebar-accent-foreground: #000000;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #0066ff;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #18181b;
 
-  /* Chart colors - monochromatic with accent */
-  --chart-1: #0066ff;
-  --chart-2: #333333;
-  --chart-3: #666666;
-  --chart-4: #999999;
-  --chart-5: #cccccc;
+  /* Chart colors - monochromatic palette */
+  --chart-1: #18181b;
+  --chart-2: #52525b;
+  --chart-3: #71717a;
+  --chart-4: #a1a1aa;
+  --chart-5: #d4d4d8;
 }
 
 @layer base {
