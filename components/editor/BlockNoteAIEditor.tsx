@@ -59,12 +59,12 @@ export function BlockNoteAIEditor({
           <AIUsageIndicator />
         </div>
       )}
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden">
         <BlockNoteView
           editor={editor}
           editable={editable}
           theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
-          className="h-full"
+          className="h-full overflow-y-auto"
           onChange={handleChange}
           formattingToolbar={false}
           slashMenu={false}

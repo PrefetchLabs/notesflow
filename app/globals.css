@@ -274,6 +274,29 @@
   color-scheme: dark;
 }
 
+/* BlockNote editor styles */
+.bn-editor {
+  /* Enable scrolling for long content */
+  overflow-y: auto;
+  max-height: 100%;
+  
+  /* Remove focus outline/border */
+  outline: none !important;
+  border: none !important;
+}
+
+/* Remove the container border on focus */
+.bn-container:focus-within {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove block focus styles */
+.bn-block-outer:focus-within {
+  outline: none !important;
+}
+
 /* BlockNote dark mode overrides */
 .dark .bn-editor {
   background-color: var(--background);
