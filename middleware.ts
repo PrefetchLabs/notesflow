@@ -1,0 +1,49 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getSessionCookie } from 'better-auth/cookies';
+
+// Routes that require authentication
+const protectedRoutes = ['/dashboard', '/notes', '/settings'];
+
+// Routes that are only for non-authenticated users
+const authRoutes = ['/login', '/register'];
+
+export async function middleware(request: NextRequest) {
+  const sessionCookie = getSessionCookie(request);
+  const { pathname } = request.nextUrl;
+
+  // Check if the current route is protected
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  // Check if the current route is an auth route
+  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+
+  // Redirect to login if accessing protected route without session
+  if (isProtectedRoute && !sessionCookie) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect to dashboard if accessing auth route with session
+  if (isAuthRoute && sessionCookie) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (auth endpoints)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*|public).*)',
+  ],
+};
