@@ -14,9 +14,8 @@ import {
 } from './aiCommands';
 
 export function CustomAIMenu() {
-  try {
-    return (
-      <AIMenu
+  return (
+    <AIMenu
       items={(
         editor: BlockNoteEditor<any, any, any>,
         aiResponseStatus:
@@ -54,9 +53,5 @@ export function CustomAIMenu() {
         return getDefaultAIMenuItems(editor, aiResponseStatus);
       }}
     />
-    );
-  } catch (error) {
-    console.error('Error rendering AI Menu:', error);
-    return null;
-  }
+  );
 }
