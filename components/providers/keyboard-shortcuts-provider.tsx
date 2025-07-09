@@ -3,7 +3,7 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Keyboard } from 'lucide-react';
+import { QuickSwitcher } from '@/components/quick-switcher';
 
 interface KeyboardShortcut {
   keys: string;
@@ -38,7 +39,6 @@ export function KeyboardShortcutsProvider({ children }: { children: React.ReactN
   const router = useRouter();
   const [showHelp, setShowHelp] = useState(false);
   const [showQuickSwitcher, setShowQuickSwitcher] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Create new note (Cmd/Ctrl + N)
   useHotkeys('mod+n', (e) => {
@@ -105,22 +105,6 @@ export function KeyboardShortcutsProvider({ children }: { children: React.ReactN
     enableOnFormTags: true,
   });
 
-  // Quick switcher functionality
-  useEffect(() => {
-    if (showQuickSwitcher) {
-      // Fetch notes for quick switcher
-      fetch('/api/notes')
-        .then(res => res.json())
-        .then(data => {
-          // Will implement actual quick switcher UI later
-          console.log('Notes for quick switcher:', data.notes);
-        })
-        .catch(err => {
-          console.error('Failed to fetch notes:', err);
-        });
-    }
-  }, [showQuickSwitcher]);
-
   return (
     <>
       {children}
@@ -150,30 +134,11 @@ export function KeyboardShortcutsProvider({ children }: { children: React.ReactN
         </DialogContent>
       </Dialog>
 
-      {/* Quick Switcher Dialog */}
-      <Dialog open={showQuickSwitcher} onOpenChange={setShowQuickSwitcher}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Quick Note Switcher</DialogTitle>
-            <DialogDescription>
-              Jump to any note quickly by typing its name.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <input
-              type="text"
-              placeholder="Search notes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
-              autoFocus
-            />
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              Quick switcher coming soon...
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Quick Switcher */}
+      <QuickSwitcher 
+        open={showQuickSwitcher} 
+        onOpenChange={setShowQuickSwitcher} 
+      />
     </>
   );
 }

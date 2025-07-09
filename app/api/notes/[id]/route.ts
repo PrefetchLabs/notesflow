@@ -34,6 +34,11 @@ export async function GET(
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });
     }
     
+    // Update lastAccessedAt timestamp
+    await db
+      .update(notes)
+      .set({ lastAccessedAt: new Date() })
+      .where(eq(notes.id, id));
 
     return NextResponse.json({ note });
   } catch (error) {

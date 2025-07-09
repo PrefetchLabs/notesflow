@@ -22,6 +22,7 @@ import { RelativeTime } from '@/components/ui/relative-time';
 import { useFolders } from '@/hooks/useFolders';
 import { suggestTitleFromContent } from '@/lib/utils/titleExtraction';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
+import { useRecentNotes } from '@/hooks/useRecentNotes';
 
 export default function NotePage() {
   const params = useParams();
@@ -29,6 +30,7 @@ export default function NotePage() {
   const noteId = params.id as string;
   const { folders } = useFolders();
   const { setHasUnsavedChanges: setGlobalUnsavedChanges, promptToSave } = useUnsavedChanges();
+  const { addToRecent } = useRecentNotes();
   
   const [note, setNote] = useState<any>(null);
   const [content, setContent] = useState<any>(null);
@@ -106,6 +108,13 @@ export default function NotePage() {
             }];
         setContent(noteContent);
         setLastSaved(new Date(note.updatedAt));
+        
+        // Add to recent notes
+        addToRecent({
+          id: note.id,
+          title: note.title,
+          folderId: note.folderId,
+        });
       } catch (error) {
         toast.error('Failed to load note');
         router.push('/notes');
@@ -115,7 +124,7 @@ export default function NotePage() {
     };
     
     loadNote();
-  }, [noteId, router]);
+  }, [noteId, router, addToRecent]);
 
   // Define handleSave first
   const handleSave = useCallback(async () => {

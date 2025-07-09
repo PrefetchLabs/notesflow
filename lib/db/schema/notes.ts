@@ -22,6 +22,7 @@ export const notes = pgTable(
     isTrashed: boolean('is_trashed').default(false).notNull(),
     deletedAt: timestamp('deleted_at'),
     lastEditedBy: text('last_edited_by').references(() => user.id),
+    lastAccessedAt: timestamp('last_accessed_at').defaultNow().notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -34,6 +35,7 @@ export const notes = pgTable(
       table.folderId
     ),
     updatedAtIdx: index('notes_updated_at_idx').on(table.updatedAt),
+    lastAccessedAtIdx: index('notes_last_accessed_at_idx').on(table.lastAccessedAt),
     isPinnedIdx: index('notes_is_pinned_idx').on(table.isPinned),
     isArchivedIdx: index('notes_is_archived_idx').on(table.isArchived),
     isTrashedIdx: index('notes_is_trashed_idx').on(table.isTrashed),
