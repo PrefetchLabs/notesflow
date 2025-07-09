@@ -4,7 +4,7 @@ import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface BlockNoteEditorProps {
   initialContent?: any;
@@ -19,13 +19,9 @@ export function BlockNoteEditorComponent({
 }: BlockNoteEditorProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Create the editor instance with onChange handler
+  // Create the editor instance
   const editor = useCreateBlockNote({
     initialContent: initialContent || undefined,
-    uploadFile: async () => {
-      // Placeholder for file upload
-      return '';
-    },
   });
 
   // Handle mounting to avoid hydration issues
@@ -33,24 +29,32 @@ export function BlockNoteEditorComponent({
     setMounted(true);
   }, []);
 
+  // Handle content changes
+  const handleEditorChange = useCallback(() => {
+    if (onContentChange && editor) {
+      // Get the document which is an array of blocks
+      const document = editor.document;
+      console.log('BlockNote onChange - document:', JSON.stringify(document, null, 2));
+      // Pass the entire document array
+      onContentChange(document);
+    }
+  }, [editor, onContentChange]);
+
   // Set up onChange handler
   useEffect(() => {
-    if (!editor || !onContentChange) return;
+    if (!editor || !mounted) return;
 
-    const handleChange = () => {
-      const content = editor.document;
-      console.log('Editor content changed:', JSON.stringify(content, null, 2));
-      onContentChange(content);
-    };
-
-    // Subscribe to changes
-    const unsubscribe = editor.onChange(handleChange);
+    console.log('Setting up BlockNote onChange handler');
+    
+    // Register the onChange callback
+    const unsubscribe = editor.onChange(handleEditorChange);
 
     // Return cleanup function
     return () => {
+      console.log('Cleaning up BlockNote onChange handler');
       unsubscribe();
     };
-  }, [editor, onContentChange]);
+  }, [editor, handleEditorChange, mounted]);
 
   if (!mounted) {
     return <div className="h-full w-full" />;
