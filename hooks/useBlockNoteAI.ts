@@ -1,13 +1,14 @@
 import { useCreateBlockNote } from "@blocknote/react";
 import { createAIExtension } from "@/lib/editor/ai-extension";
-import { openai } from "@ai-sdk/openai";
 import { defaultBlockSpecs } from "@blocknote/core";
 import { en } from "@blocknote/core/locales";
 import { en as aiEn } from "@blocknote/xl-ai/locales";
-
-const model = openai("gpt-4o-mini");
+import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 
 export function useBlockNoteAI(initialContent?: any[]) {
+  // Create model instance inside the function to ensure it's available
+  const model = createCustomAIModel();
+  
   const editor = useCreateBlockNote({
     initialContent,
     dictionary: {
