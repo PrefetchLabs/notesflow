@@ -19,6 +19,15 @@ export async function middleware(request: NextRequest) {
   // Check if the current route is an auth route
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
+  // Redirect root path to dashboard if authenticated, login if not
+  if (pathname === '/') {
+    if (sessionCookie) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    } else {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
   // Redirect to login if accessing protected route without session
   if (isProtectedRoute && !sessionCookie) {
     const loginUrl = new URL('/login', request.url);
