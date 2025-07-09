@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
 import { notes } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +25,8 @@ export async function GET(
       .where(
         and(
           eq(notes.id, id),
-          eq(notes.userId, session.user.id)
+          eq(notes.userId, session.user.id),
+          isNull(notes.deletedAt)
         )
       );
 
@@ -77,7 +78,8 @@ export async function PUT(
       .where(
         and(
           eq(notes.id, id),
-          eq(notes.userId, session.user.id)
+          eq(notes.userId, session.user.id),
+          isNull(notes.deletedAt)
         )
       )
       .returning();
@@ -111,12 +113,19 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Soft delete: set deletedAt timestamp and isTrashed flag
     const [deleted] = await db
-      .delete(notes)
+      .update(notes)
+      .set({
+        deletedAt: new Date(),
+        isTrashed: true,
+        updatedAt: new Date(),
+      })
       .where(
         and(
           eq(notes.id, id),
-          eq(notes.userId, session.user.id)
+          eq(notes.userId, session.user.id),
+          isNull(notes.deletedAt)
         )
       )
       .returning();
@@ -125,7 +134,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, note: deleted });
   } catch (error) {
     console.error('Error deleting note:', error);
     return NextResponse.json(

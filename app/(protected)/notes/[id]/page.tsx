@@ -169,7 +169,7 @@ export default function NotePage() {
     }
   }, [debouncedContent, debouncedTitle, hasUnsavedChanges, handleSave, noteId]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!noteId || noteId.startsWith('new-')) return;
     
     if (confirm('Are you sure you want to delete this note?')) {
@@ -180,13 +180,13 @@ export default function NotePage() {
         
         if (!response.ok) throw new Error('Failed to delete');
         
-        toast.success('Note deleted');
-        router.push('/notes');
+        toast.success('Note moved to trash');
+        router.push('/dashboard');
       } catch {
         toast.error('Failed to delete note');
       }
     }
-  };
+  }, [noteId, router]);
 
   const handleShare = () => {
     // TODO: Implement sharing functionality
@@ -232,6 +232,27 @@ export default function NotePage() {
     const folder = findFolder(folders, note.folderId);
     return folder?.name;
   };
+
+  // Listen for keyboard shortcut events
+  useEffect(() => {
+    const handleSaveEvent = () => {
+      if (hasUnsavedChanges) {
+        handleSave();
+      }
+    };
+
+    const handleDeleteEvent = () => {
+      handleDelete();
+    };
+
+    window.addEventListener('save-note', handleSaveEvent);
+    window.addEventListener('delete-note', handleDeleteEvent);
+
+    return () => {
+      window.removeEventListener('save-note', handleSaveEvent);
+      window.removeEventListener('delete-note', handleDeleteEvent);
+    };
+  }, [hasUnsavedChanges, handleSave, handleDelete]);
 
   return (
     <div className="flex h-screen flex-col">

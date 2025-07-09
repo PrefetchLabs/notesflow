@@ -20,6 +20,7 @@ export const notes = pgTable(
     isPinned: boolean('is_pinned').default(false).notNull(),
     isArchived: boolean('is_archived').default(false).notNull(),
     isTrashed: boolean('is_trashed').default(false).notNull(),
+    deletedAt: timestamp('deleted_at'),
     lastEditedBy: text('last_edited_by').references(() => user.id),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -36,6 +37,7 @@ export const notes = pgTable(
     isPinnedIdx: index('notes_is_pinned_idx').on(table.isPinned),
     isArchivedIdx: index('notes_is_archived_idx').on(table.isArchived),
     isTrashedIdx: index('notes_is_trashed_idx').on(table.isTrashed),
+    deletedAtIdx: index('notes_deleted_at_idx').on(table.deletedAt),
     // GIN index for JSONB content search
     contentGinIdx: index('notes_content_gin_idx').using(
       'gin',

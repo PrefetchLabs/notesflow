@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   DndContext, 
   closestCenter,
@@ -14,7 +14,6 @@ import {
   DragOverEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -55,6 +54,7 @@ import { Label } from '@/components/ui/label';
 import { FolderWithNotes, Note } from '@/hooks/useFoldersWithNotes';
 import { useRouter } from 'next/navigation';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
+import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 
 interface FolderTreeWithNotesProps {
   folders: FolderWithNotes[];
@@ -72,9 +72,11 @@ interface FolderTreeWithNotesProps {
 interface SortableNoteItemProps {
   note: Note;
   collapsed: boolean;
+  isSelected?: boolean;
+  onClick?: () => void;
 }
 
-function SortableNoteItem({ note, collapsed }: SortableNoteItemProps) {
+function SortableNoteItem({ note, collapsed, isSelected, onClick }: SortableNoteItemProps) {
   const router = useRouter();
   const { confirmNavigation } = useUnsavedChanges();
   const {
@@ -93,6 +95,7 @@ function SortableNoteItem({ note, collapsed }: SortableNoteItemProps) {
   };
 
   const handleClick = () => {
+    if (onClick) onClick();
     confirmNavigation(() => router.push(`/notes/${note.id}`));
   };
 
@@ -103,7 +106,8 @@ function SortableNoteItem({ note, collapsed }: SortableNoteItemProps) {
       className={cn(
         'group relative flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors cursor-pointer',
         'hover:bg-accent hover:text-accent-foreground ml-4',
-        isDragging && 'z-50'
+        isDragging && 'z-50',
+        isSelected && 'ring-2 ring-primary ring-offset-1'
       )}
       onClick={handleClick}
       {...attributes}
@@ -119,7 +123,6 @@ function SortableNoteItem({ note, collapsed }: SortableNoteItemProps) {
 
 interface SortableFolderItemProps {
   folder: FolderWithNotes;
-  depth: number;
   collapsed: boolean;
   onToggle: (folderId: string) => void;
   onEdit: (folder: FolderWithNotes) => void;
@@ -131,7 +134,6 @@ interface SortableFolderItemProps {
 
 function SortableFolderItem({
   folder,
-  depth,
   collapsed,
   onToggle,
   onEdit,
@@ -177,7 +179,10 @@ function SortableFolderItem({
       >
         <div
           className="flex flex-1 cursor-move items-center gap-1"
-          onClick={onSelect}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
           {...attributes}
           {...listeners}
         >
@@ -279,11 +284,64 @@ export function FolderTreeWithNotes({
 }: FolderTreeWithNotesProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [overId, setOverId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<FolderWithNotes | null>(null);
   const [folderName, setFolderName] = useState('');
   const [parentFolderId, setParentFolderId] = useState<string | undefined>();
+
+  // Build flat list of all navigable items for keyboard navigation
+  const navigableItems = useMemo(() => {
+    const items: any[] = [];
+    let index = 0;
+
+    // Add root notes
+    rootNotes.forEach(note => {
+      items.push({
+        id: note.id,
+        type: 'note',
+        title: note.title,
+        parentId: null,
+        depth: 0,
+        index: index++,
+      });
+    });
+
+    // Add folders and their notes recursively
+    const addFolder = (folder: FolderWithNotes, parentId: string | null, depth: number) => {
+      const isExpanded = expandedFolders.has(folder.id);
+      items.push({
+        id: folder.id,
+        type: 'folder',
+        title: folder.name,
+        parentId,
+        isExpanded,
+        depth,
+        index: index++,
+      });
+
+      if (isExpanded) {
+        // Add notes in this folder
+        folder.notes?.forEach(note => {
+          items.push({
+            id: note.id,
+            type: 'note',
+            title: note.title,
+            parentId: folder.id,
+            depth: depth + 1,
+            index: index++,
+          });
+        });
+
+        // Add child folders
+        folder.children?.forEach(child => {
+          addFolder(child, folder.id, depth + 1);
+        });
+      }
+    };
+
+    folders.forEach(folder => addFolder(folder, null, 0));
+    return items;
+  }, [folders, rootNotes, expandedFolders]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -301,7 +359,7 @@ export function FolderTreeWithNotes({
   };
 
   const handleDragOver = (event: DragOverEvent) => {
-    setOverId(event.over?.id as string | null);
+    // Handle drag over if needed
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -309,7 +367,6 @@ export function FolderTreeWithNotes({
     
     if (!over || active.id === over.id) {
       setActiveId(null);
-      setOverId(null);
       return;
     }
 
@@ -339,7 +396,6 @@ export function FolderTreeWithNotes({
       
       if (!activeFolder) {
         setActiveId(null);
-        setOverId(null);
         return;
       }
 
@@ -356,7 +412,6 @@ export function FolderTreeWithNotes({
         
         if (!overFolder) {
           setActiveId(null);
-          setOverId(null);
           return;
         }
 
@@ -379,7 +434,6 @@ export function FolderTreeWithNotes({
 
         if (isDescendant(activeIdStr, overIdStr)) {
           setActiveId(null);
-          setOverId(null);
           return;
         }
 
@@ -395,7 +449,6 @@ export function FolderTreeWithNotes({
     }
     
     setActiveId(null);
-    setOverId(null);
   };
 
   const toggleFolder = (folderId: string) => {
@@ -409,6 +462,12 @@ export function FolderTreeWithNotes({
       return next;
     });
   };
+
+  const { selectedIndex, isNavigating, setSelectedIndex } = useKeyboardNavigation(
+    navigableItems,
+    toggleFolder,
+    onSelectFolder
+  );
 
   const handleCreateFolder = () => {
     if (!folderName.trim()) return;
@@ -435,7 +494,6 @@ export function FolderTreeWithNotes({
         <div style={{ paddingLeft: depth * 16 }}>
           <SortableFolderItem
             folder={folderWithExpanded}
-            depth={depth}
             collapsed={collapsed}
             onToggle={toggleFolder}
             onEdit={(f) => {
@@ -450,8 +508,16 @@ export function FolderTreeWithNotes({
               setEditingFolder(null);
               setDialogOpen(true);
             }}
-            isSelected={selectedFolderId === folder.id}
-            onSelect={() => onSelectFolder(folder.id)}
+            isSelected={(() => {
+              const folderItemIndex = navigableItems.findIndex(item => item.id === folder.id && item.type === 'folder');
+              const isKeyboardSelected = selectedIndex === folderItemIndex && isNavigating;
+              return selectedFolderId === folder.id || isKeyboardSelected;
+            })()}
+            onSelect={() => {
+              const folderItemIndex = navigableItems.findIndex(item => item.id === folder.id && item.type === 'folder');
+              onSelectFolder(folder.id);
+              setSelectedIndex(folderItemIndex);
+            }}
           />
         </div>
         
@@ -470,9 +536,18 @@ export function FolderTreeWithNotes({
                     items={folder.notes.map(n => `note-${n.id}`)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {folder.notes.map((note) => (
-                      <SortableNoteItem key={`note-${note.id}`} note={note} collapsed={collapsed} />
-                    ))}
+                    {folder.notes.map((note) => {
+                      const itemIndex = navigableItems.findIndex(item => item.id === note.id && item.type === 'note');
+                      return (
+                        <SortableNoteItem 
+                          key={`note-${note.id}`} 
+                          note={note} 
+                          collapsed={collapsed}
+                          isSelected={selectedIndex === itemIndex && isNavigating}
+                          onClick={() => setSelectedIndex(itemIndex)}
+                        />
+                      );
+                    })}
                   </SortableContext>
                 </div>
               )}
@@ -539,9 +614,18 @@ export function FolderTreeWithNotes({
             {/* Render root notes */}
             {rootNotes.length > 0 && (
               <div className="mb-2">
-                {rootNotes.map((note) => (
-                  <SortableNoteItem key={`note-${note.id}`} note={note} collapsed={collapsed} />
-                ))}
+                {rootNotes.map((note) => {
+                  const itemIndex = navigableItems.findIndex(item => item.id === note.id && item.type === 'note');
+                  return (
+                    <SortableNoteItem 
+                      key={`note-${note.id}`} 
+                      note={note} 
+                      collapsed={collapsed}
+                      isSelected={selectedIndex === itemIndex && isNavigating}
+                      onClick={() => setSelectedIndex(itemIndex)}
+                    />
+                  );
+                })}
               </div>
             )}
             

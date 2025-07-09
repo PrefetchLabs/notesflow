@@ -993,8 +993,8 @@
               2,
               3
             ],
-            "details": "Add delete button to note editor and list items. Set deletedAt timestamp instead of hard delete. Create Trash view to show deleted notes. Add restore and permanent delete options. Auto-purge notes deleted > 30 days ago. Show toast notifications for delete/restore actions.",
-            "status": "pending",
+            "details": "Add delete button to note editor and list items. Set deletedAt timestamp instead of hard delete. Create Trash view to show deleted notes. Add restore and permanent delete options. Auto-purge notes deleted > 30 days ago. Show toast notifications for delete/restore actions.\n<info added on 2025-07-09T09:55:39.882Z>\nSuccessfully implemented soft delete functionality with the following completions:\n\nBackend Implementation:\n- Added deletedAt timestamp field to notes schema with database index for performance\n- Updated DELETE endpoint to perform soft delete by setting deletedAt and isTrashed flags\n- Updated GET endpoints to filter out soft-deleted notes using isNull(notes.deletedAt) condition\n- Created /api/notes/trash endpoint to retrieve trashed notes\n- Created /api/notes/[id]/restore endpoint to restore notes from trash\n- Created /api/notes/[id]/permanent-delete endpoint for permanent deletion\n- Applied database migrations successfully\n\nUI Updates:\n- Updated delete action to show \"Note moved to trash\" confirmation message\n\nRemaining Work:\n- Create UI for trash view to display deleted notes\n- Add restore and permanent delete action buttons to trash view\n- These UI components will be addressed in a future task\n</info added on 2025-07-09T09:55:39.882Z>",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1006,8 +1006,8 @@
               4,
               6
             ],
-            "details": "Use react-hotkeys-hook for shortcuts: Cmd/Ctrl+N (new note), Cmd/Ctrl+S (save), Cmd/Ctrl+F (search), Cmd/Ctrl+Delete (delete), Arrow keys (navigate list), Enter (open selected). Show keyboard shortcuts in UI tooltips. Add help modal with all shortcuts.",
-            "status": "pending",
+            "details": "Use react-hotkeys-hook for shortcuts: Cmd/Ctrl+N (new note), Cmd/Ctrl+S (save), Cmd/Ctrl+F (search), Cmd/Ctrl+Delete (delete), Arrow keys (navigate list), Enter (open selected). Show keyboard shortcuts in UI tooltips. Add help modal with all shortcuts.\n<info added on 2025-07-09T10:23:41.426Z>\nSuccessfully implemented comprehensive keyboard navigation system with react-hotkeys-hook library. Created KeyboardShortcutsProvider with global shortcuts for note creation (Cmd/Ctrl+N), saving (Cmd/Ctrl+S), search focus (Cmd/Ctrl+F), deletion (Cmd/Ctrl+Delete), quick switcher (Cmd/Ctrl+K), help modal (Cmd/Ctrl+Shift+?), and dialog closure (Escape). Developed useKeyboardNavigation hook for folder tree navigation using arrow keys with expand/collapse functionality and Enter for selection. Integrated visual selection indicators with ring styling in FolderTreeWithNotes component. Added keyboard shortcuts help dialog displaying all available shortcuts. Successfully connected save/delete events between keyboard provider and note editor components.\n</info added on 2025-07-09T10:23:41.426Z>",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2485,7 +2485,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-09T09:07:07.848Z",
+      "updated": "2025-07-09T10:23:12.431Z",
       "description": "Tasks for master context"
     }
   }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
 import { notes, folders } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, isNull } from 'drizzle-orm';
 import { getTableColumns } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -25,7 +25,12 @@ export async function GET(request: NextRequest) {
       })
       .from(notes)
       .leftJoin(folders, eq(notes.folderId, folders.id))
-      .where(eq(notes.userId, session.user.id))
+      .where(
+        and(
+          eq(notes.userId, session.user.id),
+          isNull(notes.deletedAt)
+        )
+      )
       .orderBy(desc(notes.updatedAt));
 
     return NextResponse.json({ notes: notesList });

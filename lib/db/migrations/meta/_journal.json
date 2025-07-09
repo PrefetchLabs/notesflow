@@ -8,6 +8,13 @@
       "when": 1752040827730,
       "tag": "0000_chubby_zaran",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752040900000,
+      "tag": "0001_soft_delete",
+      "breakpoints": true
     }
   ]
 }
