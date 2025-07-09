@@ -102,9 +102,33 @@ export default function NotePage() {
     loadNote();
   }, [noteId, router]);
 
+  // Define handleSave first
+  const handleSave = useCallback(async () => {
+    if (!noteId || noteId.startsWith('new-')) return;
+    
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to save');
+      
+      
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+      toast.success('Note saved');
+    } catch {
+      toast.error('Failed to save note');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [noteId, title, content]);
+  
   // Track changes
   const handleContentChange = useCallback((newContent: any) => {
-    console.log('Content changed:', newContent);
     setContent(newContent);
     setHasUnsavedChanges(true);
   }, []);
@@ -120,34 +144,6 @@ export default function NotePage() {
       handleSave();
     }
   }, [debouncedContent, debouncedTitle, hasUnsavedChanges, handleSave, noteId]);
-
-  const handleSave = useCallback(async () => {
-    if (!noteId || noteId.startsWith('new-')) return;
-    
-    console.log('Saving note:', { title, content });
-    setIsSaving(true);
-    try {
-      const response = await fetch(`/api/notes/${noteId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content }),
-      });
-      
-      if (!response.ok) throw new Error('Failed to save');
-      
-      const savedNote = await response.json();
-      console.log('Note saved:', savedNote);
-      
-      setLastSaved(new Date());
-      setHasUnsavedChanges(false);
-      toast.success('Note saved');
-    } catch (error) {
-      console.error('Save error:', error);
-      toast.error('Failed to save note');
-    } finally {
-      setIsSaving(false);
-    }
-  }, [noteId, title, content]);
 
   const handleDelete = async () => {
     if (!noteId || noteId.startsWith('new-')) return;
