@@ -41,10 +41,13 @@ export function CustomAIMenu() {
               ...defaultItems,
             ];
           } else {
-            // When no text is selected, show continue writing and other commands
+            // When no text is selected, filter out default "Continue Writing" to avoid duplicate
+            const filteredDefaultItems = defaultItems.filter(
+              item => item.key !== 'continue_writing' && item.key !== 'Continue Writing'
+            );
             return [
               continueWriting(editor),
-              ...defaultItems,
+              ...filteredDefaultItems,
             ];
           }
         }
