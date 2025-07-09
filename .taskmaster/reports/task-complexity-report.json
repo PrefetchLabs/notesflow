@@ -1,157 +1,157 @@
 {
-  "meta": {
-    "generatedAt": "2025-07-09T03:59:30.027Z",
-    "tasksAnalyzed": 18,
-    "totalTasks": 18,
-    "analysisCount": 18,
-    "thresholdScore": 5,
-    "projectName": "Taskmaster",
-    "usedResearch": true
-  },
-  "complexityAnalysis": [
-    {
-      "taskId": 1,
-      "taskTitle": "Initialize Next.js 15 Project with Core Dependencies",
-      "complexityScore": 6,
-      "recommendedSubtasks": 8,
-      "expansionPrompt": "Break down the Next.js 15 project initialization into subtasks covering: project creation with create-next-app, dependency installation and version management, TypeScript configuration with strict mode, Tailwind CSS setup with custom theme configuration, project structure creation, development environment setup, performance baseline establishment, and initial Git setup with proper .gitignore.",
-      "reasoning": "This task involves multiple configuration steps across different tools and frameworks. While each step is straightforward, the combination of Next.js 15 setup, TypeScript configuration, Tailwind theming, and performance requirements makes it moderately complex. The task requires careful attention to versions and proper configuration of development tooling."
-    },
-    {
-      "taskId": 2,
-      "taskTitle": "Implement Google OAuth with Better-Auth",
-      "complexityScore": 7,
-      "recommendedSubtasks": 10,
-      "expansionPrompt": "Create subtasks for: Google Cloud Console OAuth setup, better-auth installation and configuration, auth API route implementation, sign-in page UI creation, middleware setup for route protection, auth context provider implementation, session management with token handling, user data storage, error handling implementation, and testing of the complete auth flow.",
-      "reasoning": "Authentication implementation is inherently complex, involving external service configuration (Google), security considerations, session management, and integration with Next.js middleware. The task requires handling multiple OAuth flows, token management, and proper error handling, making it one of the more complex foundational tasks."
-    },
-    {
-      "taskId": 3,
-      "taskTitle": "Design and Implement Database Schema with Drizzle ORM",
-      "complexityScore": 8,
-      "recommendedSubtasks": 12,
-      "expansionPrompt": "Break down into: Drizzle ORM and database driver installation, database connection setup with environment variables, user table schema creation, folder hierarchy schema with self-referential relationships, notes table with JSONB content field, time blocks schema design, collaborators junction table, index creation for performance optimization, migration file generation, seed data creation, connection pooling configuration, and comprehensive testing setup.",
-      "reasoning": "Database schema design is critical and complex, requiring careful consideration of relationships, data types, and performance. The task involves multiple related tables with foreign keys, JSONB fields for flexible content storage, hierarchical data (folders), and performance optimization through indexing. The migration and seeding aspects add additional complexity."
-    },
-    {
-      "taskId": 4,
-      "taskTitle": "Integrate Supabase for Real-time and Database",
-      "complexityScore": 7,
-      "recommendedSubtasks": 11,
-      "expansionPrompt": "Create subtasks for: Supabase project creation and setup, client library installation, environment variable configuration, client singleton implementation for both server and client, RLS policy creation for all tables, real-time subscription setup, connection management with reconnection logic, database function creation for complex queries, Edge Functions project structure setup, comprehensive security testing, and performance benchmarking.",
-      "reasoning": "Supabase integration involves multiple complex aspects: authentication integration, RLS policies for security, real-time subscriptions, and proper client management for both server and client environments. The security configuration and real-time aspects require careful implementation and testing."
-    },
-    {
-      "taskId": 5,
-      "taskTitle": "Create Minimal UI Shell with Sidebar and Editor Layout",
-      "complexityScore": 5,
-      "recommendedSubtasks": 7,
-      "expansionPrompt": "Break down into: main layout component creation with CSS Grid, sidebar component implementation, user profile section, folder tree placeholder, loading state components with skeleton screens, empty state design, animation setup with Framer Motion, and responsive design implementation.",
-      "reasoning": "While this is primarily UI work, it sets the foundation for the entire application layout. The complexity comes from creating a clean, performant layout with proper loading states and animations. The 80% whitespace principle and performance requirements add design complexity."
-    },
-    {
-      "taskId": 6,
-      "taskTitle": "Implement Folder Tree with Drag-and-Drop",
-      "complexityScore": 8,
-      "recommendedSubtasks": 12,
-      "expansionPrompt": "Create subtasks for: drag-and-drop library installation and setup, recursive folder component creation, folder CRUD operations implementation, drag handlers for reordering, drop zone logic for nesting, optimistic update system with rollback, localStorage persistence, animation implementation, context menu creation, nesting depth enforcement, note count display, and comprehensive interaction testing.",
-      "reasoning": "This task is highly complex due to the combination of recursive rendering, drag-and-drop interactions, state management with optimistic updates, and persistence. The need for smooth animations, error handling with rollback, and complex user interactions makes this one of the more challenging UI features."
-    },
-    {
-      "taskId": 7,
-      "taskTitle": "Integrate BlockNote Editor for Rich Text Editing",
-      "complexityScore": 6,
-      "recommendedSubtasks": 9,
-      "expansionPrompt": "Break down into: BlockNote installation and setup, theme customization for minimalist design, toolbar configuration for selected features only, auto-save implementation with debouncing, content storage setup as JSONB, focus mode implementation with UI fading, keyboard shortcut configuration, performance optimization for typing latency, and testing across different browsers.",
-      "reasoning": "Editor integration requires careful configuration to achieve the minimalist design while maintaining performance. The custom theme, auto-save functionality, focus mode, and strict performance requirements (sub-30ms typing latency) add significant complexity to what might otherwise be a straightforward integration."
-    },
-    {
-      "taskId": 8,
-      "taskTitle": "Build Note Management System",
-      "complexityScore": 7,
-      "recommendedSubtasks": 11,
-      "expansionPrompt": "Create subtasks for: note CRUD API implementation, note list component with sorting, new note creation flow, title extraction logic, search implementation with fuzzy matching, note switching with unsaved changes handling, soft delete functionality, keyboard navigation setup, URL-based routing, recently accessed notes feature, and auto-creation of untitled notes.",
-      "reasoning": "The note management system is the core of the application and involves complex state management, search functionality, keyboard navigation, and careful UX considerations around unsaved changes. The integration with URL routing and search functionality adds additional complexity."
-    },
-    {
-      "taskId": 9,
-      "taskTitle": "Create Time-Blocking Calendar Component",
-      "complexityScore": 9,
-      "recommendedSubtasks": 14,
-      "expansionPrompt": "Break down into: calendar grid layout with CSS Grid, time slot rendering for 15-minute intervals, current time indicator with minute updates, week view implementation, TimeBlock component creation, drag-to-resize functionality, ghost element visualization during drag, database integration for time blocks, quick action handlers for slot clicking, time calculation utilities, visual styling for different block states, performance optimization, responsive sidebar toggle, and comprehensive testing.",
-      "reasoning": "This is one of the most complex UI components, requiring precise time-based layouts, complex drag interactions, real-time updates, and database synchronization. The 15-minute grid system, drag-to-resize functionality, and visual feedback requirements make this particularly challenging. Performance with many blocks is also a concern."
-    },
-    {
-      "taskId": 10,
-      "taskTitle": "Implement Drag Text to Calendar Feature",
-      "complexityScore": 10,
-      "recommendedSubtasks": 15,
-      "expansionPrompt": "Create subtasks for: text selection detection in BlockNote, drag handler implementation for editor content, drop zone detection in calendar, visual feedback during drag operation, time block creation on drop, smart text parsing for duration detection, preview rendering while dragging, edge scrolling implementation, undo/redo support integration, tooltip system for drag hints, multi-line selection handling, animation for created blocks, linked indicator system in notes, cross-component state management, and extensive user testing.",
-      "reasoning": "This is the most complex feature, requiring deep integration between two separate components (editor and calendar), custom drag-and-drop handling beyond standard library capabilities, smart text parsing, and complex visual feedback. The feature crosses multiple technical boundaries and requires careful state management and performance optimization."
-    },
-    {
-      "taskId": 11,
-      "taskTitle": "Add AI Writing Assistant with OpenAI Integration",
-      "complexityScore": 7,
-      "recommendedSubtasks": 11,
-      "expansionPrompt": "Break down into: OpenAI SDK installation and configuration, Supabase Edge Function creation for secure API calls, command palette UI with keyboard shortcuts, Continue Writing feature implementation, Improve Clarity feature, Summarize feature, Extract Tasks with time block creation, streaming response handling, usage tracking and limit enforcement, inline response UI, and error handling.",
-      "reasoning": "AI integration involves multiple moving parts: secure API key management, Edge Functions, streaming responses, and multiple distinct features. The command palette UI, usage limiting, and context extraction add complexity. The integration with time block creation for task extraction makes this particularly intricate."
-    },
-    {
-      "taskId": 12,
-      "taskTitle": "Implement Real-time Collaboration with Presence",
-      "complexityScore": 9,
-      "recommendedSubtasks": 13,
-      "expansionPrompt": "Create subtasks for: Yjs installation and setup, BlockNote collaborative editing extension, Supabase provider configuration, presence system implementation, cursor rendering with interpolation, awareness protocol setup, share functionality with link generation, access control implementation, connection status indicator, conflict resolution testing, presence timeout handling, join/leave animations, and multi-user testing setup.",
-      "reasoning": "Real-time collaboration is inherently complex, requiring CRDT implementation, WebSocket management, presence synchronization, and careful handling of conflicts. The integration with BlockNote and Supabase adds layers of complexity. Performance and smooth UX with multiple users is challenging."
-    },
-    {
-      "taskId": 13,
-      "taskTitle": "Build Free/Pro Tier System with Limitations",
-      "complexityScore": 6,
-      "recommendedSubtasks": 10,
-      "expansionPrompt": "Break down into: subscription status integration in auth context, note limit enforcement, folder limit implementation, AI access control, device fingerprinting for single-device limit, collaboration feature gating, upgrade prompt UI creation, usage tracking hooks, visual indicators for pro features, and grace period implementation.",
-      "reasoning": "While the individual limits are straightforward, the system requires careful integration throughout the app, graceful handling of limit enforcement, and good UX for upgrade prompts. Device fingerprinting and soft limits add technical complexity."
-    },
-    {
-      "taskId": 14,
-      "taskTitle": "Integrate Stripe Checkout for Payments",
-      "complexityScore": 8,
-      "recommendedSubtasks": 12,
-      "expansionPrompt": "Create subtasks for: Stripe account setup with products, SDK installation, checkout session API creation, webhook endpoint implementation, webhook event handling for subscription lifecycle, database updates for subscription status, checkout UI flow, success page creation, billing portal integration, test mode configuration, error handling and logging, and comprehensive payment testing.",
-      "reasoning": "Payment integration is complex due to security requirements, webhook handling, and the need for robust error handling. Managing subscription lifecycle events, handling edge cases, and ensuring data consistency between Stripe and the database requires careful implementation."
-    },
-    {
-      "taskId": 15,
-      "taskTitle": "Create Minimal Onboarding Flow",
-      "complexityScore": 4,
-      "recommendedSubtasks": 7,
-      "expansionPrompt": "Break down into: onboarding route setup, welcome screen creation, animation implementation for drag-to-calendar demo, plan selection screen, navigation component with step indicators, keyboard navigation, sample note creation, and completion tracking.",
-      "reasoning": "This is a relatively straightforward flow with just 3 screens. The complexity mainly comes from the animation demonstration and smooth transitions. The integration with plan selection and sample note creation is minimal."
-    },
-    {
-      "taskId": 16,
-      "taskTitle": "Design and Build Landing Page",
-      "complexityScore": 6,
-      "recommendedSubtasks": 10,
-      "expansionPrompt": "Create subtasks for: hero section with demo video, problem/solution sections, testimonial placeholders, pricing section, scroll animations with Framer Motion, responsive design implementation, SEO optimization, email capture form, privacy/terms pages, and performance optimization.",
-      "reasoning": "Landing page development involves multiple sections, animations, and performance optimization. The need for high conversion rate design, SEO optimization, and extreme performance (PageSpeed >95) adds complexity to what might otherwise be straightforward."
-    },
-    {
-      "taskId": 17,
-      "taskTitle": "Implement Performance Monitoring and Analytics",
-      "complexityScore": 5,
-      "recommendedSubtasks": 8,
-      "expansionPrompt": "Break down into: Vercel analytics installation, custom performance metric tracking, performance budget alerts, event tracking implementation, error boundary setup, Core Web Vitals monitoring, development dashboard creation, and privacy compliance implementation.",
-      "reasoning": "While analytics setup is generally straightforward, the custom performance tracking, development dashboard, and privacy considerations add moderate complexity. The need to track specific metrics without impacting performance requires careful implementation."
-    },
-    {
-      "taskId": 18,
-      "taskTitle": "Polish and Launch Preparation",
-      "complexityScore": 7,
-      "recommendedSubtasks": 15,
-      "expansionPrompt": "Create subtasks for: comprehensive QA testing, animation polish pass, empty state refinement, loading skeleton implementation, ProductHunt asset creation, marketing copy writing, discount code setup, social media content preparation, documentation writing, support system setup, monitoring configuration, backup plan creation, beta user recruitment and feedback collection, final payment testing, and launch checklist completion.",
-      "reasoning": "Launch preparation involves many different types of tasks across development, marketing, and operations. While individual tasks aren't complex, the coordination and thoroughness required, plus the critical nature of getting everything right for launch, makes this moderately complex overall."
-    }
-  ]
+	"meta": {
+		"generatedAt": "2025-07-09T20:45:12.874Z",
+		"tasksAnalyzed": 2,
+		"totalTasks": 18,
+		"analysisCount": 18,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Initialize Next.js 15 Project with Core Dependencies",
+			"complexityScore": 6,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Break down the Next.js 15 project initialization into subtasks covering: project creation with create-next-app, dependency installation and version management, TypeScript configuration with strict mode, Tailwind CSS setup with custom theme configuration, project structure creation, development environment setup, performance baseline establishment, and initial Git setup with proper .gitignore.",
+			"reasoning": "This task involves multiple configuration steps across different tools and frameworks. While each step is straightforward, the combination of Next.js 15 setup, TypeScript configuration, Tailwind theming, and performance requirements makes it moderately complex. The task requires careful attention to versions and proper configuration of development tooling."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Implement Google OAuth with Better-Auth",
+			"complexityScore": 7,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Create subtasks for: Google Cloud Console OAuth setup, better-auth installation and configuration, auth API route implementation, sign-in page UI creation, middleware setup for route protection, auth context provider implementation, session management with token handling, user data storage, error handling implementation, and testing of the complete auth flow.",
+			"reasoning": "Authentication implementation is inherently complex, involving external service configuration (Google), security considerations, session management, and integration with Next.js middleware. The task requires handling multiple OAuth flows, token management, and proper error handling, making it one of the more complex foundational tasks."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Design and Implement Database Schema with Drizzle ORM",
+			"complexityScore": 8,
+			"recommendedSubtasks": 12,
+			"expansionPrompt": "Break down into: Drizzle ORM and database driver installation, database connection setup with environment variables, user table schema creation, folder hierarchy schema with self-referential relationships, notes table with JSONB content field, time blocks schema design, collaborators junction table, index creation for performance optimization, migration file generation, seed data creation, connection pooling configuration, and comprehensive testing setup.",
+			"reasoning": "Database schema design is critical and complex, requiring careful consideration of relationships, data types, and performance. The task involves multiple related tables with foreign keys, JSONB fields for flexible content storage, hierarchical data (folders), and performance optimization through indexing. The migration and seeding aspects add additional complexity."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Integrate Supabase for Real-time and Database",
+			"complexityScore": 7,
+			"recommendedSubtasks": 11,
+			"expansionPrompt": "Create subtasks for: Supabase project creation and setup, client library installation, environment variable configuration, client singleton implementation for both server and client, RLS policy creation for all tables, real-time subscription setup, connection management with reconnection logic, database function creation for complex queries, Edge Functions project structure setup, comprehensive security testing, and performance benchmarking.",
+			"reasoning": "Supabase integration involves multiple complex aspects: authentication integration, RLS policies for security, real-time subscriptions, and proper client management for both server and client environments. The security configuration and real-time aspects require careful implementation and testing."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Create Minimal UI Shell with Sidebar and Editor Layout",
+			"complexityScore": 5,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down into: main layout component creation with CSS Grid, sidebar component implementation, user profile section, folder tree placeholder, loading state components with skeleton screens, empty state design, animation setup with Framer Motion, and responsive design implementation.",
+			"reasoning": "While this is primarily UI work, it sets the foundation for the entire application layout. The complexity comes from creating a clean, performant layout with proper loading states and animations. The 80% whitespace principle and performance requirements add design complexity."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implement Folder Tree with Drag-and-Drop",
+			"complexityScore": 8,
+			"recommendedSubtasks": 12,
+			"expansionPrompt": "Create subtasks for: drag-and-drop library installation and setup, recursive folder component creation, folder CRUD operations implementation, drag handlers for reordering, drop zone logic for nesting, optimistic update system with rollback, localStorage persistence, animation implementation, context menu creation, nesting depth enforcement, note count display, and comprehensive interaction testing.",
+			"reasoning": "This task is highly complex due to the combination of recursive rendering, drag-and-drop interactions, state management with optimistic updates, and persistence. The need for smooth animations, error handling with rollback, and complex user interactions makes this one of the more challenging UI features."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Integrate BlockNote Editor for Rich Text Editing",
+			"complexityScore": 6,
+			"recommendedSubtasks": 9,
+			"expansionPrompt": "Break down into: BlockNote installation and setup, theme customization for minimalist design, toolbar configuration for selected features only, auto-save implementation with debouncing, content storage setup as JSONB, focus mode implementation with UI fading, keyboard shortcut configuration, performance optimization for typing latency, and testing across different browsers.",
+			"reasoning": "Editor integration requires careful configuration to achieve the minimalist design while maintaining performance. The custom theme, auto-save functionality, focus mode, and strict performance requirements (sub-30ms typing latency) add significant complexity to what might otherwise be a straightforward integration."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Build Note Management System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 11,
+			"expansionPrompt": "Create subtasks for: note CRUD API implementation, note list component with sorting, new note creation flow, title extraction logic, search implementation with fuzzy matching, note switching with unsaved changes handling, soft delete functionality, keyboard navigation setup, URL-based routing, recently accessed notes feature, and auto-creation of untitled notes.",
+			"reasoning": "The note management system is the core of the application and involves complex state management, search functionality, keyboard navigation, and careful UX considerations around unsaved changes. The integration with URL routing and search functionality adds additional complexity."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Create Time-Blocking Calendar Component",
+			"complexityScore": 9,
+			"recommendedSubtasks": 14,
+			"expansionPrompt": "Break down into: calendar grid layout with CSS Grid, time slot rendering for 15-minute intervals, current time indicator with minute updates, week view implementation, TimeBlock component creation, drag-to-resize functionality, ghost element visualization during drag, database integration for time blocks, quick action handlers for slot clicking, time calculation utilities, visual styling for different block states, performance optimization, responsive sidebar toggle, and comprehensive testing.",
+			"reasoning": "This is one of the most complex UI components, requiring precise time-based layouts, complex drag interactions, real-time updates, and database synchronization. The 15-minute grid system, drag-to-resize functionality, and visual feedback requirements make this particularly challenging. Performance with many blocks is also a concern."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Implement Drag Text to Calendar Feature",
+			"complexityScore": 10,
+			"recommendedSubtasks": 15,
+			"expansionPrompt": "Create subtasks for: text selection detection in BlockNote, drag handler implementation for editor content, drop zone detection in calendar, visual feedback during drag operation, time block creation on drop, smart text parsing for duration detection, preview rendering while dragging, edge scrolling implementation, undo/redo support integration, tooltip system for drag hints, multi-line selection handling, animation for created blocks, linked indicator system in notes, cross-component state management, and extensive user testing.",
+			"reasoning": "This is the most complex feature, requiring deep integration between two separate components (editor and calendar), custom drag-and-drop handling beyond standard library capabilities, smart text parsing, and complex visual feedback. The feature crosses multiple technical boundaries and requires careful state management and performance optimization."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Build Free/Pro Tier System with Limitations",
+			"complexityScore": 6,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Break down into: subscription status integration in auth context, note limit enforcement, folder limit implementation, AI access control, device fingerprinting for single-device limit, collaboration feature gating, upgrade prompt UI creation, usage tracking hooks, visual indicators for pro features, and grace period implementation.",
+			"reasoning": "While the individual limits are straightforward, the system requires careful integration throughout the app, graceful handling of limit enforcement, and good UX for upgrade prompts. Device fingerprinting and soft limits add technical complexity."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Integrate Stripe Checkout for Payments",
+			"complexityScore": 8,
+			"recommendedSubtasks": 12,
+			"expansionPrompt": "Create subtasks for: Stripe account setup with products, SDK installation, checkout session API creation, webhook endpoint implementation, webhook event handling for subscription lifecycle, database updates for subscription status, checkout UI flow, success page creation, billing portal integration, test mode configuration, error handling and logging, and comprehensive payment testing.",
+			"reasoning": "Payment integration is complex due to security requirements, webhook handling, and the need for robust error handling. Managing subscription lifecycle events, handling edge cases, and ensuring data consistency between Stripe and the database requires careful implementation."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Create Minimal Onboarding Flow",
+			"complexityScore": 4,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down into: onboarding route setup, welcome screen creation, animation implementation for drag-to-calendar demo, plan selection screen, navigation component with step indicators, keyboard navigation, sample note creation, and completion tracking.",
+			"reasoning": "This is a relatively straightforward flow with just 3 screens. The complexity mainly comes from the animation demonstration and smooth transitions. The integration with plan selection and sample note creation is minimal."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Design and Build Landing Page",
+			"complexityScore": 6,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Create subtasks for: hero section with demo video, problem/solution sections, testimonial placeholders, pricing section, scroll animations with Framer Motion, responsive design implementation, SEO optimization, email capture form, privacy/terms pages, and performance optimization.",
+			"reasoning": "Landing page development involves multiple sections, animations, and performance optimization. The need for high conversion rate design, SEO optimization, and extreme performance (PageSpeed >95) adds complexity to what might otherwise be straightforward."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Implement Performance Monitoring and Analytics",
+			"complexityScore": 5,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Break down into: Vercel analytics installation, custom performance metric tracking, performance budget alerts, event tracking implementation, error boundary setup, Core Web Vitals monitoring, development dashboard creation, and privacy compliance implementation.",
+			"reasoning": "While analytics setup is generally straightforward, the custom performance tracking, development dashboard, and privacy considerations add moderate complexity. The need to track specific metrics without impacting performance requires careful implementation."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Polish and Launch Preparation",
+			"complexityScore": 7,
+			"recommendedSubtasks": 15,
+			"expansionPrompt": "Create subtasks for: comprehensive QA testing, animation polish pass, empty state refinement, loading skeleton implementation, ProductHunt asset creation, marketing copy writing, discount code setup, social media content preparation, documentation writing, support system setup, monitoring configuration, backup plan creation, beta user recruitment and feedback collection, final payment testing, and launch checklist completion.",
+			"reasoning": "Launch preparation involves many different types of tasks across development, marketing, and operations. While individual tasks aren't complex, the coordination and thoroughness required, plus the critical nature of getting everything right for launch, makes this moderately complex overall."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Add AI Writing Assistant with OpenAI Integration",
+			"complexityScore": 7,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Break down the AI writing assistant implementation into steps for integrating BlockNote's @blocknote/xl-ai package with OpenAI, implementing custom AI commands (Continue Writing, Improve Clarity, Summarize, Extract Tasks), configuring streaming responses, adding usage tracking for free tier limits, and integrating with slash commands and keyboard shortcuts.",
+			"reasoning": "This task requires integrating a third-party AI package with BlockNote, creating multiple custom AI commands, handling streaming responses, implementing usage tracking with database integration, and ensuring proper UI/UX integration. The complexity comes from coordinating multiple systems and ensuring reliable AI functionality."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Implement Real-time Collaboration with Presence",
+			"complexityScore": 9,
+			"recommendedSubtasks": 13,
+			"expansionPrompt": "Break down the real-time collaboration implementation into steps for setting up BlockNote's collaborative editing with Yjs, creating a custom Supabase provider for real-time sync, implementing cursor presence with user identification, building presence avatars sidebar, creating share functionality with link generation, handling connection states and recovery, and adding smooth animations for user join/leave events.",
+			"reasoning": "This is a highly complex task involving real-time synchronization, CRDT-based collaborative editing, custom WebSocket provider implementation, presence tracking, UI components for collaboration features, and handling various edge cases like disconnections and conflicts. It requires deep integration with both BlockNote and Supabase Realtime."
+		}
+	]
 }

@@ -1230,175 +1230,176 @@
         "id": 10,
         "title": "Implement Drag Text to Calendar Feature",
         "description": "Create the killer feature: dragging selected text from notes to create time blocks",
-        "details": "Implement text selection detection in BlockNote editor. Add drag handler for selected text with visual feedback (cursor change, selected text highlight). Create drop zones in calendar that highlight when dragging text over them. On drop, create time block with selected text as title, default 30-minute duration. Add smart parsing: if text contains time references ('2 hours', '30 min'), set duration accordingly. Show preview of time block while dragging. Implement edge scrolling when dragging near calendar boundaries. Add undo/redo support for drag operations. Create floating tooltip during drag showing 'Drop to schedule' hint. If text is a list item, offer to create multiple time blocks. Animate the created block with subtle scale effect. Update note content to show linked time indicator next to scheduled text.",
-        "testStrategy": "Test dragging various text selections to calendar. Verify time parsing works for different formats. Test edge scrolling behavior. Ensure undo/redo works correctly. Test multi-line text selection. Verify visual feedback appears at all stages. Test that linked indicators appear in notes. Measure drag performance stays smooth.",
-        "priority": "high",
+        "status": "pending",
         "dependencies": [
           9
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Implement text selection detection in BlockNote editor. Add drag handler for selected text with visual feedback (cursor change, selected text highlight). Create drop zones in calendar that highlight when dragging text over them. On drop, create time block with selected text as title, default 30-minute duration. Add smart parsing: if text contains time references ('2 hours', '30 min'), set duration accordingly. Show preview of time block while dragging. Implement edge scrolling when dragging near calendar boundaries. Add undo/redo support for drag operations. Create floating tooltip during drag showing 'Drop to schedule' hint. If text is a list item, offer to create multiple time blocks. Animate the created block with subtle scale effect. Update note content to show linked time indicator next to scheduled text.",
+        "testStrategy": "Test dragging various text selections to calendar. Verify time parsing works for different formats. Test edge scrolling behavior. Ensure undo/redo works correctly. Test multi-line text selection. Verify visual feedback appears at all stages. Test that linked indicators appear in notes. Measure drag performance stays smooth.",
         "subtasks": [
           {
             "id": 1,
             "title": "Implement BlockNote selection API integration",
             "description": "Create a custom selection detection system that integrates with BlockNote's internal selection API to capture text selections in real-time",
+            "status": "pending",
             "dependencies": [],
             "details": "Research BlockNote's selection API, implement event listeners for selection changes, create a selection state manager that tracks selected text, position, and block references. Handle edge cases like multi-block selections and nested content.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Build drag handler UI component",
             "description": "Create a visual drag handler that appears near selected text in the BlockNote editor",
+            "status": "pending",
             "dependencies": [
               1
             ],
             "details": "Design and implement a floating drag handle component that appears on text selection, position it correctly relative to selected text, ensure it doesn't interfere with editor functionality, add hover states and visual indicators.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Implement custom drag event system",
             "description": "Create a custom drag-and-drop system that works with BlockNote's content model",
+            "status": "pending",
             "dependencies": [
               1,
               2
             ],
             "details": "Override native drag behavior to work with BlockNote's virtual DOM, create custom drag data transfer format, handle drag start/move/end events, ensure compatibility with editor's undo/redo system.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Create calendar drop zone detection",
             "description": "Implement drop zone detection logic for the calendar component",
+            "status": "pending",
             "dependencies": [],
             "details": "Add drop target detection to calendar time slots, calculate precise drop positions based on mouse coordinates, handle different calendar views (day/week/month), create visual indicators for valid drop zones.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Build drag preview component",
             "description": "Create a visual preview of the content being dragged",
+            "status": "pending",
             "dependencies": [
               3
             ],
             "details": "Generate a preview element showing the selected text, add visual styling to indicate it's being dragged, implement ghost image replacement, ensure preview follows cursor smoothly.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 6,
             "title": "Implement smart text parsing engine",
             "description": "Create an AI-powered text parser to extract time duration and event details from selected text",
+            "status": "pending",
             "dependencies": [],
             "details": "Integrate NLP to parse natural language time expressions, detect event titles and descriptions, handle various time formats (2 hours, 2h, 120 min), extract recurring patterns, implement fallback parsing logic.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 7,
             "title": "Build visual feedback system",
             "description": "Create comprehensive visual feedback during the entire drag operation",
+            "status": "pending",
             "dependencies": [
               3,
               4,
               5
             ],
             "details": "Implement hover effects on calendar slots, show time duration preview while hovering, add visual connection lines between source and target, create smooth transitions and animations.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 8,
             "title": "Implement time block creation logic",
             "description": "Create the system to generate calendar events from dropped content",
+            "status": "pending",
             "dependencies": [
               4,
               6
             ],
             "details": "Convert parsed text data into calendar event objects, calculate event duration and position, handle time zone conversions, integrate with existing calendar data model, support recurring events.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 9,
             "title": "Build edge scrolling mechanism",
             "description": "Implement automatic scrolling when dragging near viewport edges",
+            "status": "pending",
             "dependencies": [
               3,
               7
             ],
             "details": "Detect when drag cursor approaches viewport edges, implement smooth auto-scrolling in both editor and calendar, adjust scroll speed based on cursor distance from edge, handle scroll boundaries correctly.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 10,
             "title": "Create undo/redo integration",
             "description": "Integrate drag-drop operations with the application's undo/redo system",
+            "status": "pending",
             "dependencies": [
               3,
               8
             ],
             "details": "Track all drag-drop operations in undo history, implement reversible actions for both note changes and calendar events, ensure state consistency across components, handle edge cases like deleted source content.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 11,
             "title": "Build tooltip hint system",
             "description": "Create contextual tooltips to guide users through the drag-drop process",
+            "status": "pending",
             "dependencies": [
               2,
               7
             ],
             "details": "Show tooltips on hover over drag handle, display keyboard shortcuts and tips, implement smart tooltip positioning, add progressive disclosure for advanced features, ensure accessibility compliance.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 12,
             "title": "Implement multi-line selection handling",
             "description": "Handle complex text selections spanning multiple lines and blocks",
+            "status": "pending",
             "dependencies": [
               1,
               3
             ],
             "details": "Detect and handle multi-paragraph selections, preserve formatting during drag operations, handle mixed content types (text, lists, etc.), implement selection boundary validation.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 13,
             "title": "Create animation system for dropped blocks",
             "description": "Build smooth animations for calendar blocks appearing after drop",
+            "status": "pending",
             "dependencies": [
               8
             ],
             "details": "Implement entrance animations for new calendar blocks, add success feedback animations, create smooth transitions from preview to final position, handle animation queuing for multiple drops.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 14,
             "title": "Build linked indicator system",
             "description": "Create visual indicators showing connections between notes and calendar events",
+            "status": "pending",
             "dependencies": [
               8,
               10
             ],
             "details": "Add visual markers in notes showing linked calendar events, implement bi-directional navigation between linked items, create hover previews of linked content, handle deletion and updates of linked items.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 15,
             "title": "Implement cross-component state management",
             "description": "Create a robust state management system for drag-drop operations across components",
+            "status": "pending",
             "dependencies": [
               3,
               8,
@@ -1406,7 +1407,6 @@
               14
             ],
             "details": "Design centralized drag-drop state store, implement event bus for cross-component communication, ensure state persistence across navigation, handle concurrent operations and race conditions, implement performance optimizations.",
-            "status": "pending",
             "testStrategy": ""
           }
         ]
@@ -1414,134 +1414,126 @@
       {
         "id": 11,
         "title": "Add AI Writing Assistant with OpenAI Integration",
-        "description": "Implement the AI writing assistant with context-aware features accessible via Cmd+J",
-        "details": "Install openai@4.28.0 and set up API key management in environment variables. Create Edge Function in Supabase for AI calls to protect API key. Implement Cmd+J command palette using @radix-ui/react-dialog@1.0.5 with 4 options: Continue Writing (append to current position), Improve Clarity (rewrite selected text), Summarize (create summary of entire note or selection), Extract Tasks (find actionable items and create time blocks). Add loading states with subtle spinner. Implement streaming responses for better UX using Server-Sent Events. Add error handling with user-friendly messages. Create usage tracking to enforce free tier limits (10 AI calls per day for free users). Show AI response inline with option to accept or reject. Add subtle AI indicator when content is AI-generated. Implement context gathering: send current paragraph + surrounding context (max 1000 tokens) for better results.",
-        "testStrategy": "Test all four AI features with various content types. Verify streaming responses work smoothly. Test error handling with invalid API key. Ensure usage limits are enforced correctly. Test that context is properly extracted and sent. Verify AI responses appear inline correctly. Test Cmd+J shortcut on different systems.",
-        "priority": "medium",
+        "description": "Implement the AI writing assistant using BlockNote's built-in AI features via @blocknote/xl-ai package for context-aware AI assistance",
+        "status": "pending",
         "dependencies": [
           7
         ],
-        "status": "pending",
+        "priority": "high",
+        "details": "Install @blocknote/xl-ai package and leverage BlockNote's built-in AI capabilities including AIMenuController, custom AI commands, and streaming responses. Configure OpenAI integration using BlockNote's LLM interface. Implement custom AI commands for Continue Writing, Improve Clarity, Summarize, and Extract Tasks. Integrate AI menu with slash commands and keyboard shortcuts. Add usage tracking for free tier limits (10 AI calls per day). Create custom AI commands that work with BlockNote's existing AI infrastructure for better integration.",
+        "testStrategy": "Test BlockNote AI integration with various content types. Verify custom AI commands work properly. Test streaming responses through BlockNote's AI system. Ensure usage limits are enforced correctly. Test AI menu integration with slash commands. Verify keyboard shortcuts work across different systems.",
         "subtasks": [
           {
             "id": 1,
-            "title": "OpenAI SDK installation and configuration",
-            "description": "Install OpenAI SDK v4+ and configure TypeScript types for the project",
-            "dependencies": [],
-            "details": "Install openai@4.x package using bun, create lib/openai/client.ts with proper TypeScript configuration, set up environment variables for OPENAI_API_KEY, configure the client to use gpt-4o-mini model as specified in CLAUDE.md",
+            "title": "Install BlockNote AI package and configure OpenAI",
+            "description": "Install @blocknote/xl-ai and configure OpenAI integration using BlockNote's LLM interface",
             "status": "pending",
+            "dependencies": [],
+            "details": "Install @blocknote/xl-ai package using bun, configure OpenAI client through BlockNote's LLM interface, set up environment variables for OPENAI_API_KEY, configure to use gpt-4o-mini model as specified in CLAUDE.md, integrate with existing BlockNote editor instance",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Supabase Edge Function creation for secure API calls",
-            "description": "Create Supabase Edge Function to proxy OpenAI API calls securely",
+            "title": "Set up BlockNote AI menu and controllers",
+            "description": "Configure BlockNote's AIMenuController and integrate AI menu with the editor",
+            "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Create a new Edge Function named 'openai-proxy' that validates user authentication, checks usage limits, forwards requests to OpenAI API, handles streaming responses, logs usage metrics, and returns responses. Implement proper error handling and rate limiting",
-            "status": "pending",
+            "details": "Import and configure AIMenuController from @blocknote/xl-ai, integrate with existing BlockNote editor setup, configure AI menu positioning and triggers, set up keyboard shortcuts for AI menu activation, ensure proper TypeScript integration",
             "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Command palette UI with keyboard shortcuts",
-            "description": "Build a command palette component with keyboard navigation and shortcuts",
-            "dependencies": [],
-            "details": "Create components/command-palette/index.tsx using shadcn/ui Command component, implement keyboard shortcuts (Cmd/Ctrl+K to open), add search functionality, integrate with note editor context, support arrow key navigation and Enter to execute commands",
+            "title": "Create custom Continue Writing AI command",
+            "description": "Implement Continue Writing feature using BlockNote's custom AI command system",
             "status": "pending",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Create custom AI command using BlockNote's AI command interface, implement context-aware content continuation, integrate with AIMenuController, handle text insertion at cursor position using BlockNote's editor API",
             "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Continue Writing feature implementation",
-            "description": "Implement AI-powered content continuation based on existing note content",
+            "title": "Create custom Improve Clarity AI command",
+            "description": "Build Improve Clarity feature using BlockNote's AI command system",
+            "status": "pending",
             "dependencies": [
               1,
-              2,
-              3
+              2
             ],
-            "details": "Create lib/ai/features/continue-writing.ts to analyze current note content, generate contextual continuation using OpenAI, integrate with command palette as 'Continue Writing' command, handle text insertion at cursor position in the editor",
-            "status": "pending",
+            "details": "Create custom AI command for text improvement, leverage BlockNote's text selection handling, implement diff view using BlockNote's built-in comparison features, integrate with AI menu for easy access",
             "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Improve Clarity feature",
-            "description": "Build feature to enhance selected text clarity and readability",
+            "title": "Create custom Summarize AI command",
+            "description": "Implement summarization feature using BlockNote's AI infrastructure",
+            "status": "pending",
             "dependencies": [
               1,
-              2,
-              3
+              2
             ],
-            "details": "Create lib/ai/features/improve-clarity.ts to process selected text, use OpenAI to rewrite for better clarity while preserving meaning, add to command palette with text selection detection, implement diff view to show changes before applying",
-            "status": "pending",
+            "details": "Create custom AI command for summarization, support both selected text and full note summarization using BlockNote's content extraction, add configurable summary length options, integrate with AI menu system",
             "testStrategy": ""
           },
           {
             "id": 6,
-            "title": "Summarize feature",
-            "description": "Implement AI summarization for selected text or entire notes",
+            "title": "Create custom Extract Tasks AI command with time block integration",
+            "description": "Extract actionable tasks using BlockNote AI and create corresponding time blocks",
+            "status": "pending",
             "dependencies": [
               1,
-              2,
-              3
+              2
             ],
-            "details": "Create lib/ai/features/summarize.ts to generate concise summaries, support both selected text and full note summarization, add configurable summary length options, integrate with command palette with appropriate context detection",
-            "status": "pending",
+            "details": "Create custom AI command for task extraction using BlockNote's AI system, parse time estimates and priorities from AI response, integrate with existing time block system from Task 10, automatically create time blocks with extracted tasks, add preview functionality before creation\n<info added on 2025-07-09T20:36:03.609Z>\nNote: This subtask depends on Task 10 (Time-Blocking Calendar) being completed first, since it requires the ability to create time blocks in the calendar system. The time block creation functionality from Task 10 must be fully implemented before this feature can integrate with the existing time blocking system.\n</info added on 2025-07-09T20:36:03.609Z>",
             "testStrategy": ""
           },
           {
             "id": 7,
-            "title": "Extract Tasks with time block creation",
-            "description": "Extract actionable tasks from notes and create corresponding time blocks",
+            "title": "Configure streaming responses through BlockNote AI",
+            "description": "Set up streaming AI responses using BlockNote's built-in streaming capabilities",
+            "status": "pending",
             "dependencies": [
               1,
-              2,
-              3
+              2
             ],
-            "details": "Create lib/ai/features/extract-tasks.ts to identify tasks using OpenAI, parse time estimates and priorities, integrate with existing time block system, automatically create time blocks with extracted tasks, add to command palette with preview before creation\n<info added on 2025-07-09T20:36:03.609Z>\nNote: This subtask depends on Task 10 (Time-Blocking Calendar) being completed first, since it requires the ability to create time blocks in the calendar system. The time block creation functionality from Task 10 must be fully implemented before this feature can integrate with the existing time blocking system.\n</info added on 2025-07-09T20:36:03.609Z>",
-            "status": "pending",
+            "details": "Configure BlockNote's streaming response system, leverage built-in loading states and UI components, implement proper cleanup and cancellation handling through BlockNote's AI interface, ensure smooth user experience during streaming",
             "testStrategy": ""
           },
           {
             "id": 8,
-            "title": "Streaming response handling",
-            "description": "Implement real-time streaming for AI responses",
-            "dependencies": [
-              2
-            ],
-            "details": "Update Edge Function to handle OpenAI streaming responses, create lib/ai/streaming.ts with EventSource or WebSocket implementation, add streaming UI components with loading states, implement proper cleanup and cancellation handling",
+            "title": "Implement usage tracking and limit enforcement",
+            "description": "Track AI usage per user and enforce limits while working with BlockNote AI",
             "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "details": "Create Supabase tables for usage tracking (user_id, tokens_used, timestamp), implement usage middleware that intercepts BlockNote AI calls, add usage checks before AI command execution, create components/ai/usage-indicator.tsx to show remaining usage, implement monthly reset logic",
             "testStrategy": ""
           },
           {
             "id": 9,
-            "title": "Usage tracking and limit enforcement",
-            "description": "Track AI usage per user and enforce limits",
-            "dependencies": [
-              2
-            ],
-            "details": "Create Supabase tables for usage tracking (user_id, tokens_used, timestamp), implement usage calculation in Edge Function, add usage checks before API calls, create components/ai/usage-indicator.tsx to show remaining usage, implement monthly reset logic",
+            "title": "Integrate AI commands with slash menu",
+            "description": "Add custom AI commands to BlockNote's slash menu system",
             "status": "pending",
+            "dependencies": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "details": "Extend BlockNote's slash menu to include custom AI commands, create AI command group in slash menu, implement keyboard shortcuts for quick access, ensure proper command categorization and search functionality",
             "testStrategy": ""
           },
           {
             "id": 10,
-            "title": "Inline response UI",
-            "description": "Build inline UI components for AI responses in the editor",
-            "dependencies": [
-              3,
-              8
-            ],
-            "details": "Create components/ai/inline-response.tsx for displaying AI outputs, implement floating toolbar for AI actions, add accept/reject/edit functionality for AI suggestions, integrate with editor to show responses at appropriate positions",
+            "title": "Add error handling and fallback strategies",
+            "description": "Implement comprehensive error handling for BlockNote AI features",
             "status": "pending",
-            "testStrategy": ""
-          },
-          {
-            "id": 11,
-            "title": "Error handling and fallback strategies",
-            "description": "Implement comprehensive error handling for AI features",
             "dependencies": [
               1,
               2,
@@ -1551,11 +1543,9 @@
               6,
               7,
               8,
-              9,
-              10
+              9
             ],
-            "details": "Create lib/ai/error-handling.ts with retry logic and exponential backoff, implement user-friendly error messages using sonner toast, add offline detection and queueing, create fallback behaviors when AI is unavailable, log errors for monitoring",
-            "status": "pending",
+            "details": "Create error handling middleware for BlockNote AI commands, implement retry logic with exponential backoff, add user-friendly error messages using sonner toast, create fallback behaviors when AI is unavailable, log errors for monitoring, handle BlockNote-specific error states",
             "testStrategy": ""
           }
         ]
@@ -1563,157 +1553,158 @@
       {
         "id": 12,
         "title": "Implement Real-time Collaboration with Presence",
-        "description": "Add real-time collaborative editing with cursor presence and live updates",
-        "details": "Extend BlockNote with Yjs@13.6.14 for CRDT-based collaboration. Set up y-supabase provider for real-time sync through Supabase Realtime. Implement presence system showing other users' cursors with name labels and random colors. Add presence avatars in sidebar showing active collaborators (max 5 displayed). Create smooth cursor interpolation for natural movement. Implement awareness protocol for selection highlighting. Add 'Share' button that generates shareable link with copy feedback. Set up note access control: anyone with link can edit (no complex permissions for v1). Show connection status indicator (green dot when connected). Add optimistic updates with eventual consistency. Handle conflict resolution using Yjs automatic merging. Implement presence timeout (remove cursor after 30 seconds of inactivity). Add subtle join/leave animations for collaborators.",
-        "testStrategy": "Test with multiple browser sessions editing same note. Verify cursors appear and move smoothly. Test conflict resolution with simultaneous edits. Verify presence updates within 100ms. Test connection recovery after network loss. Ensure share links work correctly. Test with 5+ simultaneous collaborators.",
-        "priority": "medium",
+        "description": "Add real-time collaborative editing with cursor presence and live updates using BlockNote's built-in collaboration features",
+        "status": "pending",
         "dependencies": [
           7,
           11
         ],
-        "status": "pending",
+        "priority": "high",
+        "details": "Leverage BlockNote's native collaboration support with Yjs integration. Use BlockNote's built-in collaborative editing features including cursor presence with name labels and user colors. Set up custom Supabase provider for real-time sync through Supabase Realtime. Implement presence system showing other users' cursors with automatic color assignment. Add presence avatars in sidebar showing active collaborators (max 5 displayed). Create 'Share' button that generates shareable link with copy feedback. Set up note access control: anyone with link can edit (no complex permissions for v1). Show connection status indicator (green dot when connected). Add optimistic updates with eventual consistency. Handle conflict resolution using Yjs automatic merging. Implement presence timeout (remove cursor after 30 seconds of inactivity). Add subtle join/leave animations for collaborators.",
+        "testStrategy": "Test with multiple browser sessions editing same note using BlockNote collaboration features. Verify cursors appear with proper labels and colors. Test conflict resolution with simultaneous edits. Verify presence updates within 100ms. Test connection recovery after network loss. Ensure share links work correctly. Test with 5+ simultaneous collaborators.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Install and configure Yjs core dependencies",
-            "description": "Install Yjs library and required type definitions for CRDT-based collaborative editing",
-            "dependencies": [],
-            "details": "Install yjs, y-websocket, y-protocols, and @types/yjs packages. Set up basic Yjs document structure and provider configuration files. Create utility functions for Yjs document initialization and management.",
+            "title": "Install BlockNote collaboration dependencies",
+            "description": "Install BlockNote collaboration extension and required Yjs dependencies",
             "status": "pending",
+            "dependencies": [],
+            "details": "Install @blocknote/react, @blocknote/core with collaboration support, yjs, and y-websocket packages. Set up BlockNote with collaboration enabled. Configure basic Yjs document structure for BlockNote collaborative editing.",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Set up BlockNote collaborative editing extension",
-            "description": "Integrate BlockNote editor with Yjs for real-time collaborative editing capabilities",
+            "title": "Configure BlockNote collaborative editor",
+            "description": "Set up BlockNote editor with built-in collaboration features enabled",
+            "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Install @blocknote/yjs extension, configure BlockNote editor to use Yjs document as data source. Set up shared types for BlockNote content structure. Implement document synchronization between BlockNote and Yjs.",
-            "status": "pending",
+            "details": "Configure BlockNote editor with collaboration option enabled. Set up Yjs document as data source for BlockNote. Configure collaborative editing settings including user identification and presence tracking. Enable built-in cursor presence and user colors.",
             "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Configure Supabase WebSocket provider for Yjs",
+            "title": "Implement custom Supabase Yjs provider",
             "description": "Create custom Yjs provider that uses Supabase Realtime channels for document synchronization",
+            "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Implement SupabaseProvider class extending Yjs WebsocketProvider. Configure Supabase Realtime channel for document updates. Handle authentication tokens and connection lifecycle. Set up message encoding/decoding for Yjs updates.",
-            "status": "pending",
+            "details": "Implement SupabaseProvider class that extends or replaces WebsocketProvider. Configure Supabase Realtime channel for document updates. Handle authentication tokens and connection lifecycle. Set up message encoding/decoding for Yjs updates through Supabase.",
             "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Implement user presence system foundation",
-            "description": "Create presence tracking system to monitor active users and their metadata",
+            "title": "Configure BlockNote presence system",
+            "description": "Set up BlockNote's built-in presence tracking with user metadata",
+            "status": "pending",
             "dependencies": [
+              2,
               3
             ],
-            "details": "Design presence state structure (user ID, name, color, cursor position). Implement presence state management using Yjs awareness protocol. Create hooks for presence updates and user tracking. Set up presence data persistence strategy.",
-            "status": "pending",
+            "details": "Configure BlockNote collaboration options for presence tracking. Set up user metadata (name, color) for presence display. Implement user identification system for collaborative sessions. Configure presence update intervals and display settings.",
             "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Build cursor rendering with smooth interpolation",
-            "description": "Implement visual cursor rendering for all active users with smooth movement animations",
+            "title": "Customize cursor rendering and animations",
+            "description": "Enhance BlockNote's default cursor rendering with custom styling and animations",
+            "status": "pending",
             "dependencies": [
               4
             ],
-            "details": "Create cursor component with user-specific colors and labels. Implement position interpolation using requestAnimationFrame for smooth movement. Handle cursor visibility based on editor focus and activity. Add cursor trail effect for better visibility.",
-            "status": "pending",
+            "details": "Customize BlockNote's cursor appearance with user-specific colors and labels. Add smooth movement animations for cursor updates. Implement cursor trail effects for better visibility. Configure cursor timeout and cleanup behavior.",
             "testStrategy": ""
           },
           {
             "id": 6,
-            "title": "Configure Yjs awareness protocol for presence",
-            "description": "Set up awareness protocol to broadcast and receive user presence updates",
+            "title": "Build presence avatars sidebar",
+            "description": "Create sidebar component showing active collaborators with avatars",
+            "status": "pending",
             "dependencies": [
               4
             ],
-            "details": "Configure awareness update intervals and timeout settings. Implement awareness state cleanup on disconnect. Handle awareness state synchronization on reconnect. Create awareness event handlers for user join/leave events.",
-            "status": "pending",
+            "details": "Design and implement presence avatars sidebar showing active users. Display maximum 5 collaborators with overflow indicator. Show user names, colors, and online status. Implement real-time updates for user join/leave events.",
             "testStrategy": ""
           },
           {
             "id": 7,
             "title": "Create share functionality with unique link generation",
             "description": "Build sharing system that generates unique collaborative session links",
+            "status": "pending",
             "dependencies": [
               3
             ],
             "details": "Implement share dialog UI with copy link functionality. Generate unique room IDs for collaborative sessions. Create URL routing for shared documents. Store share metadata in Supabase (created by, created at, permissions).",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 8,
-            "title": "Implement access control and permissions system",
-            "description": "Build permission system to control read/write access to shared documents",
+            "title": "Implement basic access control system",
+            "description": "Build simple permission system for shared document access",
+            "status": "pending",
             "dependencies": [
               7
             ],
-            "details": "Create permission levels (viewer, editor, owner). Implement permission checking middleware. Build UI for managing document permissions. Handle permission updates in real-time. Integrate with Supabase RLS policies.",
-            "status": "pending",
+            "details": "Create basic access control: anyone with link can edit. Implement link validation and access checking. Set up basic security measures for shared documents. Handle invalid or expired links gracefully.",
             "testStrategy": ""
           },
           {
             "id": 9,
             "title": "Create connection status indicator component",
             "description": "Build UI component showing real-time connection status and sync state",
+            "status": "pending",
             "dependencies": [
               3
             ],
             "details": "Design status indicator with states (connecting, connected, disconnected, syncing). Implement reconnection logic with exponential backoff. Show sync progress for large documents. Add network quality indicators and latency display.",
-            "status": "pending",
             "testStrategy": ""
           },
           {
             "id": 10,
-            "title": "Develop conflict resolution testing framework",
-            "description": "Create comprehensive testing suite for CRDT conflict resolution scenarios",
+            "title": "Test BlockNote collaboration features",
+            "description": "Create comprehensive testing suite for BlockNote collaborative editing",
+            "status": "pending",
             "dependencies": [
               2,
               3
             ],
-            "details": "Write tests for concurrent edit scenarios. Test offline editing and sync on reconnect. Verify CRDT convergence properties. Create stress tests with multiple simultaneous editors. Document conflict resolution behaviors.",
-            "status": "pending",
+            "details": "Write tests for concurrent edit scenarios using BlockNote collaboration. Test offline editing and sync on reconnect. Verify CRDT convergence with BlockNote's Yjs integration. Create stress tests with multiple simultaneous editors. Document collaboration behaviors and limitations.",
             "testStrategy": ""
           },
           {
             "id": 11,
             "title": "Implement presence timeout and cleanup handling",
             "description": "Build system to handle user disconnections and presence cleanup",
-            "dependencies": [
-              6
-            ],
-            "details": "Configure presence timeout values (30 seconds default). Implement graceful disconnect handling. Create presence garbage collection for stale users. Handle browser tab close/refresh events. Implement presence recovery on reconnection.",
             "status": "pending",
+            "dependencies": [
+              4
+            ],
+            "details": "Configure presence timeout values (30 seconds default). Implement graceful disconnect handling for BlockNote collaboration. Create presence garbage collection for stale users. Handle browser tab close/refresh events. Implement presence recovery on reconnection.",
             "testStrategy": ""
           },
           {
             "id": 12,
             "title": "Create join/leave animations for user presence",
             "description": "Add smooth animations for user cursor appearance and disappearance",
+            "status": "pending",
             "dependencies": [
               5,
               11
             ],
-            "details": "Implement fade-in animation for new user cursors. Create fade-out animation with delay for leaving users. Add notification toasts for user join/leave events. Implement smooth transition for cursor color changes.",
-            "status": "pending",
+            "details": "Implement fade-in animation for new user cursors in BlockNote. Create fade-out animation with delay for leaving users. Add notification toasts for user join/leave events. Implement smooth transition for cursor color changes.",
             "testStrategy": ""
           },
           {
             "id": 13,
             "title": "Set up multi-user testing environment and tools",
             "description": "Create testing setup to simulate multiple concurrent users for collaboration testing",
+            "status": "pending",
             "dependencies": [
               10
             ],
-            "details": "Build testing harness to spawn multiple browser instances. Create automated testing scenarios for multi-user interactions. Set up performance monitoring for collaboration features. Document testing procedures and common issues. Create demo environment for stakeholder testing.",
-            "status": "pending",
+            "details": "Build testing harness to spawn multiple browser instances. Create automated testing scenarios for multi-user interactions with BlockNote collaboration. Set up performance monitoring for collaboration features. Document testing procedures and common issues. Create demo environment for stakeholder testing.",
             "testStrategy": ""
           }
         ]
