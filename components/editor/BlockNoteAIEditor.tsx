@@ -73,7 +73,7 @@ export function BlockNoteAIEditor({
           <AIMenuController aiMenu={CustomAIMenu} />
 
           {/* Custom Formatting Toolbar with AI button */}
-          <FormattingToolbarWithAI />
+          <FormattingToolbarWithAI editor={editor} />
 
           {/* Custom SlashMenu with AI option */}
           <SuggestionMenuWithAI editor={editor} />
