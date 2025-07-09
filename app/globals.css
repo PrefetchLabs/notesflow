@@ -297,6 +297,30 @@
   outline: none !important;
 }
 
+/* Formatting toolbar styles */
+.bn-formatting-toolbar {
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .bn-formatting-toolbar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* AI button in formatting toolbar */
+.bn-formatting-toolbar .bn-button:has(.lucide-sparkles) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+/* Ensure formatting toolbar shows above content */
+.bn-formatting-toolbar-controller {
+  z-index: 50;
+}
+
 /* BlockNote dark mode overrides */
 .dark .bn-editor {
   background-color: var(--background);

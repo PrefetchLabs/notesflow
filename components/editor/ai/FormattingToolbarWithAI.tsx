@@ -1,7 +1,17 @@
 'use client';
 
 import React from 'react';
-import { FormattingToolbarController } from '@blocknote/react';
+import { 
+  FormattingToolbarController,
+  FormattingToolbar,
+  BlockTypeSelect,
+  BasicTextStyleButton,
+  TextAlignButton,
+  ColorStyleButton,
+  NestBlockButton,
+  UnnestBlockButton,
+  CreateLinkButton
+} from '@blocknote/react';
 import { getAIExtension } from '@blocknote/xl-ai';
 import { Sparkles } from 'lucide-react';
 
@@ -12,27 +22,51 @@ export function FormattingToolbarWithAI() {
         const { editor } = props;
 
         const handleAIClick = () => {
-          const aiExtension = getAIExtension(editor);
-          if (editor.getSelection()) {
-            // Get the currently selected block
-            const textCursorPosition = editor.getTextCursorPosition();
-            if (textCursorPosition?.block) {
-              aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
+          try {
+            const aiExtension = getAIExtension(editor);
+            if (aiExtension && editor.getSelection()) {
+              // Get the currently selected block
+              const textCursorPosition = editor.getTextCursorPosition();
+              if (textCursorPosition?.block) {
+                aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
+              }
             }
+          } catch (error) {
+            console.error('AI Extension error:', error);
           }
         };
 
         return (
-          <div className="bn-formatting-toolbar">
+          <FormattingToolbar>
+            <BlockTypeSelect />
+            
+            <BasicTextStyleButton basicTextStyle="bold" />
+            <BasicTextStyleButton basicTextStyle="italic" />
+            <BasicTextStyleButton basicTextStyle="underline" />
+            <BasicTextStyleButton basicTextStyle="strike" />
+            <BasicTextStyleButton basicTextStyle="code" />
+            
+            <TextAlignButton textAlignment="left" />
+            <TextAlignButton textAlignment="center" />
+            <TextAlignButton textAlignment="right" />
+            
+            <ColorStyleButton />
+            
+            <NestBlockButton />
+            <UnnestBlockButton />
+            
+            <CreateLinkButton />
+            
+            {/* AI Button */}
             <button
-              className="bn-toolbar-button"
+              className="bn-button"
               onClick={handleAIClick}
               title="AI Assistant"
+              type="button"
             >
               <Sparkles className="h-4 w-4" />
             </button>
-            {/* Add default formatting buttons here if needed */}
-          </div>
+          </FormattingToolbar>
         );
       }}
     />
