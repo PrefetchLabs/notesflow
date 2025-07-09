@@ -9,6 +9,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Menu, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TimeBlockingCalendar } from '@/components/calendar/time-blocking-calendar';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -68,13 +69,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="text-xs text-muted-foreground">v0.1</span>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCalendarOpen(!calendarOpen)}
-            >
-              <Calendar className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCalendarOpen(!calendarOpen)}
+              >
+                <Calendar className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </header>
         
@@ -111,15 +115,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="main-content overflow-hidden relative">
         <div className="h-full w-full">{children}</div>
         
-        {/* Calendar toggle button */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setCalendarOpen(!calendarOpen)}
-          className="absolute bottom-4 right-4 z-10 shadow-lg"
-        >
-          <Calendar className="h-5 w-5" />
-        </Button>
+        {/* Bottom right controls */}
+        <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
+          <ThemeToggle />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCalendarOpen(!calendarOpen)}
+            className="shadow-lg"
+          >
+            <Calendar className="h-5 w-5" />
+          </Button>
+        </div>
       </main>
       
       {/* Calendar sidebar */}

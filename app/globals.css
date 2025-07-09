@@ -114,6 +114,60 @@
   --chart-5: #d4d4d8;
 }
 
+.dark {
+  /* Dark mode colors - elegant dark theme */
+  --background: #09090b;
+  --foreground: #fafafa;
+
+  /* Accent color - subtle dark accent */
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+
+  /* Primary uses light gray for dark mode */
+  --primary: #fafafa;
+  --primary-foreground: #09090b;
+
+  /* Secondary uses dark gray */
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+
+  /* Muted colors for less emphasis */
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+
+  /* Borders and inputs - subtle in dark mode */
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d4d4d8;
+
+  /* Cards and popovers */
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+
+  /* Destructive actions - subtle red */
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+
+  /* Sidebar - clean separation in dark mode */
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #fafafa;
+  --sidebar-primary-foreground: #09090b;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #d4d4d8;
+
+  /* Chart colors - inverted for dark mode */
+  --chart-1: #fafafa;
+  --chart-2: #d4d4d8;
+  --chart-3: #a1a1aa;
+  --chart-4: #71717a;
+  --chart-5: #52525b;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -212,4 +266,39 @@
 
 .current-time-indicator {
   animation: time-pulse 2s ease-in-out infinite;
+}
+
+/* Dark mode enhancements */
+.dark {
+  /* Smooth color transitions */
+  color-scheme: dark;
+}
+
+/* BlockNote dark mode overrides */
+.dark .bn-editor {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.dark .bn-editor .bn-block-outer {
+  background-color: transparent;
+}
+
+.dark .bn-editor .bn-inline-content {
+  caret-color: var(--foreground);
+}
+
+/* Smooth theme transitions */
+html.dark,
+html.light {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollbar dark mode */
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-zinc-700;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-zinc-600;
 }

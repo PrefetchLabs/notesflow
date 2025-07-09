@@ -6,6 +6,7 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
 import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 interface BlockNoteEditorProps {
   initialContent?: any;
@@ -19,6 +20,7 @@ export function BlockNoteEditorComponent({
   editable = true,
 }: BlockNoteEditorProps) {
   const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   // Create the editor instance
   const editor = useCreateBlockNote({
@@ -49,7 +51,7 @@ export function BlockNoteEditorComponent({
     <BlockNoteView
       editor={editor}
       editable={editable}
-      theme="light"
+      theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
       className="h-full"
       onChange={handleChange}
     />
