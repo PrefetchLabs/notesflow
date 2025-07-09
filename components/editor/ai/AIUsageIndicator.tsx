@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles } from 'lucide-react';
-import { useSession } from '@/contexts/session-context';
+import { useSession } from '@/lib/auth/auth-client';
 import { toast } from 'sonner';
 
 const FREE_TIER_LIMIT = 10; // 10 AI calls per day for free tier
@@ -16,13 +16,13 @@ interface AIUsageData {
 export function AIUsageIndicator() {
   const [usage, setUsage] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const { user } = useSession();
+  const { data: session } = useSession();
 
   useEffect(() => {
-    if (user) {
+    if (session?.user) {
       fetchUsage();
     }
-  }, [user]);
+  }, [session]);
 
   const fetchUsage = async () => {
     try {
