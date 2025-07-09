@@ -1427,7 +1427,7 @@
             "id": 1,
             "title": "Install BlockNote AI package and configure OpenAI",
             "description": "Install @blocknote/xl-ai and configure OpenAI integration using BlockNote's LLM interface",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Install @blocknote/xl-ai package using bun, configure OpenAI client through BlockNote's LLM interface, set up environment variables for OPENAI_API_KEY, configure to use gpt-4o-mini model as specified in CLAUDE.md, integrate with existing BlockNote editor instance",
             "testStrategy": ""
@@ -1436,7 +1436,7 @@
             "id": 2,
             "title": "Set up BlockNote AI menu and controllers",
             "description": "Configure BlockNote's AIMenuController and integrate AI menu with the editor",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -1447,7 +1447,7 @@
             "id": 3,
             "title": "Create custom Continue Writing AI command",
             "description": "Implement Continue Writing feature using BlockNote's custom AI command system",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1,
               2
@@ -1459,7 +1459,7 @@
             "id": 4,
             "title": "Create custom Improve Clarity AI command",
             "description": "Build Improve Clarity feature using BlockNote's AI command system",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1,
               2
@@ -1471,7 +1471,7 @@
             "id": 5,
             "title": "Create custom Summarize AI command",
             "description": "Implement summarization feature using BlockNote's AI infrastructure",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1,
               2
@@ -1507,7 +1507,7 @@
             "id": 8,
             "title": "Implement usage tracking and limit enforcement",
             "description": "Track AI usage per user and enforce limits while working with BlockNote AI",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -1533,7 +1533,7 @@
             "id": 10,
             "title": "Add error handling and fallback strategies",
             "description": "Implement comprehensive error handling for BlockNote AI features",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [
               1,
               2,
@@ -2498,7 +2498,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-09T12:35:14.924Z",
+      "updated": "2025-07-09T21:08:06.353Z",
       "description": "Tasks for master context"
     }
   }

@@ -1,7 +1,9 @@
-import { createAIExtension as createBlockNoteAIExtension, AIExtensionOptions } from "@blocknote/xl-ai";
+import { createAIExtension as createBlockNoteAIExtension, AIExtension } from "@blocknote/xl-ai";
 import { BlockNoteEditor } from "@blocknote/core";
 import { checkAIUsageLimit, trackAIUsage } from "@/app/actions/ai";
 import { toast } from "sonner";
+
+type AIExtensionOptions = ConstructorParameters<typeof AIExtension>[1];
 
 export function createAIExtension(options: AIExtensionOptions) {
   return (editor: BlockNoteEditor) => {
@@ -46,16 +48,26 @@ export function createAIExtension(options: AIExtensionOptions) {
       } catch (error) {
         console.error("AI Extension error:", error);
         
-        if (error instanceof Error && error.message.includes("limit reached")) {
-          // Already handled above
-          return undefined;
+        if (error instanceof Error) {
+          if (error.message.includes("limit reached")) {
+            // Already handled above
+            return undefined;
+          }
+          
+          // Handle authentication errors
+          if (error.message.includes("not authenticated")) {
+            toast.error("Authentication required", {
+              description: "Please sign in to use AI features.",
+            });
+            return undefined;
+          }
         }
         
         toast.error("AI request failed", {
           description: "There was an error processing your AI request. Please try again.",
         });
         
-        throw error;
+        return undefined;
       }
     };
     
