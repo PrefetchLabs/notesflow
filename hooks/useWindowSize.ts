@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { debounce } from '@/lib/utils/debounce';
+import { useState, useEffect } from 'react';
 
 interface WindowSize {
   width: number | undefined;
@@ -7,35 +6,30 @@ interface WindowSize {
 }
 
 export function useWindowSize(): WindowSize {
-  const [windowSize, setWindowSize] = useState<WindowSize>(() => {
-    // Initialize with actual values to prevent layout shift
-    if (typeof window !== 'undefined') {
-      return {
-        width: window.innerWidth,
-        height: window.innerHeight,
-      };
-    }
-    return { width: undefined, height: undefined };
+  const [windowSize, setWindowSize] = useState<WindowSize>({
+    width: undefined,
+    height: undefined,
   });
 
   useEffect(() => {
     // Handler to call on window resize
-    const handleResize = () => {
+    function handleResize() {
+      // Set window width/height to state
       setWindowSize({
         width: window.innerWidth,
         height: window.innerHeight,
       });
-    };
-
-    // Debounce the resize handler to prevent excessive updates
-    const debouncedHandleResize = debounce(handleResize, 150);
+    }
 
     // Add event listener
-    window.addEventListener('resize', debouncedHandleResize);
+    window.addEventListener('resize', handleResize);
+
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
 
     // Remove event listener on cleanup
-    return () => window.removeEventListener('resize', debouncedHandleResize);
-  }, []);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Empty array ensures that effect is only run on mount
 
   return windowSize;
 }

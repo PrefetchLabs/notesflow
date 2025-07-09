@@ -3,6 +3,7 @@
 import { Home, Calendar, Settings, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MobileNavProps {
@@ -51,13 +52,18 @@ export function MobileNav({ className, onNewNote }: MobileNavProps) {
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                className="h-12 w-12 rounded-full shadow-lg transition-transform duration-150 hover:scale-110 active:scale-95"
-                onClick={onNewNote}
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <Plus className="h-6 w-6" />
-              </Button>
+                <Button
+                  size="icon"
+                  className="h-12 w-12 rounded-full shadow-lg"
+                  onClick={onNewNote}
+                >
+                  <Plus className="h-6 w-6" />
+                </Button>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent side="top">
               <p>New Note</p>

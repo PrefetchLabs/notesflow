@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo } from 'react';
+import { useState } from 'react';
 import { 
   Folder, 
   FolderOpen, 
@@ -57,7 +57,7 @@ const PLACEHOLDER_FOLDERS = [
   },
 ];
 
-export const FolderTree = memo(function FolderTree({ collapsed, isLoading = false }: FolderTreeProps) {
+export function FolderTree({ collapsed, isLoading = false }: FolderTreeProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set(['1', '2']) // Default expanded
   );
@@ -84,9 +84,9 @@ export const FolderTree = memo(function FolderTree({ collapsed, isLoading = fals
     const hasChildren = item.children && item.children.length > 0;
 
     const content = (
-      <div
+      <motion.div
         className={cn(
-          'group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
+          'group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm',
           'hover:bg-accent/50',
           isSelected && 'bg-accent',
           collapsed && 'justify-center'
@@ -98,9 +98,16 @@ export const FolderTree = memo(function FolderTree({ collapsed, isLoading = fals
           }
           setSelectedItem(item.id);
         }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.1 }}
       >
         {/* Icon */}
-        <div className="flex h-4 w-4 items-center justify-center text-muted-foreground">
+        <motion.div 
+          className="flex h-4 w-4 items-center justify-center text-muted-foreground"
+          animate={{ rotate: isFolder && isExpanded ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
           {isFolder ? (
             item.isSpecial ? (
               <Archive className="h-4 w-4" />
@@ -112,7 +119,7 @@ export const FolderTree = memo(function FolderTree({ collapsed, isLoading = fals
           ) : (
             <FileText className="h-4 w-4" />
           )}
-        </div>
+        </motion.div>
 
         {/* Name and actions */}
         {!collapsed && (
@@ -143,7 +150,7 @@ export const FolderTree = memo(function FolderTree({ collapsed, isLoading = fals
             </div>
           </>
         )}
-      </div>
+      </motion.div>
     );
 
     if (collapsed) {
@@ -165,11 +172,19 @@ export const FolderTree = memo(function FolderTree({ collapsed, isLoading = fals
     return (
       <div key={item.id}>
         {content}
-        {isFolder && isExpanded && hasChildren && (
-          <div className="mt-0.5">
-            {item.children.map((child: any) => renderItem(child, level + 1))}
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {isFolder && isExpanded && hasChildren && (
+            <motion.div
+              className="mt-0.5 overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+            >
+              {item.children.map((child: any) => renderItem(child, level + 1))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
@@ -232,4 +247,4 @@ export const FolderTree = memo(function FolderTree({ collapsed, isLoading = fals
       )}
     </div>
   );
-});
+}

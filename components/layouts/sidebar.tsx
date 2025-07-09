@@ -1,6 +1,5 @@
 'use client';
 
-import { memo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,16 +14,16 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-export const Sidebar = memo(function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
-    <aside
-      className={cn(
-        "sidebar relative flex h-screen flex-col border-r bg-background transition-all duration-300 ease-out",
-        collapsed ? "w-[60px]" : "w-[280px]"
-      )}
-      style={{
-        // Add will-change for performance
-        willChange: "width",
+    <motion.aside
+      className="sidebar relative flex h-screen flex-col border-r bg-background"
+      animate={{ width: collapsed ? 60 : 280 }}
+      initial={false}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
       }}
     >
       {/* Collapse/Expand Button */}
@@ -76,6 +75,6 @@ export const Sidebar = memo(function Sidebar({ collapsed, onToggle }: SidebarPro
       <div className="border-t p-4">
         {/* Settings and other actions can go here */}
       </div>
-    </aside>
+    </motion.aside>
   );
-});
+}

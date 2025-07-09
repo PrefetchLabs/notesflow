@@ -5,6 +5,7 @@ import { Welcome } from '@/components/empty-states';
 import { useAuth } from '@/lib/auth/auth-hooks';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { MobileNav } from '@/components/layouts/mobile-nav';
 import { useResponsive } from '@/hooks/useResponsive';
 
@@ -38,7 +39,12 @@ export default function DashboardPage() {
       </header>
       
       <main className="flex-1 p-4 pb-20 sm:p-6 md:pb-6">
-        <div className="mx-auto max-w-4xl">
+        <motion.div 
+          className="mx-auto max-w-4xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <p className="text-muted-foreground">
             Welcome back! Your notes and folders will appear here.
           </p>
@@ -46,18 +52,30 @@ export default function DashboardPage() {
           <div className="mt-6 rounded-lg border bg-card p-4 sm:mt-8 sm:p-6">
             <h2 className="text-base font-semibold sm:text-lg">Quick Stats</h2>
             <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-3">
-              <div className="rounded-lg bg-background p-3 sm:p-4 transition-transform duration-150 hover:scale-[1.02]">
+              <motion.div 
+                className="rounded-lg bg-background p-3 sm:p-4"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
                 <p className="text-xs text-muted-foreground sm:text-sm">Total Notes</p>
                 <p className="text-xl font-bold sm:text-2xl">0</p>
-              </div>
-              <div className="rounded-lg bg-background p-3 sm:p-4 transition-transform duration-150 hover:scale-[1.02]">
+              </motion.div>
+              <motion.div 
+                className="rounded-lg bg-background p-3 sm:p-4"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
                 <p className="text-xs text-muted-foreground sm:text-sm">Folders</p>
                 <p className="text-xl font-bold sm:text-2xl">0</p>
-              </div>
-              <div className="rounded-lg bg-background p-3 sm:p-4 transition-transform duration-150 hover:scale-[1.02]">
+              </motion.div>
+              <motion.div 
+                className="rounded-lg bg-background p-3 sm:p-4"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
                 <p className="text-xs text-muted-foreground sm:text-sm">Time Blocks Today</p>
                 <p className="text-xl font-bold sm:text-2xl">0</p>
-              </div>
+              </motion.div>
             </div>
           </div>
           
@@ -66,7 +84,7 @@ export default function DashboardPage() {
               Show Welcome Screen
             </Button>
           </div>
-        </div>
+        </motion.div>
       </main>
       
       {/* Mobile bottom navigation */}
