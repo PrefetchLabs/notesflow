@@ -49,13 +49,26 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title = 'Untitled Note', content = [], folderId } = body;
+    const { title = 'Untitled Note', content, folderId } = body;
+    
+    // Ensure content is never empty for BlockNote
+    const validContent = content && Array.isArray(content) && content.length > 0
+      ? content
+      : [{
+          type: 'paragraph',
+          props: {
+            textColor: 'default',
+            backgroundColor: 'default',
+          },
+          content: [],
+          children: [],
+        }];
 
     const [newNote] = await db
       .insert(notes)
       .values({
         title,
-        content,
+        content: validContent,
         userId: session.user.id,
         folderId: folderId || null,
       })

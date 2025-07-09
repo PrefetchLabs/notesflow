@@ -74,12 +74,24 @@ export default function NotesPage() {
 
   const handleCreateNote = async () => {
     try {
+      const defaultContent = [
+        {
+          type: 'paragraph',
+          props: {
+            textColor: 'default',
+            backgroundColor: 'default',
+          },
+          content: [],
+          children: [],
+        },
+      ];
+      
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: 'Untitled Note',
-          content: [],
+          content: defaultContent,
         }),
       });
       

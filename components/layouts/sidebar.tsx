@@ -19,9 +19,36 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter();
 
-  const handleCreateNote = () => {
-    const newNoteId = 'new-' + Date.now();
-    router.push(`/notes/${newNoteId}`);
+  const handleCreateNote = async () => {
+    try {
+      const defaultContent = [
+        {
+          type: 'paragraph',
+          props: {
+            textColor: 'default',
+            backgroundColor: 'default',
+          },
+          content: [],
+          children: [],
+        },
+      ];
+      
+      const response = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Untitled Note',
+          content: defaultContent,
+        }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to create note');
+      
+      const { note } = await response.json();
+      router.push(`/notes/${note.id}`);
+    } catch (error) {
+      console.error('Error creating note:', error);
+    }
   };
 
   return (

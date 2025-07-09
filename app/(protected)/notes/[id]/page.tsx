@@ -40,12 +40,24 @@ export default function NotePage() {
         // Check if it's a new note
         if (noteId.startsWith('new-')) {
           // Create new note
+          const defaultContent = [
+            {
+              type: 'paragraph',
+              props: {
+                textColor: 'default',
+                backgroundColor: 'default',
+              },
+              content: [],
+              children: [],
+            },
+          ];
+          
           const response = await fetch('/api/notes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               title: 'Untitled Note',
-              content: [],
+              content: defaultContent,
             }),
           });
           
@@ -63,7 +75,19 @@ export default function NotePage() {
         const { note } = await response.json();
         setNote(note);
         setTitle(note.title);
-        setContent(note.content || []);
+        // Ensure content is never empty for BlockNote
+        const noteContent = note.content && Array.isArray(note.content) && note.content.length > 0 
+          ? note.content 
+          : [{
+              type: 'paragraph',
+              props: {
+                textColor: 'default',
+                backgroundColor: 'default',
+              },
+              content: [],
+              children: [],
+            }];
+        setContent(noteContent);
         setLastSaved(new Date(note.updatedAt));
       } catch (error) {
         toast.error('Failed to load note');
