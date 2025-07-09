@@ -20,12 +20,15 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { RelativeTime } from '@/components/ui/relative-time';
 import { useFolders } from '@/hooks/useFolders';
+import { suggestTitleFromContent } from '@/lib/utils/titleExtraction';
+import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 
 export default function NotePage() {
   const params = useParams();
   const router = useRouter();
   const noteId = params.id as string;
   const { folders } = useFolders();
+  const { setHasUnsavedChanges: setGlobalUnsavedChanges, promptToSave } = useUnsavedChanges();
   
   const [note, setNote] = useState<any>(null);
   const [content, setContent] = useState<any>(null);
@@ -38,6 +41,13 @@ export default function NotePage() {
   // Debounce both title and content changes for autosave
   const debouncedTitle = useDebounce(title, 2000);
   const debouncedContent = useDebounce(content, 2000);
+
+  // Clear unsaved changes when unmounting
+  useEffect(() => {
+    return () => {
+      setGlobalUnsavedChanges(false);
+    };
+  }, [setGlobalUnsavedChanges]);
 
   // Load note data
   useEffect(() => {
@@ -124,24 +134,33 @@ export default function NotePage() {
       
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
+      setGlobalUnsavedChanges(false);
       toast.success('Note saved');
     } catch {
       toast.error('Failed to save note');
     } finally {
       setIsSaving(false);
     }
-  }, [noteId, title, content]);
+  }, [noteId, title, content, setGlobalUnsavedChanges]);
   
   // Track changes
   const handleContentChange = useCallback((newContent: any) => {
     setContent(newContent);
     setHasUnsavedChanges(true);
-  }, []);
+    setGlobalUnsavedChanges(true);
+    
+    // Auto-extract title from content if current title is generic
+    const suggestedTitle = suggestTitleFromContent(title, newContent);
+    if (suggestedTitle) {
+      setTitle(suggestedTitle);
+    }
+  }, [title, setGlobalUnsavedChanges]);
   
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     setHasUnsavedChanges(true);
-  }, []);
+    setGlobalUnsavedChanges(true);
+  }, [setGlobalUnsavedChanges]);
   
   // Autosave functionality
   useEffect(() => {
@@ -224,14 +243,20 @@ export default function NotePage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => router.push('/dashboard')}
+                onClick={() => promptToSave(
+                  handleSave,
+                  () => router.push('/dashboard')
+                )}
                 className="h-8 w-8"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-1.5 text-sm">
                 <button
-                  onClick={() => router.push('/dashboard')}
+                  onClick={() => promptToSave(
+                    handleSave,
+                    () => router.push('/dashboard')
+                  )}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Dashboard

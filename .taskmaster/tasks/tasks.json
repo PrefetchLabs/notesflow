@@ -905,7 +905,7 @@
           6,
           7
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -957,7 +957,7 @@
               1
             ],
             "details": "Create lib/utils/titleExtraction.ts to extract title from first line of content (max 50 chars). If first line is empty or too short, use first non-empty line. Fall back to 'Untitled Note' if no suitable content. Update title automatically when content changes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -981,7 +981,7 @@
               4
             ],
             "details": "Track dirty state in note editor using isDirty flag. Show confirmation dialog using shadcn/ui AlertDialog when switching notes with unsaved changes. Offer options: Save & Continue, Discard Changes, Cancel. Implement auto-save with 5-second debounce.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2485,7 +2485,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-09T09:00:03.445Z",
+      "updated": "2025-07-09T09:07:07.848Z",
       "description": "Tasks for master context"
     }
   }

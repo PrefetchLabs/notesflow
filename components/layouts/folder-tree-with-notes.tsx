@@ -54,6 +54,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FolderWithNotes, Note } from '@/hooks/useFoldersWithNotes';
 import { useRouter } from 'next/navigation';
+import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 
 interface FolderTreeWithNotesProps {
   folders: FolderWithNotes[];
@@ -75,6 +76,7 @@ interface SortableNoteItemProps {
 
 function SortableNoteItem({ note, collapsed }: SortableNoteItemProps) {
   const router = useRouter();
+  const { confirmNavigation } = useUnsavedChanges();
   const {
     attributes,
     listeners,
@@ -90,6 +92,10 @@ function SortableNoteItem({ note, collapsed }: SortableNoteItemProps) {
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const handleClick = () => {
+    confirmNavigation(() => router.push(`/notes/${note.id}`));
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -99,7 +105,7 @@ function SortableNoteItem({ note, collapsed }: SortableNoteItemProps) {
         'hover:bg-accent hover:text-accent-foreground ml-4',
         isDragging && 'z-50'
       )}
-      onClick={() => router.push(`/notes/${note.id}`)}
+      onClick={handleClick}
       {...attributes}
       {...listeners}
     >
