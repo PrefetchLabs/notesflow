@@ -6,9 +6,11 @@ import { eq, and } from 'drizzle-orm';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const session = await auth.api.getSession({
       headers: request.headers,
     });
@@ -22,7 +24,7 @@ export async function GET(
       .from(notes)
       .where(
         and(
-          eq(notes.id, params.id),
+          eq(notes.id, id),
           eq(notes.userId, session.user.id)
         )
       );
@@ -43,9 +45,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const session = await auth.api.getSession({
       headers: request.headers,
     });
@@ -66,7 +70,7 @@ export async function PUT(
       })
       .where(
         and(
-          eq(notes.id, params.id),
+          eq(notes.id, id),
           eq(notes.userId, session.user.id)
         )
       )
@@ -88,9 +92,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const session = await auth.api.getSession({
       headers: request.headers,
     });
@@ -103,7 +109,7 @@ export async function DELETE(
       .delete(notes)
       .where(
         and(
-          eq(notes.id, params.id),
+          eq(notes.id, id),
           eq(notes.userId, session.user.id)
         )
       )
