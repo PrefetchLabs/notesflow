@@ -22,9 +22,6 @@ export function useBlockNoteAI(initialContent?: any[]) {
     blockSpecs: {
       ...defaultBlockSpecs,
     },
-    // Disable default toolbars as we'll use custom ones with AI
-    // slashMenu: false,
-    // formattingToolbar: false,
   });
 
   return editor;
