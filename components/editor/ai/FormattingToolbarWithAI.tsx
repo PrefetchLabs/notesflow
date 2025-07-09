@@ -23,22 +23,16 @@ export function FormattingToolbarWithAI() {
 
         const handleAIClick = () => {
           try {
-            // Simplest approach: insert /ai to trigger the AI menu
-            if (editor.getSelection()) {
-              // Save current selection
-              const selection = editor.getSelection();
-              
-              // Clear selection to insert /ai command
+            // Get the current text cursor position
+            const textCursorPosition = editor.getTextCursorPosition();
+            
+            if (textCursorPosition) {
+              // Focus the editor first
               editor.focus();
               
-              // Insert /ai at the current position to trigger AI menu
-              editor.insertText('/ai ');
-              
-              // The AI menu should appear automatically
-            } else {
-              // No selection, just insert /ai at cursor
-              editor.focus();
-              editor.insertText('/ai ');
+              // Insert /ai at the current cursor position
+              // This will trigger the AI suggestion menu
+              editor.insertInlineContent('/ai ');
             }
           } catch (error) {
             console.error('AI button error:', error);
