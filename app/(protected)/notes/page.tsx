@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatDistanceToNow } from 'date-fns';
+import { RelativeTime } from '@/components/ui/relative-time';
 
 interface Note {
   id: string;
@@ -164,7 +164,7 @@ export default function NotesPage() {
                     <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
                       <span>{note.folder?.name || 'No folder'}</span>
                       <span>•</span>
-                      <span>{formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}</span>
+                      <RelativeTime date={note.updatedAt} />
                     </div>
                   </div>
                   

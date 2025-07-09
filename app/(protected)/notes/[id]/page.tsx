@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { RelativeTime } from '@/components/ui/relative-time';
 
 export default function NotePage() {
   const params = useParams();
@@ -148,9 +149,7 @@ export default function NotePage() {
               placeholder="Untitled Note"
             />
             {lastSaved && (
-              <p className="text-xs text-muted-foreground">
-                Last saved {lastSaved.toLocaleTimeString()}
-              </p>
+              <RelativeTime date={lastSaved} />
             )}
           </div>
         </div>
