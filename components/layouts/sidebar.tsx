@@ -4,13 +4,13 @@ import { ChevronRight, FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/components/layouts/user-profile';
-import { DraggableFolderTree } from '@/components/layouts/draggable-folder-tree';
+import { FolderTreeWithNotes } from '@/components/layouts/folder-tree-with-notes';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useFolders } from '@/hooks/useFolders';
+import { useFoldersWithNotes } from '@/hooks/useFoldersWithNotes';
 import { useState } from 'react';
 
 interface SidebarProps {
@@ -21,7 +21,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
-  const { folders, isLoading, createFolder, updateFolder, deleteFolder, updateFolderPositions } = useFolders();
+  const { folders, rootNotes, isLoading, createFolder, updateFolder, deleteFolder, updateFolderPositions, moveNoteToFolder } = useFoldersWithNotes();
 
   const handleCreateNote = async () => {
     try {
@@ -67,6 +67,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         damping: 30,
       }}
     >
+      {/* Logo and Version */}
+      <div className="border-b p-4">
+        <div className={cn("flex items-baseline gap-2", collapsed && "justify-center")}>
+          <h1 className={cn("text-2xl font-bold tracking-tight", collapsed && "text-lg")}>
+            {collapsed ? "N" : "NotesFlow"}
+          </h1>
+          {!collapsed && (
+            <span className="text-xs text-muted-foreground">v0.1</span>
+          )}
+        </div>
+      </div>
+
       {/* Collapse/Expand Button */}
       <TooltipProvider delayDuration={0}>
         <Tooltip>
@@ -107,46 +119,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* Quick Actions */}
       <div className="border-b p-2">
-        <div className="flex gap-2">
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size={collapsed ? "icon" : "sm"}
-                  className="w-full justify-start"
-                  onClick={handleCreateNote}
-                >
-                  <Plus className={cn("h-4 w-4", !collapsed && "mr-2")} />
-                  {!collapsed && "New Note"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                Create new note
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/notes" className={cn("w-full", collapsed && "flex justify-center")}>
-                  <Button
-                    variant="ghost"
-                    size={collapsed ? "icon" : "sm"}
-                    className="w-full justify-start"
-                  >
-                    <FileText className={cn("h-4 w-4", !collapsed && "mr-2")} />
-                    {!collapsed && "All Notes"}
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                View all notes
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size={collapsed ? "icon" : "sm"}
+                className="w-full justify-start"
+                onClick={handleCreateNote}
+              >
+                <Plus className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                {!collapsed && "New Note"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              Create new note
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Folder Tree Section */}
@@ -159,13 +149,15 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
             </div>
           ) : (
-            <DraggableFolderTree
+            <FolderTreeWithNotes
               folders={folders}
+              rootNotes={rootNotes}
               collapsed={collapsed}
               onCreateFolder={createFolder}
               onUpdateFolder={updateFolder}
               onDeleteFolder={deleteFolder}
               onUpdatePositions={updateFolderPositions}
+              onMoveNoteToFolder={moveNoteToFolder}
               onSelectFolder={setSelectedFolderId}
               selectedFolderId={selectedFolderId}
             />

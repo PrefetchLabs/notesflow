@@ -15,10 +15,41 @@ export default function DashboardPage() {
   const [hasStarted, setHasStarted] = useState(false);
   const { isMobile } = useResponsive();
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
     setHasStarted(true);
-    // In the future, this would navigate to the main notes view
-    // For now, we'll just update the state
+    // Create the first note for the user
+    try {
+      const defaultContent = [
+        {
+          type: 'paragraph',
+          props: {
+            textColor: 'default',
+            backgroundColor: 'default',
+          },
+          content: [{
+            type: 'text',
+            text: 'Welcome to NotesFlow! Start typing here...'
+          }],
+          children: [],
+        },
+      ];
+      
+      const response = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'My First Note',
+          content: defaultContent,
+        }),
+      });
+      
+      if (response.ok) {
+        const { note } = await response.json();
+        router.push(`/notes/${note.id}`);
+      }
+    } catch (error) {
+      console.error('Error creating first note:', error);
+    }
   };
 
   if (!hasStarted) {

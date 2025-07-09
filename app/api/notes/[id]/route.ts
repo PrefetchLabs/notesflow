@@ -60,16 +60,20 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { title, content } = body;
+    const { title, content, folderId } = body;
     
+    // Build update object
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+    
+    if (title !== undefined) updateData.title = title;
+    if (content !== undefined) updateData.content = content;
+    if (folderId !== undefined) updateData.folderId = folderId;
 
     const [updated] = await db
       .update(notes)
-      .set({
-        title,
-        content,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(
         and(
           eq(notes.id, id),

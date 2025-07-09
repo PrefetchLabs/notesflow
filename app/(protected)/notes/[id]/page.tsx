@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { BlockNoteEditorComponent } from '@/components/editor/block-note-editor';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, MoreVertical, Trash2, Share2 } from 'lucide-react';
+import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
   DropdownMenu,
@@ -12,15 +12,20 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { RelativeTime } from '@/components/ui/relative-time';
+import { useFolders } from '@/hooks/useFolders';
 
 export default function NotePage() {
   const params = useParams();
   const router = useRouter();
   const noteId = params.id as string;
+  const { folders } = useFolders();
   
   const [note, setNote] = useState<any>(null);
   const [content, setContent] = useState<any>(null);
@@ -169,62 +174,135 @@ export default function NotePage() {
     toast.info('Sharing coming soon!');
   };
 
+  const handleMoveToFolder = async (folderId: string | null) => {
+    if (!noteId || noteId.startsWith('new-')) return;
+    
+    try {
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folderId: folderId,
+        }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to move note');
+      
+      const folderName = folderId ? folders.find(f => f.id === folderId)?.name : 'root';
+      toast.success(`Note moved to ${folderName || 'folder'}`);
+    } catch (error) {
+      toast.error('Failed to move note');
+    }
+  };
+
+  // Get folder name for breadcrumb
+  const getFolderPath = () => {
+    if (!note?.folderId || !folders.length) return null;
+    
+    const findFolder = (folders: any[], id: string): any => {
+      for (const folder of folders) {
+        if (folder.id === id) return folder;
+        if (folder.children) {
+          const found = findFolder(folder.children, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    
+    const folder = findFolder(folders, note.folderId);
+    return folder?.name;
+  };
+
   return (
     <div className="flex h-screen flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between border-b px-4 py-3">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex flex-col">
-            <input
-              type="text"
-              value={title}
-              onChange={handleTitleChange}
-              className="bg-transparent text-lg font-semibold outline-none"
-              placeholder="Untitled Note"
-            />
-            {lastSaved && (
-              <RelativeTime date={lastSaved} />
-            )}
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {isSaving && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-2 text-sm text-muted-foreground"
-            >
-              <Save className="h-4 w-4 animate-pulse" />
-              <span>Saving...</span>
-            </motion.div>
-          )}
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-4 w-4" />
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.push('/dashboard')}
+                className="h-8 w-8"
+              >
+                <ArrowLeft className="h-4 w-4" />
               </Button>
-            </DropdownMenuTrigger>
+              <div className="flex items-center gap-1.5 text-sm">
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Dashboard
+                </button>
+                {getFolderPath() && (
+                  <>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground hover:text-foreground transition-colors">
+                      {getFolderPath()}
+                    </span>
+                  </>
+                )}
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">{title || 'Untitled Note'}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {lastSaved && (
+                <span className="text-xs text-muted-foreground">
+                  <RelativeTime date={lastSaved} />
+                </span>
+              )}
+              
+              {isSaving && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
+                >
+                  <Save className="h-3 w-3 animate-pulse" />
+                  <span>Saving...</span>
+                </motion.div>
+              )}
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Folder className="mr-2 h-4 w-4" />
+                  Move to Folder
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => handleMoveToFolder(null)}>
+                    No Folder (Root)
+                  </DropdownMenuItem>
+                  {folders.length > 0 && <DropdownMenuSeparator />}
+                  {folders.map((folder) => (
+                    <DropdownMenuItem
+                      key={folder.id}
+                      onClick={() => handleMoveToFolder(folder.id)}
+                    >
+                      {folder.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               <DropdownMenuItem onClick={handleShare}>
                 <Share2 className="mr-2 h-4 w-4" />
                 Share
@@ -238,7 +316,20 @@ export default function NotePage() {
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenu>
+            </div>
+          </div>
+          
+          {/* Title editing section */}
+          <div className="mt-6">
+            <input
+              type="text"
+              value={title}
+              onChange={handleTitleChange}
+              className="w-full bg-transparent text-3xl font-semibold tracking-tight outline-none placeholder:text-muted-foreground/50 focus:ring-0"
+              placeholder="Untitled Note"
+            />
+          </div>
         </div>
       </header>
 

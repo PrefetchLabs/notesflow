@@ -53,7 +53,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <span className="ml-2 text-lg font-semibold">NotesFlow</span>
+            <div className="ml-2 flex items-baseline gap-1">
+              <span className="text-lg font-bold tracking-tight">NotesFlow</span>
+              <span className="text-xs text-muted-foreground">v0.1</span>
+            </div>
           </div>
         </header>
         
