@@ -57,7 +57,54 @@ node_modules/
 *.sln
 *.sw?
 # OS specific
+.DS_Store
+Thumbs.db
 
-# Task files
-# tasks.json
+# IDE and Editor files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vim
+.nova/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Bundle analysis
+.next/analyze/
+.next/cache/
+
+# Test files
+coverage/
+.nyc_output
+test-results/
+playwright-report/
+
+# Build artifacts
+dist/
+storybook-static/
+*.tsbuildinfo
+
+# Lock files (keep only one)
+yarn.lock
+pnpm-lock.yaml
+package-lock.json
+
+# Bun
+.bun/
+
+# Task files (Task Master)
+# .taskmaster/state.json
 # tasks/ 
