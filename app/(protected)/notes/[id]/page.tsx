@@ -108,13 +108,6 @@ export default function NotePage() {
             }];
         setContent(noteContent);
         setLastSaved(new Date(note.updatedAt));
-        
-        // Add to recent notes
-        addToRecent({
-          id: note.id,
-          title: note.title,
-          folderId: note.folderId,
-        });
       } catch (error) {
         toast.error('Failed to load note');
         router.push('/notes');
@@ -124,7 +117,18 @@ export default function NotePage() {
     };
     
     loadNote();
-  }, [noteId, router, addToRecent]);
+  }, [noteId, router]);
+
+  // Add to recent notes when note is loaded
+  useEffect(() => {
+    if (note && !noteId.startsWith('new-')) {
+      addToRecent({
+        id: note.id,
+        title: note.title,
+        folderId: note.folderId,
+      });
+    }
+  }, [note?.id, addToRecent]);
 
   // Define handleSave first
   const handleSave = useCallback(async () => {

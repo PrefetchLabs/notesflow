@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Note } from '@/lib/db/schema/notes';
 
 const RECENT_NOTES_KEY = 'notesflow-recent-notes';
@@ -55,7 +55,7 @@ export function useRecentNotes() {
   };
 
   // Add a note to recent list
-  const addToRecent = (note: { id: string; title: string; folderId?: string | null }) => {
+  const addToRecent = useCallback((note: { id: string; title: string; folderId?: string | null }) => {
     const newRecent: RecentNote = {
       id: note.id,
       title: note.title,
@@ -74,7 +74,7 @@ export function useRecentNotes() {
       
       return updated;
     });
-  };
+  }, []);
 
   // Clear recent notes
   const clearRecent = () => {

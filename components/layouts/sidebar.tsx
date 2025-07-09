@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, FileText, Plus } from 'lucide-react';
+import { ChevronRight, FileText, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/components/layouts/user-profile';
@@ -167,7 +167,25 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* Bottom Section - Settings/Actions */}
       <div className="border-t p-4">
-        {/* Settings and other actions can go here */}
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/trash" className="block">
+                <Button
+                  variant="ghost"
+                  size={collapsed ? "icon" : "sm"}
+                  className="w-full justify-start"
+                >
+                  <Trash2 className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                  {!collapsed && "Trash"}
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              View deleted notes
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </motion.aside>
   );

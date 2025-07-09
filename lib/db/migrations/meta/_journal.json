@@ -15,6 +15,13 @@
       "when": 1752040900000,
       "tag": "0001_soft_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752059886405,
+      "tag": "0002_left_jane_foster",
+      "breakpoints": true
     }
   ]
 }
