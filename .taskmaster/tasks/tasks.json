@@ -237,7 +237,7 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -245,7 +245,7 @@
             "description": "Install Drizzle ORM, PostgreSQL driver (pg), and necessary type definitions",
             "dependencies": [],
             "details": "Run: bun add drizzle-orm pg @types/pg\nInstall Drizzle Kit for migrations: bun add -d drizzle-kit\nVerify installations in package.json",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -256,7 +256,7 @@
               1
             ],
             "details": "Create lib/db/index.ts with connection setup\nConfigure DATABASE_URL in .env.local\nImplement connection singleton pattern for Next.js\nAdd connection error handling and logging",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -267,7 +267,7 @@
               2
             ],
             "details": "Create lib/db/schema/users.ts\nDefine users table with: id (UUID), email, username, avatar_url, created_at, updated_at\nLink to Supabase auth.users table via foreign key\nAdd unique constraints on email and username",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -278,7 +278,7 @@
               3
             ],
             "details": "Create lib/db/schema/folders.ts\nImplement: id, name, parent_id (self-referential), user_id, color, icon, order, created_at, updated_at\nAdd foreign key to users table\nImplement path materialization for efficient querying",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -289,7 +289,7 @@
               4
             ],
             "details": "Create lib/db/schema/notes.ts\nDefine: id, title, content (JSONB), folder_id, user_id, tags (array), is_pinned, is_archived, created_at, updated_at\nImplement content schema validation\nAdd foreign keys to users and folders",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -300,7 +300,7 @@
               5
             ],
             "details": "Create lib/db/schema/timeBlocks.ts\nImplement: id, note_id, user_id, start_time, end_time, title, color, recurrence_rule, reminder_minutes, created_at, updated_at\nAdd check constraints for time validation\nImplement recurrence pattern storage",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -311,7 +311,7 @@
               5
             ],
             "details": "Create lib/db/schema/collaborators.ts\nDefine: id, note_id, user_id, permission_level (view/edit), invited_at, accepted_at\nAdd composite unique constraint on (note_id, user_id)\nImplement permission enum type",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -326,7 +326,7 @@
               7
             ],
             "details": "Add indexes on: users.email, folders.user_id, folders.parent_id, notes.user_id, notes.folder_id, time_blocks.user_id, time_blocks.start_time\nCreate composite indexes for common query patterns\nAdd GIN index on notes.content for JSONB searches",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -337,7 +337,7 @@
               8
             ],
             "details": "Create drizzle.config.ts with PostgreSQL configuration\nRun: bun drizzle-kit generate:pg\nReview generated SQL migration files\nAdd migration scripts to package.json",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2485,7 +2485,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-09T05:51:28.948Z",
+      "updated": "2025-07-09T06:21:23.125Z",
       "description": "Tasks for master context"
     }
   }
