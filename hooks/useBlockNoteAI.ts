@@ -3,6 +3,8 @@ import { createAIExtension } from "@/lib/editor/ai-extension";
 import { defaultBlockSpecs } from "@blocknote/core";
 import { en } from "@blocknote/core/locales";
 import { en as aiEn } from "@blocknote/xl-ai/locales";
+import { llmFormats } from "@blocknote/xl-ai";
+import "@blocknote/xl-ai/style.css";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 
 export function useBlockNoteAI(initialContent?: any[]) {
@@ -19,7 +21,7 @@ export function useBlockNoteAI(initialContent?: any[]) {
       createAIExtension({
         model,
         stream: true,
-        dataFormat: "html",
+        dataFormat: llmFormats.html,
         agentCursor: {
           name: "AI",
           color: "#8bc6ff"
