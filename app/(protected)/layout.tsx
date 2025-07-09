@@ -1,12 +1,10 @@
 import { AuthProvider } from '@/lib/auth/auth-context';
+import { AppShell } from '@/components/layouts/app-shell';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-background">
-        {/* Sidebar and main content will be added here */}
-        {children}
-      </div>
+      <AppShell>{children}</AppShell>
     </AuthProvider>
   );
 }

@@ -1,59 +1,76 @@
 'use client';
 
-import { useAuth } from '@/lib/auth/auth-context';
+import { useState } from 'react';
+import { Welcome } from '@/components/empty-states';
+import { useAuth } from '@/lib/auth/auth-hooks';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRouter } from 'next/navigation';
+import { MobileNav } from '@/components/layouts/mobile-nav';
+import { useResponsive } from '@/hooks/useResponsive';
 
 export default function DashboardPage() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const router = useRouter();
+  const [hasStarted, setHasStarted] = useState(false);
+  const { isMobile } = useResponsive();
+
+  const handleGetStarted = () => {
+    setHasStarted(true);
+    // In the future, this would navigate to the main notes view
+    // For now, we'll just update the state
+  };
+
+  if (!hasStarted) {
+    return (
+      <div className="flex h-full items-center justify-center bg-background">
+        <Welcome 
+          userName={user?.name?.split(' ')[0]} 
+          onGetStarted={handleGetStarted}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar placeholder */}
-      <aside className="w-64 border-r border-border bg-sidebar">
-        <div className="p-4">
-          <h1 className="text-xl font-semibold">NotesFlow</h1>
-        </div>
-        
-        {/* User profile section */}
-        <div className="p-4 border-t border-border">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.image || ''} alt={user?.name || ''} />
-              <AvatarFallback>
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+    <div className="flex h-screen flex-col">
+      <header className="border-b px-4 py-3 sm:px-6 sm:py-4">
+        <h1 className="text-xl font-semibold sm:text-2xl">Dashboard</h1>
+      </header>
+      
+      <main className="flex-1 p-4 pb-20 sm:p-6 md:pb-6">
+        <div className="mx-auto max-w-4xl">
+          <p className="text-muted-foreground">
+            Welcome back! Your notes and folders will appear here.
+          </p>
+          
+          <div className="mt-6 rounded-lg border bg-card p-4 sm:mt-8 sm:p-6">
+            <h2 className="text-base font-semibold sm:text-lg">Quick Stats</h2>
+            <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-3">
+              <div className="rounded-lg bg-background p-3 sm:p-4 transition-transform duration-150 hover:scale-[1.02]">
+                <p className="text-xs text-muted-foreground sm:text-sm">Total Notes</p>
+                <p className="text-xl font-bold sm:text-2xl">0</p>
+              </div>
+              <div className="rounded-lg bg-background p-3 sm:p-4 transition-transform duration-150 hover:scale-[1.02]">
+                <p className="text-xs text-muted-foreground sm:text-sm">Folders</p>
+                <p className="text-xl font-bold sm:text-2xl">0</p>
+              </div>
+              <div className="rounded-lg bg-background p-3 sm:p-4 transition-transform duration-150 hover:scale-[1.02]">
+                <p className="text-xs text-muted-foreground sm:text-sm">Time Blocks Today</p>
+                <p className="text-xl font-bold sm:text-2xl">0</p>
+              </div>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full mt-3"
-            onClick={() => signOut()}
-          >
-            Sign out
-          </Button>
+          
+          <div className="mt-6">
+            <Button onClick={() => setHasStarted(false)} variant="outline">
+              Show Welcome Screen
+            </Button>
+          </div>
         </div>
-      </aside>
-
-      {/* Main content area */}
-      <main className="flex-1 flex">
-        {/* Editor area */}
-        <div className="flex-1 p-8">
-          <h2 className="text-2xl font-light mb-4">Welcome back, {user?.name?.split(' ')[0]}!</h2>
-          <p className="text-muted-foreground">Your thoughts and time, beautifully unified.</p>
-        </div>
-
-        {/* Calendar sidebar */}
-        <aside className="w-80 border-l border-border bg-background p-4">
-          <h3 className="text-lg font-medium mb-4">Time Blocks</h3>
-          <p className="text-sm text-muted-foreground">Drag text here to create time blocks</p>
-        </aside>
       </main>
+      
+      {/* Mobile bottom navigation */}
+      {isMobile && <MobileNav />}
     </div>
   );
 }
