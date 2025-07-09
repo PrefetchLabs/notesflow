@@ -28,7 +28,7 @@ export const sessions = pgTable('sessions', {
 export const accounts = pgTable(
   'accounts',
   {
-    id: text('id').primaryKey(),
+    id: text('id').notNull(),
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
@@ -51,7 +51,7 @@ export const accounts = pgTable(
 export const verificationTokens = pgTable(
   'verification_tokens',
   {
-    id: text('id').primaryKey(),
+    id: text('id').notNull(),
     identifier: text('identifier').notNull(),
     token: text('token').notNull(),
     expiresAt: timestamp('expires_at').notNull(),
