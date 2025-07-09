@@ -237,7 +237,7 @@
         "dependencies": [
           2
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -348,7 +348,7 @@
               9
             ],
             "details": "Create lib/db/seed.ts with sample data\nGenerate test users, folders hierarchy, notes with rich content\nAdd time blocks and collaborations\nImplement idempotent seeding logic",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -359,7 +359,7 @@
               2
             ],
             "details": "Configure pg pool settings: max connections, idle timeout, connection timeout\nImplement connection health checks\nAdd query logging for development\nSet up connection retry logic",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -371,7 +371,7 @@
               11
             ],
             "details": "Set up test database configuration\nCreate schema validation tests\nImplement CRUD operation tests for each table\nAdd relationship integrity tests\nConfigure test data cleanup",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -2485,7 +2485,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-09T06:21:23.125Z",
+      "updated": "2025-07-09T06:24:05.241Z",
       "description": "Tasks for master context"
     }
   }
