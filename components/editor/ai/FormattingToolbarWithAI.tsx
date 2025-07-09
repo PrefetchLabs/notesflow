@@ -1,42 +1,40 @@
 'use client';
 
 import React from 'react';
-import { useComponentsContext } from '@blocknote/react';
-import { FormattingToolbar } from '@blocknote/mantine';
+import { FormattingToolbarController } from '@blocknote/react';
 import { getAIExtension } from '@blocknote/xl-ai';
-import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
 
 export function FormattingToolbarWithAI() {
-  const Components = useComponentsContext()!;
+  return (
+    <FormattingToolbarController
+      formattingToolbar={(props) => {
+        const { editor } = props;
 
-  const customComponents = {
-    ...Components,
-    FormattingToolbar: (props: any) => {
-      const { editor } = props;
-
-      const handleAIClick = () => {
-        const aiExtension = getAIExtension(editor);
-        if (editor.getSelection()) {
-          // Get the currently selected block
-          const textCursorPosition = editor.getTextCursorPosition();
-          if (textCursorPosition?.block) {
-            aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
+        const handleAIClick = () => {
+          const aiExtension = getAIExtension(editor);
+          if (editor.getSelection()) {
+            // Get the currently selected block
+            const textCursorPosition = editor.getTextCursorPosition();
+            if (textCursorPosition?.block) {
+              aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
+            }
           }
-        }
-      };
+        };
 
-      return (
-        <Components.FormattingToolbar.Root {...props}>
-          <Components.FormattingToolbar.Button onClick={handleAIClick}>
-            <Sparkles className="h-4 w-4 mr-1" />
-            AI
-          </Components.FormattingToolbar.Button>
-          {props.children}
-        </Components.FormattingToolbar.Root>
-      );
-    },
-  };
-
-  return <FormattingToolbar key="FormattingToolbarWithAI" />;
+        return (
+          <div className="bn-formatting-toolbar">
+            <button
+              className="bn-toolbar-button"
+              onClick={handleAIClick}
+              title="AI Assistant"
+            >
+              <Sparkles className="h-4 w-4" />
+            </button>
+            {/* Add default formatting buttons here if needed */}
+          </div>
+        );
+      }}
+    />
+  );
 }
