@@ -106,6 +106,7 @@ export default function NotePage() {
   const handleSave = useCallback(async () => {
     if (!noteId || noteId.startsWith('new-')) return;
     
+    console.log('Frontend - Saving note with content:', content);
     setIsSaving(true);
     try {
       const response = await fetch(`/api/notes/${noteId}`, {
@@ -129,6 +130,7 @@ export default function NotePage() {
   
   // Track changes
   const handleContentChange = useCallback((newContent: any) => {
+    console.log('handleContentChange called with:', JSON.stringify(newContent, null, 2));
     setContent(newContent);
     setHasUnsavedChanges(true);
   }, []);
@@ -256,6 +258,7 @@ export default function NotePage() {
             ) : (
               content && (
                 <BlockNoteEditorComponent
+                  key={noteId} // Force re-mount when note changes
                   initialContent={content}
                   onContentChange={handleContentChange}
                 />

@@ -32,6 +32,9 @@ export async function GET(
     if (!note) {
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });
     }
+    
+    console.log('GET /api/notes/[id] - Loading note:', id);
+    console.log('Loaded content:', JSON.stringify(note.content, null, 2));
 
     return NextResponse.json({ note });
   } catch (error) {
@@ -60,6 +63,10 @@ export async function PUT(
 
     const body = await request.json();
     const { title, content } = body;
+    
+    console.log('PUT /api/notes/[id] - Updating note:', id);
+    console.log('Title:', title);
+    console.log('Content:', JSON.stringify(content, null, 2));
 
     const [updated] = await db
       .update(notes)

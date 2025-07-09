@@ -5,7 +5,6 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
 import { useEffect, useState } from 'react';
-import { getDefaultReactSlashMenuItems } from '@blocknote/react';
 
 interface BlockNoteEditorProps {
   initialContent?: any;
@@ -20,7 +19,7 @@ export function BlockNoteEditorComponent({
 }: BlockNoteEditorProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Create the editor instance
+  // Create the editor instance with onChange handler
   const editor = useCreateBlockNote({
     initialContent: initialContent || undefined,
     uploadFile: async () => {
@@ -34,17 +33,20 @@ export function BlockNoteEditorComponent({
     setMounted(true);
   }, []);
 
-  // Handle content changes
+  // Set up onChange handler
   useEffect(() => {
     if (!editor || !onContentChange) return;
 
-    // Set up the change handler
-    const unsubscribe = editor.onChange(() => {
+    const handleChange = () => {
       const content = editor.document;
+      console.log('Editor content changed:', JSON.stringify(content, null, 2));
       onContentChange(content);
-    });
+    };
 
-    // Cleanup
+    // Subscribe to changes
+    const unsubscribe = editor.onChange(handleChange);
+
+    // Return cleanup function
     return () => {
       unsubscribe();
     };
