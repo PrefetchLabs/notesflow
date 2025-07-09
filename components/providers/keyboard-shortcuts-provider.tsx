@@ -33,6 +33,10 @@ const shortcuts: KeyboardShortcut[] = [
   { keys: '←', description: 'Collapse folder / Go to parent' },
   { keys: 'Enter', description: 'Open note / Select folder' },
   { keys: 'Esc', description: 'Close dialogs/modals' },
+  { keys: 'Cmd/Ctrl + T', description: 'Toggle time-blocking calendar' },
+  { keys: 'T', description: 'Go to today (in calendar)' },
+  { keys: 'Cmd/Ctrl + ←', description: 'Previous week (in calendar)' },
+  { keys: 'Cmd/Ctrl + →', description: 'Next week (in calendar)' },
 ];
 
 export function KeyboardShortcutsProvider({ children }: { children: React.ReactNode }) {
@@ -103,6 +107,36 @@ export function KeyboardShortcutsProvider({ children }: { children: React.ReactN
     if (showQuickSwitcher) setShowQuickSwitcher(false);
   }, {
     enableOnFormTags: true,
+  });
+
+  // Toggle time-blocking calendar (Cmd/Ctrl + T)
+  useHotkeys('mod+t', (e) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('toggle-calendar'));
+  }, {
+    enableOnFormTags: false,
+  });
+
+  // Calendar navigation shortcuts
+  useHotkeys('t', (e) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('calendar-today'));
+  }, {
+    enableOnFormTags: false,
+  });
+
+  useHotkeys('mod+left', (e) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('calendar-prev-week'));
+  }, {
+    enableOnFormTags: false,
+  });
+
+  useHotkeys('mod+right', (e) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('calendar-next-week'));
+  }, {
+    enableOnFormTags: false,
   });
 
   return (

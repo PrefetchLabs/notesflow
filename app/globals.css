@@ -160,3 +160,56 @@
     @apply bg-muted-foreground;
   }
 }
+
+/* Calendar optimizations */
+.calendar-grid {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
+}
+
+.calendar-grid::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.calendar-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calendar-grid::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.calendar-grid::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+}
+
+/* Time block performance optimizations */
+.time-block {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.time-block.dragging {
+  cursor: grabbing !important;
+  z-index: 1000;
+}
+
+/* Current time indicator pulse */
+@keyframes time-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.current-time-indicator {
+  animation: time-pulse 2s ease-in-out infinite;
+}
