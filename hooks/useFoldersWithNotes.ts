@@ -34,8 +34,8 @@ export function useFoldersWithNotes() {
   const loadData = useCallback(async () => {
     try {
       const [foldersResponse, notesResponse] = await Promise.all([
-        fetch('/api/folders'),
-        fetch('/api/notes'),
+        fetch('/api/folders', { credentials: 'same-origin' }),
+        fetch('/api/notes', { credentials: 'same-origin' }),
       ]);
 
       if (!foldersResponse.ok || !notesResponse.ok) {
@@ -81,6 +81,7 @@ export function useFoldersWithNotes() {
       const response = await fetch('/api/folders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ name, parentId }),
       });
       
@@ -103,6 +104,7 @@ export function useFoldersWithNotes() {
       const response = await fetch(`/api/folders/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify(updates),
       });
       
@@ -123,6 +125,7 @@ export function useFoldersWithNotes() {
     try {
       const response = await fetch(`/api/folders/${id}`, {
         method: 'DELETE',
+        credentials: 'same-origin',
       });
       
       if (!response.ok) {
@@ -149,6 +152,7 @@ export function useFoldersWithNotes() {
           fetch(`/api/folders/${update.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
             body: JSON.stringify({
               position: update.position,
               parentId: update.parentId,
@@ -170,6 +174,7 @@ export function useFoldersWithNotes() {
       const response = await fetch(`/api/notes/${noteId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ folderId }),
       });
       

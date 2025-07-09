@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { format, addWeeks, subWeeks, startOfWeek, isSameWeek } from 'date-fns';
+import { format, addDays, subDays, isSameDay, isToday } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { CalendarGrid } from './calendar-grid';
+import { SingleDayCalendarGrid } from './single-day-calendar-grid';
 import { CurrentTimeIndicator } from './current-time-indicator';
 import { TimeBlock } from './time-block';
 import { useTimeBlocks } from '@/hooks/useTimeBlocks';
@@ -13,7 +13,6 @@ import {
   pixelPositionToTime,
   roundToNearestSlot,
   addMinutes,
-  getWeekDates,
 } from '@/lib/utils/time-blocks';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -34,11 +33,10 @@ interface TimeBlockingCalendarProps {
 }
 
 export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarProps) {
-  const [currentWeek, setCurrentWeek] = useState(() => startOfWeek(new Date(), { weekStartsOn: 0 }));
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [isCreating, setIsCreating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBlockData, setNewBlockData] = useState<{
-    dayIndex: number;
     startTime: Date;
     title: string;
     duration: number; // minutes
@@ -47,19 +45,17 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
   const [ghostBlock, setGhostBlock] = useState<{
     startTime: Date;
     endTime: Date;
-    dayIndex: number;
   } | null>(null);
 
-  const weekDates = getWeekDates(currentWeek);
-  const { blocks, isLoading, error, createBlock, updateBlock, deleteBlock, refetch } = useTimeBlocks(currentWeek);
+  const { blocks, isLoading, error, createBlock, updateBlock, deleteBlock, refetch } = useTimeBlocks(currentDate);
 
-  // Navigate weeks
-  const goToPreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
-  const goToNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
-  const goToToday = () => setCurrentWeek(startOfWeek(new Date(), { weekStartsOn: 0 }));
+  // Navigate days
+  const goToPreviousDay = () => setCurrentDate(subDays(currentDate, 1));
+  const goToNextDay = () => setCurrentDate(addDays(currentDate, 1));
+  const goToToday = () => setCurrentDate(new Date());
 
-  // Check if current week contains today
-  const isCurrentWeek = isSameWeek(new Date(), currentWeek, { weekStartsOn: 0 });
+  // Check if current date is today
+  const isCurrentDay = isToday(currentDate);
 
   // Handle empty slot click (single vs double)
   const handleSlotClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -72,14 +68,13 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
     if (!slotElement) return;
     
     const slotIndex = parseInt(slotElement.dataset.slotIndex || '0');
-    const dayIndex = parseInt(slotElement.dataset.dayIndex || '0');
     
     // Calculate click position relative to the slot
     const rect = slotElement.getBoundingClientRect();
     const relativeY = e.clientY - rect.top;
     
     // Convert to time
-    const clickTime = pixelPositionToTime(slotIndex * 20 + relativeY, weekDates[dayIndex]);
+    const clickTime = pixelPositionToTime(slotIndex * 20 + relativeY, currentDate);
     const roundedTime = roundToNearestSlot(clickTime);
     
     // Handle single vs double click
@@ -89,7 +84,6 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
       setClickTimer(null);
       
       setNewBlockData({
-        dayIndex,
         startTime: roundedTime,
         title: '',
         duration: 60, // 1 hour
@@ -100,7 +94,6 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
       const timer = setTimeout(() => {
         setClickTimer(null);
         setNewBlockData({
-          dayIndex,
           startTime: roundedTime,
           title: '',
           duration: 30, // 30 minutes
@@ -110,7 +103,7 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
       
       setClickTimer(timer);
     }
-  }, [weekDates, clickTimer]);
+  }, [currentDate, clickTimer]);
 
   // Handle mouse move for ghost block preview
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -129,18 +122,17 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
     }
     
     const slotIndex = parseInt(slotElement.dataset.slotIndex || '0');
-    const dayIndex = parseInt(slotElement.dataset.dayIndex || '0');
     
     // Calculate position
     const rect = slotElement.getBoundingClientRect();
     const relativeY = e.clientY - rect.top;
     
-    const clickTime = pixelPositionToTime(slotIndex * 20 + relativeY, weekDates[dayIndex]);
+    const clickTime = pixelPositionToTime(slotIndex * 20 + relativeY, currentDate);
     const startTime = roundToNearestSlot(clickTime);
     const endTime = addMinutes(startTime, 30);
     
-    setGhostBlock({ startTime, endTime, dayIndex });
-  }, [weekDates, isCreating]);
+    setGhostBlock({ startTime, endTime });
+  }, [currentDate, isCreating]);
 
   const handleMouseLeave = useCallback(() => {
     setGhostBlock(null);
@@ -185,17 +177,17 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
     if (!isOpen) return;
 
     const handleToday = () => goToToday();
-    const handlePrevWeek = () => goToPreviousWeek();
-    const handleNextWeek = () => goToNextWeek();
+    const handlePrevDay = () => goToPreviousDay();
+    const handleNextDay = () => goToNextDay();
 
     window.addEventListener('calendar-today', handleToday);
-    window.addEventListener('calendar-prev-week', handlePrevWeek);
-    window.addEventListener('calendar-next-week', handleNextWeek);
+    window.addEventListener('calendar-prev-day', handlePrevDay);
+    window.addEventListener('calendar-next-day', handleNextDay);
 
     return () => {
       window.removeEventListener('calendar-today', handleToday);
-      window.removeEventListener('calendar-prev-week', handlePrevWeek);
-      window.removeEventListener('calendar-next-week', handleNextWeek);
+      window.removeEventListener('calendar-prev-day', handlePrevDay);
+      window.removeEventListener('calendar-next-day', handleNextDay);
     };
   }, [isOpen]);
 
@@ -236,7 +228,7 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
                 </Button>
               </div>
 
-              {/* Week navigation */}
+              {/* Day navigation */}
               <div className="flex items-center justify-between">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -245,7 +237,7 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={goToPreviousWeek}
+                    onClick={goToPreviousDay}
                     className="h-8 w-8"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -254,16 +246,16 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
 
                 <motion.div 
                   className="text-center"
-                  key={currentWeek.toISOString()}
+                  key={currentDate.toISOString()}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                 >
                   <div className="text-sm font-medium">
-                    {format(weekDates[0], 'MMM d')} - {format(weekDates[6], 'MMM d, yyyy')}
+                    {format(currentDate, 'EEEE, MMMM d, yyyy')}
                   </div>
                   <AnimatePresence>
-                    {!isCurrentWeek && (
+                    {!isCurrentDay && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
@@ -290,7 +282,7 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={goToNextWeek}
+                    onClick={goToNextDay}
                     className="h-8 w-8"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -345,14 +337,19 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
                   />
                 )}
               </AnimatePresence>
-              <CalendarGrid currentWeek={currentWeek}>
+              <SingleDayCalendarGrid 
+                currentDate={currentDate}
+                onSlotClick={handleSlotClick}
+                onSlotMouseMove={handleMouseMove}
+                onSlotMouseLeave={handleMouseLeave}
+              >
                 {/* Current time indicator */}
-                {isCurrentWeek && <CurrentTimeIndicator currentWeek={currentWeek} />}
+                {isCurrentDay && <CurrentTimeIndicator currentDate={currentDate} />}
 
-                {/* Time blocks */}
-                {blocks.map((block) => {
-                  const dayIndex = block.startTime.getDay();
-                  return (
+                {/* Time blocks for current day only */}
+                {blocks
+                  .filter(block => isSameDay(block.startTime, currentDate))
+                  .map((block) => (
                     <TimeBlock
                       key={block.id}
                       id={block.id}
@@ -361,16 +358,14 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
                       endTime={block.endTime}
                       color={block.color}
                       isCompleted={block.isCompleted}
-                      dayIndex={dayIndex}
                       onUpdate={updateBlock}
                       onDelete={deleteBlock}
                     />
-                  );
-                })}
+                  ))}
 
                 {/* Ghost block preview */}
                 <AnimatePresence>
-                  {ghostBlock && (
+                  {ghostBlock && isSameDay(ghostBlock.startTime, currentDate) && (
                     <TimeBlock
                       id="ghost"
                       title="Click to create 30min block\nDouble-click for 1hr block"
@@ -378,12 +373,11 @@ export function TimeBlockingCalendar({ isOpen, onToggle }: TimeBlockingCalendarP
                       endTime={ghostBlock.endTime}
                       color="#94A3B8"
                       isCompleted={false}
-                      dayIndex={ghostBlock.dayIndex}
                       isGhost
                     />
                   )}
                 </AnimatePresence>
-              </CalendarGrid>
+              </SingleDayCalendarGrid>
             </div>
           </div>
 

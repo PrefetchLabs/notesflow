@@ -38,6 +38,7 @@ export function Sidebar({ onToggle }: SidebarProps) {
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({
           title: 'Untitled Note',
           content: defaultContent,

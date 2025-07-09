@@ -36,7 +36,7 @@ export function useRecentNotes() {
   // Fetch recent notes from API
   const fetchRecentNotes = async () => {
     try {
-      const response = await fetch('/api/notes/recent');
+      const response = await fetch('/api/notes/recent', { credentials: 'same-origin' });
       if (!response.ok) throw new Error('Failed to fetch recent notes');
       
       const data = await response.json();

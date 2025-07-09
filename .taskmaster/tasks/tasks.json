@@ -1419,8 +1419,7 @@
         "testStrategy": "Test all four AI features with various content types. Verify streaming responses work smoothly. Test error handling with invalid API key. Ensure usage limits are enforced correctly. Test that context is properly extracted and sent. Verify AI responses appear inline correctly. Test Cmd+J shortcut on different systems.",
         "priority": "medium",
         "dependencies": [
-          7,
-          10
+          7
         ],
         "status": "pending",
         "subtasks": [
@@ -1501,7 +1500,7 @@
               2,
               3
             ],
-            "details": "Create lib/ai/features/extract-tasks.ts to identify tasks using OpenAI, parse time estimates and priorities, integrate with existing time block system, automatically create time blocks with extracted tasks, add to command palette with preview before creation",
+            "details": "Create lib/ai/features/extract-tasks.ts to identify tasks using OpenAI, parse time estimates and priorities, integrate with existing time block system, automatically create time blocks with extracted tasks, add to command palette with preview before creation\n<info added on 2025-07-09T20:36:03.609Z>\nNote: This subtask depends on Task 10 (Time-Blocking Calendar) being completed first, since it requires the ability to create time blocks in the calendar system. The time block creation functionality from Task 10 must be fully implemented before this feature can integrate with the existing time blocking system.\n</info added on 2025-07-09T20:36:03.609Z>",
             "status": "pending",
             "testStrategy": ""
           },

@@ -5,7 +5,7 @@ import { Sidebar } from '@/components/layouts/sidebar';
 import { cn } from '@/lib/utils';
 import { AppShellSkeleton } from '@/components/skeletons';
 import { useResponsive } from '@/hooks/useResponsive';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Menu, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TimeBlockingCalendar } from '@/components/calendar/time-blocking-calendar';
@@ -81,6 +81,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Mobile sidebar sheet */}
         <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
           <SheetContent side="left" className="w-[280px] p-0">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
             <Sidebar onToggle={() => setMobileSidebarOpen(false)} />
           </SheetContent>
         </Sheet>

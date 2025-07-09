@@ -6,14 +6,13 @@ import { motion } from 'framer-motion';
 import {
   timeToPixelPosition,
   isWithinCalendarBounds,
-  SLOT_HEIGHT_PX,
 } from '@/lib/utils/time-blocks';
 
 interface CurrentTimeIndicatorProps {
-  currentWeek: Date;
+  currentDate: Date;
 }
 
-export function CurrentTimeIndicator({ currentWeek }: CurrentTimeIndicatorProps) {
+export function CurrentTimeIndicator({ currentDate }: CurrentTimeIndicatorProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -30,44 +29,31 @@ export function CurrentTimeIndicator({ currentWeek }: CurrentTimeIndicatorProps)
     return null;
   }
 
-  // Check if current week contains today
+  // Check if we're showing today
   const today = new Date();
-  const weekStart = new Date(currentWeek);
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-
-  if (today < weekStart || today > weekEnd) {
+  if (currentDate.toDateString() !== today.toDateString()) {
     return null;
   }
 
-  const dayIndex = today.getDay();
   const topPosition = timeToPixelPosition(currentTime);
 
   return (
     <motion.div
-      className="absolute left-0 right-0 pointer-events-none z-10"
+      className="absolute left-0 right-0 pointer-events-none z-20"
       style={{
-        gridColumn: `2 / -1`, // Span all day columns
-        gridRow: 2, // Start after header
+        top: `${topPosition}px`,
       }}
-      initial={{ opacity: 0, y: topPosition }}
-      animate={{ opacity: 1, y: topPosition }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ 
-        y: { type: "tween", ease: "linear", duration: 0.5 },
         opacity: { duration: 0.3 }
       }}
     >
       {/* Time indicator line */}
-      <div className="relative">
+      <div className="relative flex items-center">
         {/* Red dot at the start with pulse animation */}
         <motion.div
-          className="absolute w-2 h-2 bg-red-500 rounded-full"
-          style={{
-            left: `${(dayIndex * (100 / 7))}%`,
-            top: '-4px',
-            marginLeft: '-4px',
-          }}
+          className="absolute w-3 h-3 bg-red-500 rounded-full -left-1"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.8, 1, 0.8],
@@ -93,18 +79,19 @@ export function CurrentTimeIndicator({ currentWeek }: CurrentTimeIndicatorProps)
           />
         </motion.div>
         
-        {/* Horizontal line for current day */}
+        {/* Horizontal line */}
         <motion.div
-          className="absolute h-0.5 bg-red-500"
-          style={{
-            left: `${(dayIndex * (100 / 7))}%`,
-            width: `${100 / 7}%`,
-          }}
+          className="h-0.5 bg-red-500 flex-1"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           style={{ transformOrigin: 'left' }}
         />
+        
+        {/* Current time label */}
+        <div className="absolute -right-12 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded">
+          {currentTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+        </div>
       </div>
     </motion.div>
   );

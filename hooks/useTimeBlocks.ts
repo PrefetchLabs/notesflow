@@ -43,7 +43,8 @@ export function useTimeBlocks(currentWeek: Date) {
       const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 0 });
 
       const response = await fetch(
-        `/api/time-blocks?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`
+        `/api/time-blocks?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`,
+        { credentials: 'same-origin' }
       );
 
       if (!response.ok) throw new Error('Failed to fetch time blocks');
@@ -76,6 +77,7 @@ export function useTimeBlocks(currentWeek: Date) {
         const response = await fetch('/api/time-blocks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
             title: input.title,
             startTime: input.startTime.toISOString(),
@@ -114,6 +116,7 @@ export function useTimeBlocks(currentWeek: Date) {
         const response = await fetch(`/api/time-blocks/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
             ...updates,
             startTime: updates.startTime?.toISOString(),
@@ -151,6 +154,7 @@ export function useTimeBlocks(currentWeek: Date) {
     try {
       const response = await fetch(`/api/time-blocks/${id}`, {
         method: 'DELETE',
+        credentials: 'same-origin',
       });
 
       if (!response.ok) throw new Error('Failed to delete time block');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
@@ -78,10 +78,9 @@ export function CalendarGrid({ currentWeek, children }: CalendarGridProps) {
         {timeSlots.map((time, slotIndex) => {
           const isHourStart = time.getMinutes() === 0;
           return (
-            <>
+            <React.Fragment key={`slot-${slotIndex}`}>
               {/* Time label */}
               <div
-                key={`time-${slotIndex}`}
                 className={cn(
                   "text-right pr-2 text-xs text-muted-foreground",
                   isHourStart && "font-medium",
@@ -117,7 +116,7 @@ export function CalendarGrid({ currentWeek, children }: CalendarGridProps) {
                   />
                 );
               })}
-            </>
+            </React.Fragment>
           );
         })}
 

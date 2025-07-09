@@ -19,7 +19,6 @@ interface TimeBlockProps {
   endTime: Date;
   color?: string;
   isCompleted?: boolean;
-  dayIndex: number;
   onUpdate?: (id: string, updates: { startTime?: Date; endTime?: Date; isCompleted?: boolean }) => void;
   onDelete?: (id: string) => void;
   isGhost?: boolean;
@@ -32,7 +31,6 @@ export function TimeBlock({
   endTime,
   color = '#3B82F6',
   isCompleted = false,
-  dayIndex,
   onUpdate,
   onDelete,
   isGhost = false,
@@ -153,15 +151,14 @@ export function TimeBlock({
         isGhost && "opacity-40 pointer-events-none border-dashed bg-muted"
       )}
       style={{
-        gridColumn: dayIndex + 2,
-        gridRow: 2,
+        position: 'absolute',
         top: `${topPosition}px`,
         height: `${height}px`,
         backgroundColor: isGhost ? 'transparent' : (isCompleted ? '#86EFAC' : color),
         borderColor: isGhost ? '#94A3B8' : (isCompleted ? '#4ADE80' : color),
-        left: 0,
-        right: 0,
-        margin: '0 2px',
+        left: '8px',
+        right: '8px',
+        pointerEvents: 'auto',
       }}
       onMouseDown={!isGhost ? (e) => handleMouseDown(e, 'move') : undefined}
       initial={{ opacity: 0, scale: 0.8, y: 10 }}
