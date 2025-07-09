@@ -28,8 +28,10 @@ export default function NotePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
-  // Debounce content changes for autosave
+  // Debounce both title and content changes for autosave
+  const debouncedTitle = useDebounce(title, 2000);
   const debouncedContent = useDebounce(content, 2000);
 
   // Load note data
@@ -100,16 +102,29 @@ export default function NotePage() {
     loadNote();
   }, [noteId, router]);
 
+  // Track changes
+  const handleContentChange = useCallback((newContent: any) => {
+    console.log('Content changed:', newContent);
+    setContent(newContent);
+    setHasUnsavedChanges(true);
+  }, []);
+  
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+    setHasUnsavedChanges(true);
+  }, []);
+  
   // Autosave functionality
   useEffect(() => {
-    if (debouncedContent && debouncedContent !== content) {
+    if (hasUnsavedChanges && noteId && !noteId.startsWith('new-') && (debouncedContent || debouncedTitle)) {
       handleSave();
     }
-  }, [debouncedContent, content]);
+  }, [debouncedContent, debouncedTitle, hasUnsavedChanges, handleSave, noteId]);
 
   const handleSave = useCallback(async () => {
     if (!noteId || noteId.startsWith('new-')) return;
     
+    console.log('Saving note:', { title, content });
     setIsSaving(true);
     try {
       const response = await fetch(`/api/notes/${noteId}`, {
@@ -120,8 +135,14 @@ export default function NotePage() {
       
       if (!response.ok) throw new Error('Failed to save');
       
+      const savedNote = await response.json();
+      console.log('Note saved:', savedNote);
+      
       setLastSaved(new Date());
-    } catch {
+      setHasUnsavedChanges(false);
+      toast.success('Note saved');
+    } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to save note');
     } finally {
       setIsSaving(false);
@@ -168,7 +189,7 @@ export default function NotePage() {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange}
               className="bg-transparent text-lg font-semibold outline-none"
               placeholder="Untitled Note"
             />
@@ -240,7 +261,7 @@ export default function NotePage() {
               content && (
                 <BlockNoteEditorComponent
                   initialContent={content}
-                  onContentChange={setContent}
+                  onContentChange={handleContentChange}
                 />
               )
             )}

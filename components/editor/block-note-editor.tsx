@@ -23,6 +23,10 @@ export function BlockNoteEditorComponent({
   // Create the editor instance
   const editor = useCreateBlockNote({
     initialContent: initialContent || undefined,
+    uploadFile: async () => {
+      // Placeholder for file upload
+      return '';
+    },
   });
 
   // Handle mounting to avoid hydration issues
@@ -34,12 +38,16 @@ export function BlockNoteEditorComponent({
   useEffect(() => {
     if (!editor || !onContentChange) return;
 
-    const handleChange = () => {
+    // Set up the change handler
+    const unsubscribe = editor.onChange(() => {
       const content = editor.document;
       onContentChange(content);
-    };
+    });
 
-    editor.onChange(handleChange);
+    // Cleanup
+    return () => {
+      unsubscribe();
+    };
   }, [editor, onContentChange]);
 
   if (!mounted) {
