@@ -1,0 +1,2492 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Initialize Next.js 15 Project with Core Dependencies",
+        "description": "Set up the foundational Next.js 15 project with TypeScript, Tailwind CSS, and essential dependencies for the NotesFlow MLP",
+        "details": "Create a new Next.js 15 project using the latest app router. Install and configure: next@15.0.3, react@19.0.0, react-dom@19.0.0, typescript@5.3.3, tailwindcss@3.4.1, @tailwindcss/typography@0.5.10, framer-motion@11.0.3, and postcss@8.4.33. Set up TypeScript with strict mode enabled. Configure Tailwind with a minimalist theme using system font stack and limited color palette (black, white, single accent color). Set up project structure with /app directory for Next.js 15 app router, /components for reusable UI components, /lib for utilities, and /types for TypeScript interfaces. Ensure the development server runs with sub-50ms response times.",
+        "testStrategy": "Verify project initialization by running 'npm run dev' and checking that the development server starts successfully. Confirm TypeScript compilation works without errors. Test that Tailwind CSS is properly configured by creating a test component with utility classes. Measure initial page load performance to ensure it meets <1s first paint target.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Next.js 15 project with create-next-app",
+            "description": "Initialize a new Next.js 15 project using create-next-app with TypeScript and Tailwind CSS options",
+            "dependencies": [],
+            "details": "Run `npx create-next-app@latest notesflow --typescript --tailwind --app --use-bun` to create the project with App Router, TypeScript, and Tailwind CSS support. Ensure Next.js 15.3+ is installed.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Configure TypeScript with strict mode",
+            "description": "Update tsconfig.json to enable strict mode and configure advanced TypeScript 5+ settings",
+            "dependencies": [
+              1
+            ],
+            "details": "Enable strict mode in tsconfig.json, configure module resolution, path aliases, and ensure compatibility with React 19 and Next.js 15.3. Add strict null checks, no implicit any, and other recommended strict settings.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Install and configure essential dependencies",
+            "description": "Install core dependencies including React 19, shadcn/ui, Drizzle ORM, Supabase, and other essential packages",
+            "dependencies": [
+              1
+            ],
+            "details": "Install dependencies: @radix-ui/react-*, @supabase/supabase-js@2.x, @supabase/ssr@latest, drizzle-orm@latest, @tanstack/react-query@5.x, react-hook-form@7.x, zod@3.x, lucide-react@latest, sonner@latest, framer-motion@11.x, zustand@4.x, openai@4.x, class-variance-authority@latest, clsx@latest, tailwind-merge@latest",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Set up Tailwind CSS with custom theme configuration",
+            "description": "Configure Tailwind CSS with custom theme, colors, breakpoints, and integrate with shadcn/ui",
+            "dependencies": [
+              3
+            ],
+            "details": "Update tailwind.config.ts with custom theme configuration, set up CSS variables for shadcn/ui components, configure responsive breakpoints for mobile-first design, and set up globals.css with base styles and CSS custom properties.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create project directory structure",
+            "description": "Set up the complete project structure following Next.js 15 App Router conventions without src directory",
+            "dependencies": [
+              1
+            ],
+            "details": "Create directories: app/(auth), app/(dashboard), app/api, components/ui, components/forms, components/wizards, components/modals, components/layouts, components/dashboard, components/features, lib/db, lib/supabase, lib/store, lib/validations, lib/hooks, lib/api, lib/constants, lib/utils, types/, config/, hooks/, styles/",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Configure development environment and tooling",
+            "description": "Set up ESLint, Prettier, environment variables, and development scripts",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Configure ESLint with Next.js and TypeScript rules, set up Prettier for code formatting, create .env.local with Supabase and OpenAI placeholders, update package.json scripts for development workflow including db:generate, db:push, db:studio, lint, and type-check commands.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Establish performance baseline and monitoring",
+            "description": "Set up performance monitoring tools and establish Core Web Vitals baseline",
+            "dependencies": [
+              5,
+              6
+            ],
+            "details": "Configure @next/bundle-analyzer, set up basic performance monitoring hooks, create instrumentation for Core Web Vitals tracking (LCP < 2.5s, FID < 100ms, CLS < 0.1, INP < 200ms), and document baseline metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Initialize Git repository with comprehensive .gitignore",
+            "description": "Set up Git repository with proper .gitignore configuration for Next.js project",
+            "dependencies": [
+              5
+            ],
+            "details": "Initialize Git repository, create comprehensive .gitignore including node_modules, .env*, .next/, out/, build/, dist/, .DS_Store, *.log, .vercel, and other common patterns. Make initial commit with project structure.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Google OAuth with Better-Auth",
+        "description": "Set up Google OAuth authentication using better-auth library for secure user sign-in",
+        "details": "Install better-auth@0.3.0 and configure Google OAuth provider. Set up OAuth credentials in Google Cloud Console with proper redirect URIs for development and production. Create auth configuration in /lib/auth.ts with Better-Auth setup. Implement auth API routes in /app/api/auth/[...all]/route.ts. Create a simple sign-in page at /app/auth/signin/page.tsx with Google sign-in button. Set up middleware.ts to protect routes and redirect unauthenticated users. Create auth context provider for client-side auth state management. Implement user session management with proper token handling and refresh logic. Store minimal user data (id, email, name, avatar) in session.",
+        "testStrategy": "Test complete OAuth flow from sign-in to sign-out. Verify redirect behavior for protected routes. Confirm session persistence across page refreshes. Test token refresh mechanism. Validate that user data is properly stored and accessible throughout the app. Test error handling for failed authentication attempts.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Google Cloud Console OAuth 2.0 credentials",
+            "description": "Create and configure OAuth 2.0 credentials in Google Cloud Console for the application",
+            "dependencies": [],
+            "details": "Navigate to Google Cloud Console, create a new project or select existing one, enable Google+ API, create OAuth 2.0 credentials with proper redirect URIs (http://localhost:3000/api/auth/callback/google for development and production URL), download credentials JSON, and store client ID and secret securely in environment variables",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Install and configure better-auth package",
+            "description": "Install better-auth and its dependencies, set up basic configuration with Google provider",
+            "dependencies": [
+              1
+            ],
+            "details": "Run 'bun add better-auth @better-auth/client', create auth configuration file at lib/auth/config.ts, configure better-auth with Google OAuth provider using environment variables, set up database adapter for Drizzle ORM, configure session options and token settings",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create auth database schema with Drizzle",
+            "description": "Define database schema for users, sessions, and OAuth accounts using Drizzle ORM",
+            "dependencies": [
+              2
+            ],
+            "details": "Create schema file at lib/db/schema/auth.ts, define users table with id, email, name, image, emailVerified fields, create sessions table with id, userId, expiresAt, create accounts table for OAuth provider data, add necessary indexes and relations, generate and run migrations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement auth API routes for better-auth",
+            "description": "Create Next.js API routes to handle authentication endpoints",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create app/api/auth/[...auth]/route.ts to handle all better-auth endpoints, implement GET and POST handlers that proxy to better-auth, ensure proper CORS and security headers, handle callback URLs for OAuth flow, implement error handling for failed auth attempts",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create sign-in page UI with shadcn/ui components",
+            "description": "Build a responsive sign-in page using shadcn/ui components and integrate with better-auth client",
+            "dependencies": [
+              4
+            ],
+            "details": "Create app/(auth)/login/page.tsx, implement responsive layout with Card component, add Google sign-in button using Button component from shadcn/ui, integrate better-auth client hooks for authentication, add loading states and animations with framer-motion, implement proper error display using toast notifications",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Set up Next.js middleware for route protection",
+            "description": "Implement middleware to protect authenticated routes and handle redirects",
+            "dependencies": [
+              4
+            ],
+            "details": "Create middleware.ts in project root, implement session verification using better-auth, define protected route patterns (dashboard, api routes), handle unauthenticated redirects to login page, implement proper matcher configuration, add public route exceptions",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create auth context provider and hooks",
+            "description": "Implement React context for auth state management and custom hooks for authentication",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "Create lib/auth/auth-context.tsx with AuthProvider component, implement useAuth hook for accessing auth state, integrate with better-auth client for session management, handle auth state persistence and rehydration, create useRequireAuth hook for protected components, implement proper TypeScript types",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement session management and token handling",
+            "description": "Set up secure session management with automatic token refresh and expiration handling",
+            "dependencies": [
+              7
+            ],
+            "details": "Configure better-auth session settings with appropriate expiration times, implement automatic token refresh before expiration, handle session persistence across browser sessions, set up secure cookie configuration for production, implement logout functionality that clears all session data",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Add comprehensive error handling and user feedback",
+            "description": "Implement error boundaries, failed auth handling, and user-friendly error messages",
+            "dependencies": [
+              5,
+              7,
+              8
+            ],
+            "details": "Create custom error boundary for auth-related errors, implement retry logic for failed OAuth attempts, add user-friendly error messages using Sonner toast, handle network errors and API failures gracefully, implement fallback UI states, log errors to monitoring service",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Write tests for complete authentication flow",
+            "description": "Create comprehensive test suite for authentication functionality",
+            "dependencies": [
+              9
+            ],
+            "details": "Write unit tests for auth hooks and utilities, create integration tests for API routes, implement E2E tests for complete sign-in flow using Playwright, test error scenarios and edge cases, verify middleware protection works correctly, test session persistence and token refresh",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Design and Implement Database Schema with Drizzle ORM",
+        "description": "Create the database schema using Drizzle ORM with PostgreSQL for all core data models",
+        "details": "Install drizzle-orm@0.29.3, drizzle-kit@0.20.14, and @neondatabase/serverless@0.9.0 (or postgres@3.4.3 for local dev). Create database schema in /db/schema.ts with tables for: users (id, email, name, avatar, isPro, stripeCustomerId, createdAt, updatedAt), folders (id, userId, name, parentId, position, createdAt, updatedAt), notes (id, userId, folderId, title, content as JSONB, lastEditedBy, createdAt, updatedAt), timeBlocks (id, userId, noteId, title, date, startTime, duration, completed, createdAt), and collaborators (noteId, userId, addedAt). Set up proper indexes for performance: userId indexes on all tables, composite indexes for folder hierarchy queries, and datetime indexes for time blocks. Configure Drizzle with connection pooling and prepared statements. Create migration files and seed data for development.",
+        "testStrategy": "Write unit tests for all database operations using Vitest. Test CRUD operations for each model. Verify foreign key constraints work correctly. Test cascade deletes for user data. Benchmark query performance for common operations like folder tree retrieval and time block queries. Test connection pooling under load.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install Drizzle ORM and PostgreSQL driver",
+            "description": "Install Drizzle ORM, PostgreSQL driver (pg), and necessary type definitions",
+            "dependencies": [],
+            "details": "Run: bun add drizzle-orm pg @types/pg\nInstall Drizzle Kit for migrations: bun add -d drizzle-kit\nVerify installations in package.json",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Configure database connection with environment variables",
+            "description": "Set up database connection configuration using Drizzle and environment variables",
+            "dependencies": [
+              1
+            ],
+            "details": "Create lib/db/index.ts with connection setup\nConfigure DATABASE_URL in .env.local\nImplement connection singleton pattern for Next.js\nAdd connection error handling and logging",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create user table schema with authentication fields",
+            "description": "Design and implement the users table schema with Supabase auth integration",
+            "dependencies": [
+              2
+            ],
+            "details": "Create lib/db/schema/users.ts\nDefine users table with: id (UUID), email, username, avatar_url, created_at, updated_at\nLink to Supabase auth.users table via foreign key\nAdd unique constraints on email and username",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Design folder hierarchy schema with self-referential relationships",
+            "description": "Create folders table with parent-child relationships for nested folder structure",
+            "dependencies": [
+              3
+            ],
+            "details": "Create lib/db/schema/folders.ts\nImplement: id, name, parent_id (self-referential), user_id, color, icon, order, created_at, updated_at\nAdd foreign key to users table\nImplement path materialization for efficient querying",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement notes table with JSONB content field",
+            "description": "Create notes table with flexible JSONB storage for rich content",
+            "dependencies": [
+              4
+            ],
+            "details": "Create lib/db/schema/notes.ts\nDefine: id, title, content (JSONB), folder_id, user_id, tags (array), is_pinned, is_archived, created_at, updated_at\nImplement content schema validation\nAdd foreign keys to users and folders",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Design time blocks schema for scheduling",
+            "description": "Create time_blocks table for calendar integration and time management",
+            "dependencies": [
+              5
+            ],
+            "details": "Create lib/db/schema/timeBlocks.ts\nImplement: id, note_id, user_id, start_time, end_time, title, color, recurrence_rule, reminder_minutes, created_at, updated_at\nAdd check constraints for time validation\nImplement recurrence pattern storage",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create collaborators junction table",
+            "description": "Implement many-to-many relationship for note collaboration",
+            "dependencies": [
+              5
+            ],
+            "details": "Create lib/db/schema/collaborators.ts\nDefine: id, note_id, user_id, permission_level (view/edit), invited_at, accepted_at\nAdd composite unique constraint on (note_id, user_id)\nImplement permission enum type",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Add performance indexes to all tables",
+            "description": "Create database indexes for optimal query performance",
+            "dependencies": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "details": "Add indexes on: users.email, folders.user_id, folders.parent_id, notes.user_id, notes.folder_id, time_blocks.user_id, time_blocks.start_time\nCreate composite indexes for common query patterns\nAdd GIN index on notes.content for JSONB searches",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Generate and configure migration files",
+            "description": "Set up Drizzle Kit configuration and generate initial migration",
+            "dependencies": [
+              8
+            ],
+            "details": "Create drizzle.config.ts with PostgreSQL configuration\nRun: bun drizzle-kit generate:pg\nReview generated SQL migration files\nAdd migration scripts to package.json",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Create comprehensive seed data script",
+            "description": "Implement seed data for development and testing",
+            "dependencies": [
+              9
+            ],
+            "details": "Create lib/db/seed.ts with sample data\nGenerate test users, folders hierarchy, notes with rich content\nAdd time blocks and collaborations\nImplement idempotent seeding logic",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Configure connection pooling and optimization",
+            "description": "Set up database connection pooling for production performance",
+            "dependencies": [
+              2
+            ],
+            "details": "Configure pg pool settings: max connections, idle timeout, connection timeout\nImplement connection health checks\nAdd query logging for development\nSet up connection retry logic",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Implement comprehensive database testing setup",
+            "description": "Create test suite for database schema and operations",
+            "dependencies": [
+              10,
+              11
+            ],
+            "details": "Set up test database configuration\nCreate schema validation tests\nImplement CRUD operation tests for each table\nAdd relationship integrity tests\nConfigure test data cleanup",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Integrate Supabase for Real-time and Database",
+        "description": "Set up Supabase client for database operations and real-time synchronization",
+        "details": "Install @supabase/supabase-js@2.39.3 and @supabase/ssr@0.1.0. Create Supabase project and configure environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY). Set up Supabase client singleton in /lib/supabase/client.ts for client-side usage and /lib/supabase/server.ts for server-side operations. Configure Row Level Security (RLS) policies for all tables: users can only access their own data, collaborators can access shared notes, public read for shared notes. Set up real-time subscriptions for notes and time blocks tables. Implement connection management with automatic reconnection. Create database functions for complex operations like folder tree retrieval. Set up Supabase Edge Functions project structure for future AI integration.",
+        "testStrategy": "Test RLS policies by attempting unauthorized data access. Verify real-time updates work across multiple browser sessions. Test connection recovery after network interruption. Measure real-time sync latency (<500ms target). Test database performance with 1000+ notes and folders. Validate that offline changes sync correctly when connection is restored.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Supabase project and configure initial settings",
+            "description": "Set up a new Supabase project, configure authentication providers, and establish basic project settings",
+            "dependencies": [],
+            "details": "Create a new Supabase project through the dashboard, configure email/password authentication, enable Google OAuth provider, set up custom SMTP settings if needed, configure password policies and email templates",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Install Supabase client libraries and dependencies",
+            "description": "Install @supabase/supabase-js and @supabase/ssr packages with proper version management",
+            "dependencies": [],
+            "details": "Run bun add @supabase/supabase-js@2.x @supabase/ssr@latest, ensure compatibility with Next.js 15.3 and React 19, update package.json with exact versions",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Configure environment variables for Supabase",
+            "description": "Set up all required Supabase environment variables in .env.local and ensure proper security",
+            "dependencies": [
+              1
+            ],
+            "details": "Add NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY to .env.local, create .env.example with placeholders, update .gitignore to exclude .env files",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Supabase server client singleton",
+            "description": "Create server-side Supabase client with proper cookie handling for SSR",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create lib/supabase/server.ts with createServerClient function using @supabase/ssr, implement cookie adapter for Next.js cookies(), add proper TypeScript types, handle async cookie operations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Supabase browser client singleton",
+            "description": "Create client-side Supabase client with proper configuration and type safety",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create lib/supabase/client.ts with createBrowserClient singleton pattern, implement proper TypeScript generics for database types, add environment variable validation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Create RLS policies for all database tables",
+            "description": "Implement Row Level Security policies for user data protection across all tables",
+            "dependencies": [
+              1
+            ],
+            "details": "Create policies for SELECT, INSERT, UPDATE, DELETE operations, implement user_id based access control, add policies for public read access where appropriate, test policies with different user roles",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Set up real-time subscription infrastructure",
+            "description": "Implement real-time subscription system with proper cleanup and error handling",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "Create hooks/useRealtimeSubscription.ts for React components, implement subscription cleanup on unmount, add reconnection logic, create subscription manager for multiple channels",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement connection management with reconnection logic",
+            "description": "Create robust connection management system with automatic reconnection and state tracking",
+            "dependencies": [
+              7
+            ],
+            "details": "Implement exponential backoff for reconnection attempts, add connection state management with Zustand, create connection status indicators, handle offline/online transitions gracefully",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Create database functions for complex queries",
+            "description": "Implement PostgreSQL functions for complex operations and aggregations",
+            "dependencies": [
+              6
+            ],
+            "details": "Create functions for common aggregations, implement stored procedures for multi-table operations, add functions for search functionality, optimize with proper indexing",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Set up Edge Functions project structure",
+            "description": "Initialize Supabase Edge Functions with proper TypeScript configuration and deployment setup",
+            "dependencies": [
+              1
+            ],
+            "details": "Create supabase/functions directory structure, implement shared utilities and types, set up local development with Deno, configure CORS and authentication middleware",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Implement comprehensive security testing and performance benchmarking",
+            "description": "Create test suite for security validation and performance metrics collection",
+            "dependencies": [
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "details": "Write tests for RLS policy enforcement, test authentication flows and token handling, benchmark query performance, load test real-time subscriptions, implement security headers validation",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Create Minimal UI Shell with Sidebar and Editor Layout",
+        "description": "Build the core application shell with a minimalist sidebar for navigation and main editor area",
+        "details": "Create the main application layout in /app/(app)/layout.tsx with a fixed 200px sidebar and fluid main content area. Implement sidebar component with: user avatar and name at top, folder tree in middle (using radix-ui/react-collapsible@1.0.3 for smooth animations), and minimal settings link at bottom. Design with 80% whitespace principle: generous padding (24-32px), clean borders (1px solid #e5e5e5), and subtle hover states. Use CSS Grid for layout to ensure proper responsiveness. Implement loading states with subtle skeleton screens. Add smooth transitions using Framer Motion for sidebar collapse/expand. Create empty state component with beautiful typography encouraging users to create their first note. Ensure all interactions feel instant (<50ms response time) using optimistic updates.",
+        "testStrategy": "Test layout responsiveness on different screen sizes (minimum 1280px width for MLP). Verify sidebar maintains 200px width consistently. Test animation performance using Chrome DevTools. Ensure loading states appear for operations over 100ms. Test keyboard navigation through sidebar. Validate empty state renders correctly for new users.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create main layout component with CSS Grid",
+            "description": "Implement the base layout structure using CSS Grid for optimal performance and flexibility",
+            "dependencies": [],
+            "details": "Create a main layout component that uses CSS Grid to define the overall structure with a collapsible sidebar (280px expanded, 60px collapsed) and main content area. Implement the grid system to handle responsive behavior and ensure smooth transitions. Use CSS custom properties for dynamic sizing.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement sidebar component structure",
+            "description": "Build the sidebar component with collapse/expand functionality and proper state management",
+            "dependencies": [
+              1
+            ],
+            "details": "Create the sidebar component with Zustand for collapse state management. Include the collapse/expand button with smooth width transitions. Structure the sidebar to contain user profile section at top and folder tree below. Implement proper overflow handling and scrollable areas.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Design and implement user profile section",
+            "description": "Create the user profile component for the sidebar with avatar, name, and settings access",
+            "dependencies": [
+              2
+            ],
+            "details": "Design a clean user profile section that displays user avatar (with fallback), name, and email. Include a settings gear icon for quick access. Ensure the design works in both expanded and collapsed sidebar states with appropriate tooltips in collapsed mode.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Build folder tree placeholder component",
+            "description": "Create a placeholder structure for the folder tree with proper indentation and icons",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement a folder tree placeholder component that will later be populated with actual data. Include folder/file icons from Lucide React, proper indentation levels, and hover states. Design for both expanded and collapsed sidebar views with icon-only display when collapsed.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement loading state components with skeleton screens",
+            "description": "Create reusable skeleton screen components for smooth loading experiences",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Build skeleton screen components for the sidebar (profile skeleton, folder tree skeleton) and main content area. Use subtle shimmer animations and match the exact dimensions of actual content. Create variants for different content types and ensure they respect the 80% whitespace principle.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Design empty state components",
+            "description": "Create engaging empty state designs for when no content is available",
+            "dependencies": [
+              1
+            ],
+            "details": "Design empty state components for scenarios like no folders, no notes, or first-time user experience. Include helpful illustrations or icons, clear messaging, and call-to-action buttons. Ensure designs align with the minimalist aesthetic and 80% whitespace principle.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Set up Framer Motion animations and responsive design",
+            "description": "Implement smooth animations and ensure responsive behavior across all breakpoints",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "details": "Configure Framer Motion for sidebar collapse/expand animations, page transitions, and micro-interactions. Implement responsive breakpoints using custom hooks (useMediaQuery, useWindowSize). Ensure mobile-first design with appropriate navigation patterns for different screen sizes. Add subtle hover and focus states throughout.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement Folder Tree with Drag-and-Drop",
+        "description": "Create a collapsible, draggable folder structure for organizing notes",
+        "details": "Install @dnd-kit/sortable@8.0.0, @dnd-kit/core@6.1.0, and @dnd-kit/utilities@3.2.2 for drag-and-drop functionality. Create FolderTree component with recursive rendering for nested folders. Implement folder CRUD operations: create folder with inline editing, rename with double-click, delete with confirmation. Add drag-and-drop to reorder folders and move between parents. Use optimistic updates for all operations with rollback on error. Implement folder collapse state persistence in localStorage. Add subtle hover effects and smooth expand/collapse animations (150ms). Create context menu (right-click) with new folder, rename, and delete options. Limit nesting to 3 levels for simplicity. Show note count per folder with subtle gray text.",
+        "testStrategy": "Test folder creation, rename, and deletion operations. Verify drag-and-drop works correctly for reordering and nesting. Test that folder state persists across sessions. Ensure animations are smooth and under 200ms. Test edge cases like moving parent into child. Validate optimistic updates and error rollback behavior.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and configure drag-and-drop library",
+            "description": "Install @dnd-kit/sortable and set up the DndContext provider in the main layout",
+            "dependencies": [],
+            "details": "Install @dnd-kit/core, @dnd-kit/sortable, and @dnd-kit/utilities. Configure the DndContext provider at the app level with appropriate sensors for mouse and touch interactions. Set up collision detection algorithms for nested structures.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create recursive folder component structure",
+            "description": "Build a FolderItem component that can render itself recursively for nested folders",
+            "dependencies": [
+              1
+            ],
+            "details": "Create FolderItem component with props for folder data, depth level, and expanded state. Implement recursive rendering logic to display child folders. Include proper TypeScript types for folder structure with id, name, parentId, children array, and noteCount.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement folder CRUD operations",
+            "description": "Create functions for creating, reading, updating, and deleting folders with proper state management",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement createFolder, updateFolder, deleteFolder, and moveFolder functions. Use Zustand store for state management. Ensure operations maintain referential integrity and update parent-child relationships correctly.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Add drag handlers for folder reordering",
+            "description": "Implement useSortable hook integration for draggable folder items",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Integrate useSortable hook from @dnd-kit/sortable into FolderItem. Configure drag handle UI element, implement transform and transition styles, and handle isDragging state for visual feedback. Ensure proper accessibility attributes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement drop zone logic for folder nesting",
+            "description": "Create drop zones that allow folders to be nested within other folders",
+            "dependencies": [
+              4
+            ],
+            "details": "Implement onDragOver and onDragEnd handlers to detect valid drop targets. Create visual indicators for drop zones with hover states. Handle logic for preventing circular references and invalid nesting scenarios.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Build optimistic update system with rollback",
+            "description": "Create a system for immediate UI updates with ability to rollback on failure",
+            "dependencies": [
+              3,
+              5
+            ],
+            "details": "Implement optimistic updates using temporary state changes. Create rollback mechanism that reverts to previous state on API failure. Use try-catch blocks with proper error handling and user notifications via toast messages.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement localStorage persistence layer",
+            "description": "Add localStorage integration for offline functionality and state persistence",
+            "dependencies": [
+              6
+            ],
+            "details": "Create localStorage adapter with methods for saving and loading folder structure. Implement debounced auto-save on state changes. Add migration logic for schema changes and handle storage quota exceeded errors.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Add smooth animations for folder operations",
+            "description": "Implement Framer Motion animations for all folder interactions",
+            "dependencies": [
+              5,
+              6
+            ],
+            "details": "Add AnimatePresence for enter/exit animations. Implement layout animations for reordering, expand/collapse animations with height transitions, and subtle spring animations for drag operations. Ensure animations are performant and respect prefers-reduced-motion.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Create context menu for folder actions",
+            "description": "Build a right-click context menu for folder operations",
+            "dependencies": [
+              3,
+              8
+            ],
+            "details": "Implement context menu using Radix UI or custom solution. Include options for rename, delete, create subfolder, and move operations. Add keyboard shortcuts and ensure proper positioning logic to keep menu within viewport.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Enforce nesting depth limits",
+            "description": "Implement validation to prevent excessive folder nesting beyond defined limits",
+            "dependencies": [
+              5,
+              6
+            ],
+            "details": "Create MAX_NESTING_DEPTH constant and validation function. Prevent drop operations that would exceed depth limit. Show visual indicators or tooltips when depth limit is reached. Consider performance implications of deep nesting.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Add note count display with updates",
+            "description": "Display note counts for each folder and update them when notes are moved",
+            "dependencies": [
+              2,
+              3,
+              7
+            ],
+            "details": "Add noteCount to folder data structure. Create aggregation logic to calculate total notes including subfolders. Update counts when notes are created, deleted, or moved between folders. Display counts with appropriate styling and consider zero states.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Comprehensive interaction testing",
+            "description": "Test all drag-and-drop scenarios and edge cases thoroughly",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
+            ],
+            "details": "Write unit tests for CRUD operations and state management. Create integration tests for drag-and-drop scenarios including multi-level nesting. Test edge cases like circular references, maximum depth, and concurrent operations. Verify accessibility with keyboard navigation and screen readers.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Integrate BlockNote Editor for Rich Text Editing",
+        "description": "Implement BlockNote as the core editor with clean, distraction-free interface",
+        "details": "Install @blocknote/core@0.12.0 and @blocknote/react@0.12.0. Configure BlockNote with minimal toolbar that appears on text selection only. Customize theme to match minimalist design: remove all unnecessary UI elements, use system font stack, subtle selection colors. Implement auto-save with debounce (1 second) showing subtle 'Saving...' indicator. Configure allowed blocks: paragraph, headings (h1-h3), bullet lists, numbered lists, and basic formatting (bold, italic, link). Remove complex features like tables, images, and code blocks for v1. Set up content storage as JSONB in database. Implement focus mode where UI fades when typing (reduce opacity to 0.3 after 2 seconds of typing). Add keyboard shortcuts: Cmd/Ctrl+S for manual save, Cmd/Ctrl+B for bold, Cmd/Ctrl+I for italic. Ensure typing latency stays under 30ms.",
+        "testStrategy": "Test all basic formatting options work correctly. Verify auto-save triggers after 1 second of inactivity. Test that content persists across page refreshes. Measure typing latency with performance profiler. Test focus mode UI fading behavior. Validate keyboard shortcuts work on both Mac and Windows.",
+        "priority": "high",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and configure BlockNote editor dependencies",
+            "description": "Set up BlockNote React component library with necessary peer dependencies and TypeScript types",
+            "dependencies": [],
+            "details": "Install @blocknote/react, @blocknote/core, and @blocknote/mantine packages. Configure TypeScript definitions and ensure compatibility with Next.js 15.3 and React 19. Set up basic editor instance with minimal configuration to verify installation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create minimalist custom theme for BlockNote",
+            "description": "Design and implement a clean, minimal theme that aligns with the overall app design aesthetics",
+            "dependencies": [
+              1
+            ],
+            "details": "Create custom CSS theme using CSS variables for BlockNote components. Override default styles to achieve minimalist look with reduced visual clutter. Implement light/dark mode support using Tailwind CSS classes. Focus on typography, spacing, and subtle borders.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Configure toolbar with selected features only",
+            "description": "Customize BlockNote toolbar to show only essential formatting options for note-taking",
+            "dependencies": [
+              1
+            ],
+            "details": "Configure toolbar to include only: bold, italic, underline, strikethrough, code, headings (H1-H3), bullet lists, numbered lists, checkboxes, and links. Remove unnecessary features like tables, images, and advanced formatting. Implement responsive toolbar that adapts to screen size.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement auto-save with debouncing mechanism",
+            "description": "Create efficient auto-save functionality that saves content changes with proper debouncing",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement debounced save function with 2-second delay after typing stops. Use React hooks to track editor content changes. Create visual indicator for save status (saving, saved, error). Handle network failures gracefully with retry logic and offline queue.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Set up JSONB content storage in database",
+            "description": "Configure Drizzle ORM schema and Supabase for storing BlockNote content as JSONB",
+            "dependencies": [
+              4
+            ],
+            "details": "Create notes table with JSONB column for BlockNote document structure. Set up Drizzle schema with proper TypeScript types. Implement database migrations. Create API endpoints for saving and retrieving note content. Ensure proper indexing for performance.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement focus mode with UI fading",
+            "description": "Create distraction-free writing mode that fades out UI elements except the editor",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Implement focus mode toggle that gradually fades navigation, sidebar, and toolbar. Use Framer Motion for smooth opacity transitions. Maintain editor visibility while dimming surrounding UI to 20% opacity. Add keyboard shortcut (Cmd/Ctrl + Shift + F) to toggle focus mode.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Configure comprehensive keyboard shortcuts",
+            "description": "Set up keyboard shortcuts for all editor actions and app navigation",
+            "dependencies": [
+              3,
+              6
+            ],
+            "details": "Implement standard text formatting shortcuts (Cmd/Ctrl + B/I/U). Add custom shortcuts for heading levels, lists, and checkboxes. Configure app-level shortcuts for navigation, search, and focus mode. Create keyboard shortcut help modal accessible via Cmd/Ctrl + /.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Optimize performance for sub-30ms typing latency",
+            "description": "Fine-tune editor performance to achieve smooth typing experience with minimal latency",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Implement virtual scrolling for long documents. Optimize re-renders using React.memo and useMemo. Configure BlockNote with performance-focused settings. Profile and eliminate unnecessary computations during typing. Implement requestIdleCallback for non-critical updates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Test editor across different browsers and devices",
+            "description": "Comprehensive testing to ensure consistent experience across all supported platforms",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "details": "Test on Chrome, Firefox, Safari, and Edge browsers. Verify mobile responsiveness on iOS and Android devices. Test keyboard shortcuts on different operating systems. Measure and document typing latency across platforms. Create automated E2E tests for critical editor functions.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Build Note Management System",
+        "description": "Create the complete note creation, listing, and management functionality",
+        "details": "Implement note CRUD operations with optimistic updates. Create note list component in sidebar showing title and last modified date. Add 'New Note' button with Cmd/Ctrl+N shortcut. Implement note title extraction from first line of content. Add note search with fuzzy matching using fuse.js@7.0.0 (search both title and content). Create note switching with unsaved changes warning. Implement note deletion with soft delete initially (move to trash). Add keyboard navigation: Cmd/Ctrl+P for quick note switcher. Store active note ID in URL for shareable links. Implement recently accessed notes (last 5) at top of sidebar. Auto-create 'Untitled Note' when user starts typing in empty state. Add subtle transition animations when switching between notes.",
+        "testStrategy": "Test complete note lifecycle: create, edit, save, delete. Verify search works accurately for both titles and content. Test keyboard shortcuts on different operating systems. Ensure note switching preserves unsaved changes. Test URL-based note loading. Verify recently accessed notes update correctly. Test performance with 100+ notes.",
+        "priority": "high",
+        "dependencies": [
+          6,
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Note CRUD API endpoints",
+            "description": "Create server actions for creating, reading, updating, and deleting notes using Drizzle ORM and Supabase",
+            "dependencies": [],
+            "details": "Implement server actions in app/actions/notes.ts with proper TypeScript types, error handling, and Supabase RLS policies. Include createNote, getNote, updateNote, deleteNote (soft delete), and listNotes functions. Use Drizzle ORM for type-safe database operations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create note database schema and migrations",
+            "description": "Define Drizzle schema for notes table with soft delete support and proper indexes",
+            "dependencies": [],
+            "details": "Create notes table schema in lib/db/schema.ts with fields: id (uuid), title, content, userId, createdAt, updatedAt, deletedAt (for soft delete), lastAccessedAt. Add indexes for userId, deletedAt, and full-text search on title/content.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Build NoteList component with sorting",
+            "description": "Create a responsive note list component using shadcn/ui with multiple sorting options",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement components/notes/NoteList.tsx with sorting by: last modified, created date, alphabetical, last accessed. Use shadcn/ui Select for sort dropdown. Display note title, preview text, and timestamps. Implement virtualization for large lists using @tanstack/react-virtual.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement new note creation flow",
+            "description": "Create UI and logic for creating new notes with auto-generated untitled names",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Add 'New Note' button to NoteList header. Auto-generate title as 'Untitled Note' with timestamp. Create note immediately on button click and navigate to editor. Use optimistic updates with React Query for instant UI feedback.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build title extraction logic",
+            "description": "Implement intelligent title extraction from note content",
+            "dependencies": [
+              1
+            ],
+            "details": "Create lib/utils/titleExtraction.ts to extract title from first line of content (max 50 chars). If first line is empty or too short, use first non-empty line. Fall back to 'Untitled Note' if no suitable content. Update title automatically when content changes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement fuzzy search functionality",
+            "description": "Add full-text search with fuzzy matching across note titles and content",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Use Fuse.js for client-side fuzzy search. Index notes by title and content preview. Implement search debouncing (300ms). Highlight matching terms in results. Add search input to NoteList header with clear button. Store search query in URL params.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Handle note switching with unsaved changes",
+            "description": "Implement confirmation dialog and auto-save for unsaved changes when switching notes",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Track dirty state in note editor using isDirty flag. Show confirmation dialog using shadcn/ui AlertDialog when switching notes with unsaved changes. Offer options: Save & Continue, Discard Changes, Cancel. Implement auto-save with 5-second debounce.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement soft delete functionality",
+            "description": "Add soft delete with trash/restore features",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Add delete button to note editor and list items. Set deletedAt timestamp instead of hard delete. Create Trash view to show deleted notes. Add restore and permanent delete options. Auto-purge notes deleted > 30 days ago. Show toast notifications for delete/restore actions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Set up keyboard navigation",
+            "description": "Implement comprehensive keyboard shortcuts for note management",
+            "dependencies": [
+              3,
+              4,
+              6
+            ],
+            "details": "Use react-hotkeys-hook for shortcuts: Cmd/Ctrl+N (new note), Cmd/Ctrl+S (save), Cmd/Ctrl+F (search), Cmd/Ctrl+Delete (delete), Arrow keys (navigate list), Enter (open selected). Show keyboard shortcuts in UI tooltips. Add help modal with all shortcuts.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Implement URL-based routing",
+            "description": "Add Next.js App Router routes for note navigation and deep linking",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Create app/notes/[id]/page.tsx for individual note routes. Use parallel routes for list/editor split view. Update URL when selecting notes. Handle invalid note IDs with redirect to notes list. Preserve scroll position and search state in URL.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Build recently accessed notes feature",
+            "description": "Track and display recently accessed notes with quick access",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Update lastAccessedAt timestamp when opening notes. Add 'Recent' section to NoteList showing last 5 accessed notes. Store recent note IDs in localStorage for offline access. Add quick switcher modal (Cmd/Ctrl+K) showing recent notes at top.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Create Time-Blocking Calendar Component",
+        "description": "Build the unique time-blocking calendar with 15-minute grid on the right side",
+        "details": "Create calendar component with 15-minute time slots from 6 AM to 10 PM. Design as fixed-width (300px) right sidebar that can be toggled. Use CSS Grid for time slot layout with each slot being 20px height. Implement current time indicator as a subtle red line that updates every minute. Add week view with 7 columns for days, current day highlighted. Create TimeBlock component with title, duration visualization, and completion checkbox. Add smooth drag-to-resize for adjusting block duration. Implement visual feedback during drag: ghost element, valid drop zones highlighted. Store time blocks in database linked to notes and user. Add quick actions: click empty slot to create 30-min block, double-click to create 1-hour block. Show total focused time at top of calendar. Use subtle colors: completed blocks in light green, upcoming in light blue.",
+        "testStrategy": "Test time block creation via clicking and dragging. Verify blocks save correctly to database. Test drag-to-resize functionality. Ensure current time indicator updates properly. Test week navigation. Verify time calculations are accurate. Test visual feedback during interactions. Validate performance with 50+ blocks per week.",
+        "priority": "high",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Calendar Grid Layout with CSS Grid",
+            "description": "Implement the base calendar grid structure using CSS Grid for the week view, including day headers and time column",
+            "dependencies": [],
+            "details": "Set up a CSS Grid container with 8 columns (time column + 7 days) and dynamic rows for time slots. Use grid-template-columns for fixed time column width and equal day columns. Implement sticky positioning for headers and time column.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement 15-Minute Time Slot Rendering",
+            "description": "Create the time slot grid system with 15-minute intervals from start to end of day",
+            "dependencies": [
+              1
+            ],
+            "details": "Generate time slots dynamically based on configurable start/end hours. Each hour should have 4 slots (15-minute intervals). Add visual separators between hours and subtle lines for 15-minute marks. Calculate total slots needed based on day range.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Build Current Time Indicator Component",
+            "description": "Create a visual indicator that shows the current time on the calendar and updates every minute",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement a horizontal line component that spans across all day columns at the current time position. Use React hooks with setInterval to update position every minute. Calculate pixel position based on current time relative to calendar time range. Add smooth CSS transitions for position updates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Week View Navigation",
+            "description": "Add week navigation controls and date range calculations for the calendar view",
+            "dependencies": [
+              1
+            ],
+            "details": "Create previous/next week buttons and current week indicator. Implement date arithmetic for week boundaries. Add today button to jump to current week. Display week range in header. Handle week transitions smoothly.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create TimeBlock Component",
+            "description": "Build the core TimeBlock component that represents scheduled time blocks on the calendar",
+            "dependencies": [
+              2
+            ],
+            "details": "Design component to accept start time, duration, title, and color props. Calculate grid positioning based on time slot mapping. Implement proper z-index handling for overlapping blocks. Add truncation for long titles with tooltips.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Drag-to-Resize Functionality",
+            "description": "Add drag handles to TimeBlock components for resizing from top and bottom edges",
+            "dependencies": [
+              5
+            ],
+            "details": "Create resize handles that appear on hover at block edges. Implement mouse event handlers for drag start, move, and end. Snap to 15-minute grid during resize. Update block duration in real-time. Enforce minimum block size constraints.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create Ghost Element Visualization",
+            "description": "Implement visual feedback during drag operations with ghost elements",
+            "dependencies": [
+              6
+            ],
+            "details": "Create semi-transparent preview element that shows new size during resize. Add visual indicators for snap points. Show time labels during drag to indicate new start/end times. Implement smooth transitions when releasing drag.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Set Up Database Integration for Time Blocks",
+            "description": "Implement Supabase database schema and CRUD operations for time blocks",
+            "dependencies": [],
+            "details": "Create time_blocks table with fields for user_id, start_time, end_time, title, description, color, and metadata. Implement real-time subscriptions for block updates. Add database triggers for conflict detection. Create TypeScript types from schema.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Build Quick Action Handlers",
+            "description": "Implement click handlers for empty time slots to create new blocks quickly",
+            "dependencies": [
+              2,
+              5
+            ],
+            "details": "Add click detection on empty calendar cells. Calculate clicked time slot based on mouse position. Show inline creation form or modal. Implement keyboard shortcuts for quick block creation. Add default duration settings.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Create Time Calculation Utilities",
+            "description": "Build utility functions for time-based calculations and conversions",
+            "dependencies": [],
+            "details": "Create functions to convert between time strings, slot indices, and pixel positions. Implement duration calculations and time rounding to 15-minute intervals. Add timezone handling utilities. Build time formatting helpers for display.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Implement Visual Styling for Block States",
+            "description": "Create distinct visual styles for different time block states and interactions",
+            "dependencies": [
+              5
+            ],
+            "details": "Design styles for default, hover, active, and dragging states. Implement color theming system for different block categories. Add visual indicators for conflicts or overlaps. Create focus styles for keyboard navigation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Add Performance Optimization",
+            "description": "Optimize calendar rendering performance for handling many time blocks",
+            "dependencies": [
+              5,
+              8
+            ],
+            "details": "Implement React.memo for TimeBlock components. Use virtualization for blocks outside viewport. Batch database updates during drag operations. Optimize re-renders with proper key strategies. Add debouncing for resize updates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 13,
+            "title": "Implement Responsive Sidebar Toggle",
+            "description": "Create collapsible sidebar integration with the calendar view",
+            "dependencies": [
+              1
+            ],
+            "details": "Add toggle button to show/hide sidebar. Implement smooth transition animations. Adjust calendar grid to fill available space. Persist sidebar state in local storage. Ensure calendar remains functional at all viewport sizes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 14,
+            "title": "Create Comprehensive Test Suite",
+            "description": "Build unit and integration tests for calendar functionality",
+            "dependencies": [
+              10,
+              11,
+              12
+            ],
+            "details": "Write unit tests for time calculation utilities. Create component tests for TimeBlock interactions. Test drag-and-drop functionality with testing library. Add integration tests for database operations. Test edge cases like daylight saving time transitions.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement Drag Text to Calendar Feature",
+        "description": "Create the killer feature: dragging selected text from notes to create time blocks",
+        "details": "Implement text selection detection in BlockNote editor. Add drag handler for selected text with visual feedback (cursor change, selected text highlight). Create drop zones in calendar that highlight when dragging text over them. On drop, create time block with selected text as title, default 30-minute duration. Add smart parsing: if text contains time references ('2 hours', '30 min'), set duration accordingly. Show preview of time block while dragging. Implement edge scrolling when dragging near calendar boundaries. Add undo/redo support for drag operations. Create floating tooltip during drag showing 'Drop to schedule' hint. If text is a list item, offer to create multiple time blocks. Animate the created block with subtle scale effect. Update note content to show linked time indicator next to scheduled text.",
+        "testStrategy": "Test dragging various text selections to calendar. Verify time parsing works for different formats. Test edge scrolling behavior. Ensure undo/redo works correctly. Test multi-line text selection. Verify visual feedback appears at all stages. Test that linked indicators appear in notes. Measure drag performance stays smooth.",
+        "priority": "high",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement BlockNote selection API integration",
+            "description": "Create a custom selection detection system that integrates with BlockNote's internal selection API to capture text selections in real-time",
+            "dependencies": [],
+            "details": "Research BlockNote's selection API, implement event listeners for selection changes, create a selection state manager that tracks selected text, position, and block references. Handle edge cases like multi-block selections and nested content.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build drag handler UI component",
+            "description": "Create a visual drag handler that appears near selected text in the BlockNote editor",
+            "dependencies": [
+              1
+            ],
+            "details": "Design and implement a floating drag handle component that appears on text selection, position it correctly relative to selected text, ensure it doesn't interfere with editor functionality, add hover states and visual indicators.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement custom drag event system",
+            "description": "Create a custom drag-and-drop system that works with BlockNote's content model",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Override native drag behavior to work with BlockNote's virtual DOM, create custom drag data transfer format, handle drag start/move/end events, ensure compatibility with editor's undo/redo system.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create calendar drop zone detection",
+            "description": "Implement drop zone detection logic for the calendar component",
+            "dependencies": [],
+            "details": "Add drop target detection to calendar time slots, calculate precise drop positions based on mouse coordinates, handle different calendar views (day/week/month), create visual indicators for valid drop zones.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build drag preview component",
+            "description": "Create a visual preview of the content being dragged",
+            "dependencies": [
+              3
+            ],
+            "details": "Generate a preview element showing the selected text, add visual styling to indicate it's being dragged, implement ghost image replacement, ensure preview follows cursor smoothly.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement smart text parsing engine",
+            "description": "Create an AI-powered text parser to extract time duration and event details from selected text",
+            "dependencies": [],
+            "details": "Integrate NLP to parse natural language time expressions, detect event titles and descriptions, handle various time formats (2 hours, 2h, 120 min), extract recurring patterns, implement fallback parsing logic.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Build visual feedback system",
+            "description": "Create comprehensive visual feedback during the entire drag operation",
+            "dependencies": [
+              3,
+              4,
+              5
+            ],
+            "details": "Implement hover effects on calendar slots, show time duration preview while hovering, add visual connection lines between source and target, create smooth transitions and animations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement time block creation logic",
+            "description": "Create the system to generate calendar events from dropped content",
+            "dependencies": [
+              4,
+              6
+            ],
+            "details": "Convert parsed text data into calendar event objects, calculate event duration and position, handle time zone conversions, integrate with existing calendar data model, support recurring events.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Build edge scrolling mechanism",
+            "description": "Implement automatic scrolling when dragging near viewport edges",
+            "dependencies": [
+              3,
+              7
+            ],
+            "details": "Detect when drag cursor approaches viewport edges, implement smooth auto-scrolling in both editor and calendar, adjust scroll speed based on cursor distance from edge, handle scroll boundaries correctly.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Create undo/redo integration",
+            "description": "Integrate drag-drop operations with the application's undo/redo system",
+            "dependencies": [
+              3,
+              8
+            ],
+            "details": "Track all drag-drop operations in undo history, implement reversible actions for both note changes and calendar events, ensure state consistency across components, handle edge cases like deleted source content.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Build tooltip hint system",
+            "description": "Create contextual tooltips to guide users through the drag-drop process",
+            "dependencies": [
+              2,
+              7
+            ],
+            "details": "Show tooltips on hover over drag handle, display keyboard shortcuts and tips, implement smart tooltip positioning, add progressive disclosure for advanced features, ensure accessibility compliance.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Implement multi-line selection handling",
+            "description": "Handle complex text selections spanning multiple lines and blocks",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Detect and handle multi-paragraph selections, preserve formatting during drag operations, handle mixed content types (text, lists, etc.), implement selection boundary validation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 13,
+            "title": "Create animation system for dropped blocks",
+            "description": "Build smooth animations for calendar blocks appearing after drop",
+            "dependencies": [
+              8
+            ],
+            "details": "Implement entrance animations for new calendar blocks, add success feedback animations, create smooth transitions from preview to final position, handle animation queuing for multiple drops.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 14,
+            "title": "Build linked indicator system",
+            "description": "Create visual indicators showing connections between notes and calendar events",
+            "dependencies": [
+              8,
+              10
+            ],
+            "details": "Add visual markers in notes showing linked calendar events, implement bi-directional navigation between linked items, create hover previews of linked content, handle deletion and updates of linked items.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 15,
+            "title": "Implement cross-component state management",
+            "description": "Create a robust state management system for drag-drop operations across components",
+            "dependencies": [
+              3,
+              8,
+              10,
+              14
+            ],
+            "details": "Design centralized drag-drop state store, implement event bus for cross-component communication, ensure state persistence across navigation, handle concurrent operations and race conditions, implement performance optimizations.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Add AI Writing Assistant with OpenAI Integration",
+        "description": "Implement the AI writing assistant with context-aware features accessible via Cmd+J",
+        "details": "Install openai@4.28.0 and set up API key management in environment variables. Create Edge Function in Supabase for AI calls to protect API key. Implement Cmd+J command palette using @radix-ui/react-dialog@1.0.5 with 4 options: Continue Writing (append to current position), Improve Clarity (rewrite selected text), Summarize (create summary of entire note or selection), Extract Tasks (find actionable items and create time blocks). Add loading states with subtle spinner. Implement streaming responses for better UX using Server-Sent Events. Add error handling with user-friendly messages. Create usage tracking to enforce free tier limits (10 AI calls per day for free users). Show AI response inline with option to accept or reject. Add subtle AI indicator when content is AI-generated. Implement context gathering: send current paragraph + surrounding context (max 1000 tokens) for better results.",
+        "testStrategy": "Test all four AI features with various content types. Verify streaming responses work smoothly. Test error handling with invalid API key. Ensure usage limits are enforced correctly. Test that context is properly extracted and sent. Verify AI responses appear inline correctly. Test Cmd+J shortcut on different systems.",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          10
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "OpenAI SDK installation and configuration",
+            "description": "Install OpenAI SDK v4+ and configure TypeScript types for the project",
+            "dependencies": [],
+            "details": "Install openai@4.x package using bun, create lib/openai/client.ts with proper TypeScript configuration, set up environment variables for OPENAI_API_KEY, configure the client to use gpt-4o-mini model as specified in CLAUDE.md",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Supabase Edge Function creation for secure API calls",
+            "description": "Create Supabase Edge Function to proxy OpenAI API calls securely",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a new Edge Function named 'openai-proxy' that validates user authentication, checks usage limits, forwards requests to OpenAI API, handles streaming responses, logs usage metrics, and returns responses. Implement proper error handling and rate limiting",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Command palette UI with keyboard shortcuts",
+            "description": "Build a command palette component with keyboard navigation and shortcuts",
+            "dependencies": [],
+            "details": "Create components/command-palette/index.tsx using shadcn/ui Command component, implement keyboard shortcuts (Cmd/Ctrl+K to open), add search functionality, integrate with note editor context, support arrow key navigation and Enter to execute commands",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Continue Writing feature implementation",
+            "description": "Implement AI-powered content continuation based on existing note content",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create lib/ai/features/continue-writing.ts to analyze current note content, generate contextual continuation using OpenAI, integrate with command palette as 'Continue Writing' command, handle text insertion at cursor position in the editor",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Improve Clarity feature",
+            "description": "Build feature to enhance selected text clarity and readability",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create lib/ai/features/improve-clarity.ts to process selected text, use OpenAI to rewrite for better clarity while preserving meaning, add to command palette with text selection detection, implement diff view to show changes before applying",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Summarize feature",
+            "description": "Implement AI summarization for selected text or entire notes",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create lib/ai/features/summarize.ts to generate concise summaries, support both selected text and full note summarization, add configurable summary length options, integrate with command palette with appropriate context detection",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Extract Tasks with time block creation",
+            "description": "Extract actionable tasks from notes and create corresponding time blocks",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create lib/ai/features/extract-tasks.ts to identify tasks using OpenAI, parse time estimates and priorities, integrate with existing time block system, automatically create time blocks with extracted tasks, add to command palette with preview before creation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Streaming response handling",
+            "description": "Implement real-time streaming for AI responses",
+            "dependencies": [
+              2
+            ],
+            "details": "Update Edge Function to handle OpenAI streaming responses, create lib/ai/streaming.ts with EventSource or WebSocket implementation, add streaming UI components with loading states, implement proper cleanup and cancellation handling",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Usage tracking and limit enforcement",
+            "description": "Track AI usage per user and enforce limits",
+            "dependencies": [
+              2
+            ],
+            "details": "Create Supabase tables for usage tracking (user_id, tokens_used, timestamp), implement usage calculation in Edge Function, add usage checks before API calls, create components/ai/usage-indicator.tsx to show remaining usage, implement monthly reset logic",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Inline response UI",
+            "description": "Build inline UI components for AI responses in the editor",
+            "dependencies": [
+              3,
+              8
+            ],
+            "details": "Create components/ai/inline-response.tsx for displaying AI outputs, implement floating toolbar for AI actions, add accept/reject/edit functionality for AI suggestions, integrate with editor to show responses at appropriate positions",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Error handling and fallback strategies",
+            "description": "Implement comprehensive error handling for AI features",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "details": "Create lib/ai/error-handling.ts with retry logic and exponential backoff, implement user-friendly error messages using sonner toast, add offline detection and queueing, create fallback behaviors when AI is unavailable, log errors for monitoring",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Implement Real-time Collaboration with Presence",
+        "description": "Add real-time collaborative editing with cursor presence and live updates",
+        "details": "Extend BlockNote with Yjs@13.6.14 for CRDT-based collaboration. Set up y-supabase provider for real-time sync through Supabase Realtime. Implement presence system showing other users' cursors with name labels and random colors. Add presence avatars in sidebar showing active collaborators (max 5 displayed). Create smooth cursor interpolation for natural movement. Implement awareness protocol for selection highlighting. Add 'Share' button that generates shareable link with copy feedback. Set up note access control: anyone with link can edit (no complex permissions for v1). Show connection status indicator (green dot when connected). Add optimistic updates with eventual consistency. Handle conflict resolution using Yjs automatic merging. Implement presence timeout (remove cursor after 30 seconds of inactivity). Add subtle join/leave animations for collaborators.",
+        "testStrategy": "Test with multiple browser sessions editing same note. Verify cursors appear and move smoothly. Test conflict resolution with simultaneous edits. Verify presence updates within 100ms. Test connection recovery after network loss. Ensure share links work correctly. Test with 5+ simultaneous collaborators.",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and configure Yjs core dependencies",
+            "description": "Install Yjs library and required type definitions for CRDT-based collaborative editing",
+            "dependencies": [],
+            "details": "Install yjs, y-websocket, y-protocols, and @types/yjs packages. Set up basic Yjs document structure and provider configuration files. Create utility functions for Yjs document initialization and management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Set up BlockNote collaborative editing extension",
+            "description": "Integrate BlockNote editor with Yjs for real-time collaborative editing capabilities",
+            "dependencies": [
+              1
+            ],
+            "details": "Install @blocknote/yjs extension, configure BlockNote editor to use Yjs document as data source. Set up shared types for BlockNote content structure. Implement document synchronization between BlockNote and Yjs.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Configure Supabase WebSocket provider for Yjs",
+            "description": "Create custom Yjs provider that uses Supabase Realtime channels for document synchronization",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement SupabaseProvider class extending Yjs WebsocketProvider. Configure Supabase Realtime channel for document updates. Handle authentication tokens and connection lifecycle. Set up message encoding/decoding for Yjs updates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement user presence system foundation",
+            "description": "Create presence tracking system to monitor active users and their metadata",
+            "dependencies": [
+              3
+            ],
+            "details": "Design presence state structure (user ID, name, color, cursor position). Implement presence state management using Yjs awareness protocol. Create hooks for presence updates and user tracking. Set up presence data persistence strategy.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build cursor rendering with smooth interpolation",
+            "description": "Implement visual cursor rendering for all active users with smooth movement animations",
+            "dependencies": [
+              4
+            ],
+            "details": "Create cursor component with user-specific colors and labels. Implement position interpolation using requestAnimationFrame for smooth movement. Handle cursor visibility based on editor focus and activity. Add cursor trail effect for better visibility.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Configure Yjs awareness protocol for presence",
+            "description": "Set up awareness protocol to broadcast and receive user presence updates",
+            "dependencies": [
+              4
+            ],
+            "details": "Configure awareness update intervals and timeout settings. Implement awareness state cleanup on disconnect. Handle awareness state synchronization on reconnect. Create awareness event handlers for user join/leave events.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create share functionality with unique link generation",
+            "description": "Build sharing system that generates unique collaborative session links",
+            "dependencies": [
+              3
+            ],
+            "details": "Implement share dialog UI with copy link functionality. Generate unique room IDs for collaborative sessions. Create URL routing for shared documents. Store share metadata in Supabase (created by, created at, permissions).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement access control and permissions system",
+            "description": "Build permission system to control read/write access to shared documents",
+            "dependencies": [
+              7
+            ],
+            "details": "Create permission levels (viewer, editor, owner). Implement permission checking middleware. Build UI for managing document permissions. Handle permission updates in real-time. Integrate with Supabase RLS policies.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Create connection status indicator component",
+            "description": "Build UI component showing real-time connection status and sync state",
+            "dependencies": [
+              3
+            ],
+            "details": "Design status indicator with states (connecting, connected, disconnected, syncing). Implement reconnection logic with exponential backoff. Show sync progress for large documents. Add network quality indicators and latency display.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Develop conflict resolution testing framework",
+            "description": "Create comprehensive testing suite for CRDT conflict resolution scenarios",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Write tests for concurrent edit scenarios. Test offline editing and sync on reconnect. Verify CRDT convergence properties. Create stress tests with multiple simultaneous editors. Document conflict resolution behaviors.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Implement presence timeout and cleanup handling",
+            "description": "Build system to handle user disconnections and presence cleanup",
+            "dependencies": [
+              6
+            ],
+            "details": "Configure presence timeout values (30 seconds default). Implement graceful disconnect handling. Create presence garbage collection for stale users. Handle browser tab close/refresh events. Implement presence recovery on reconnection.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Create join/leave animations for user presence",
+            "description": "Add smooth animations for user cursor appearance and disappearance",
+            "dependencies": [
+              5,
+              11
+            ],
+            "details": "Implement fade-in animation for new user cursors. Create fade-out animation with delay for leaving users. Add notification toasts for user join/leave events. Implement smooth transition for cursor color changes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 13,
+            "title": "Set up multi-user testing environment and tools",
+            "description": "Create testing setup to simulate multiple concurrent users for collaboration testing",
+            "dependencies": [
+              10
+            ],
+            "details": "Build testing harness to spawn multiple browser instances. Create automated testing scenarios for multi-user interactions. Set up performance monitoring for collaboration features. Document testing procedures and common issues. Create demo environment for stakeholder testing.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Build Free/Pro Tier System with Limitations",
+        "description": "Implement usage limitations for free tier and pro upgrade prompts",
+        "details": "Create subscription status check in auth context (isPro boolean). Implement free tier limits: max 10 notes (show counter in sidebar), max 3 folders, no AI assistant access, single device only (using device fingerprinting), no real-time collaboration. Add gentle upgrade prompts when limits are reached (non-blocking modal with benefits list). Create usage tracking hooks for notes count and AI calls. Show upgrade button in sidebar for free users with 'Pro' badge. Implement soft limits: allow creating 11th note but show persistent upgrade banner. Add localStorage detection for device limit (warn on second device). Create upgrade flow trigger functions. Design limit messages to be encouraging, not punishing ('Unlock unlimited notes with Pro'). Add visual indicators for pro features (subtle lock icon). Implement grace period: full features for first 7 days.",
+        "testStrategy": "Test all limit enforcements work correctly. Verify upgrade prompts appear at right times. Test device detection works across browsers. Ensure pro users have no limitations. Test grace period behavior. Verify usage counters are accurate. Test that limits don't break core functionality.",
+        "priority": "medium",
+        "dependencies": [
+          8,
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate subscription status in auth context",
+            "description": "Add subscription plan details (free/pro) and limits to the existing auth context to make them accessible throughout the app",
+            "dependencies": [],
+            "details": "Extend the auth context to include subscription plan type, plan limits (notes, folders, devices), current usage counts, and subscription expiry date. Create TypeScript interfaces for subscription data structure.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement note limit enforcement",
+            "description": "Add validation logic to prevent creating notes beyond the plan limit (10 for free, unlimited for pro)",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement a pre-creation check in the note creation flow. Show appropriate error messages when limit is reached. Consider allowing read/edit of existing notes even at limit.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement folder limit enforcement",
+            "description": "Add validation to restrict folder creation based on plan limits (3 for free, unlimited for pro)",
+            "dependencies": [
+              1
+            ],
+            "details": "Add folder count validation before allowing new folder creation. Implement UI feedback when folder limit is reached. Allow organizing existing notes within current folders.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement AI feature access control",
+            "description": "Gate AI-powered features (chat, search, suggestions) behind pro subscription",
+            "dependencies": [
+              1
+            ],
+            "details": "Create a higher-order component or hook to wrap AI features. Show upgrade prompts when free users try to access AI features. Disable AI UI elements for free users with tooltips.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement device fingerprinting system",
+            "description": "Create a reliable device identification system for enforcing single-device limit on free plan",
+            "dependencies": [
+              1
+            ],
+            "details": "Use combination of browser fingerprinting techniques (user agent, screen resolution, timezone, etc.) to generate unique device IDs. Store device IDs in database with last access timestamp.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Gate collaboration features for pro users",
+            "description": "Restrict sharing, commenting, and real-time collaboration to pro subscribers",
+            "dependencies": [
+              1
+            ],
+            "details": "Add subscription checks to collaboration endpoints and UI. Hide collaboration UI elements for free users. Show upgrade prompts when free users attempt to share notes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create upgrade prompt UI components",
+            "description": "Design and implement reusable upgrade prompt modals and banners",
+            "dependencies": [
+              1
+            ],
+            "details": "Create modal component for limit-reached scenarios. Design inline upgrade banners for disabled features. Include pricing information and clear CTA buttons. Make prompts dismissible but memorable.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement usage tracking hooks",
+            "description": "Create React hooks to track and display current usage against limits",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Build useSubscriptionLimits hook to fetch current usage. Create useFeatureAccess hook to check feature availability. Add real-time usage updates when notes/folders are created/deleted.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Add visual indicators for pro features",
+            "description": "Implement UI elements that clearly indicate which features require pro subscription",
+            "dependencies": [
+              4,
+              6,
+              7
+            ],
+            "details": "Add 'PRO' badges to premium features. Use consistent visual treatment (opacity, lock icons) for disabled features. Implement tooltips explaining feature restrictions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Implement grace period system",
+            "description": "Create a soft-limit system that allows temporary access beyond limits with warnings",
+            "dependencies": [
+              2,
+              3,
+              5,
+              8
+            ],
+            "details": "Allow 10% overage on limits with persistent warnings. Implement 7-day grace period for device limit violations. Track grace period usage in database. Send email notifications about limit overages.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Integrate Stripe Checkout for Payments",
+        "description": "Implement Stripe payment processing for Pro subscriptions",
+        "details": "Install stripe@14.14.0 and @stripe/stripe-js@2.4.0. Set up Stripe account with products: Pro Monthly ($8/month), Pro Yearly ($80/year), and Early Bird Special ($4/month lifetime for first 100). Create API routes for checkout session creation at /api/stripe/checkout. Implement webhook handler at /api/stripe/webhook for payment events. Set up subscription management: handle checkout.session.completed, customer.subscription.updated, and customer.subscription.deleted. Update user isPro status and stripeCustomerId in database. Create checkout flow with loading state and error handling. Implement success page at /welcome that shows pro features. Add billing portal link for subscription management. Set up test mode for development with test cards. Create StipeProvider component for client-side Stripe elements. Add proper error logging for failed payments.",
+        "testStrategy": "Test complete payment flow with Stripe test cards. Verify webhooks update user status correctly. Test subscription lifecycle: create, update, cancel. Ensure billing portal works. Test error cases like declined cards. Verify early bird pricing applies correctly. Test both monthly and yearly subscriptions.",
+        "priority": "high",
+        "dependencies": [
+          13
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Stripe account and configure products",
+            "description": "Set up Stripe account, create subscription products with pricing tiers, and configure tax settings",
+            "dependencies": [],
+            "details": "Sign up for Stripe account, navigate to Products section, create subscription products for different tiers (Basic, Pro, Enterprise), set up monthly and annual pricing for each tier, configure tax collection settings if needed, and obtain API keys for both test and production environments",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Install and configure Stripe SDK",
+            "description": "Install Stripe SDK for Next.js and configure with environment variables",
+            "dependencies": [
+              1
+            ],
+            "details": "Run 'bun add stripe @stripe/stripe-js', create lib/stripe/client.ts for browser client initialization, create lib/stripe/server.ts for server-side Stripe instance, add STRIPE_PUBLISHABLE_KEY and STRIPE_SECRET_KEY to .env files, configure Stripe webhook endpoint secret",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Design subscription database schema",
+            "description": "Create Drizzle ORM schema for subscriptions, plans, and billing history",
+            "dependencies": [],
+            "details": "Define tables: subscriptions (id, userId, stripeCustomerId, stripeSubscriptionId, status, currentPeriodEnd), plans (id, name, stripePriceId, features, limits), billing_history (id, userId, amount, status, invoiceUrl), add foreign key relationships and indexes, create migration files",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement checkout session API endpoint",
+            "description": "Create API route to generate Stripe checkout sessions for subscription purchases",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create app/api/stripe/checkout/route.ts, implement POST handler that creates checkout session with selected price ID, include success_url and cancel_url, add metadata for user identification, implement proper error handling and validation, ensure authentication before session creation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create subscription management UI components",
+            "description": "Build pricing cards, plan selector, and checkout button components",
+            "dependencies": [
+              2
+            ],
+            "details": "Create components/pricing/PricingCard.tsx with plan features display, implement PlanSelector.tsx for monthly/annual toggle, create CheckoutButton.tsx that calls checkout API, use shadcn/ui components for consistent styling, implement loading states and error handling",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement webhook endpoint for Stripe events",
+            "description": "Create secure webhook endpoint to receive and process Stripe events",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Create app/api/stripe/webhook/route.ts, implement signature verification using stripe.webhooks.constructEvent, add raw body parsing for webhook verification, implement event routing based on event type, add logging for all incoming events, ensure idempotent event processing",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Handle subscription lifecycle events",
+            "description": "Process checkout.session.completed, subscription updated/deleted events",
+            "dependencies": [
+              6
+            ],
+            "details": "Implement handlers for: checkout.session.completed (create subscription record), customer.subscription.updated (update status/plan), customer.subscription.deleted (cancel subscription), payment_intent.succeeded (log successful payments), invoice.payment_failed (handle failed payments), update database accordingly for each event",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Create success and cancel pages",
+            "description": "Build post-checkout success page and cancellation handling page",
+            "dependencies": [
+              5
+            ],
+            "details": "Create app/(dashboard)/checkout/success/page.tsx with order confirmation, implement session retrieval to show purchase details, create cancel page for abandoned checkouts, add email notification trigger on success, implement proper loading and error states",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Integrate Stripe customer portal",
+            "description": "Enable customers to manage subscriptions through Stripe's hosted portal",
+            "dependencies": [
+              2,
+              7
+            ],
+            "details": "Configure customer portal in Stripe dashboard, create API endpoint to generate portal sessions, add 'Manage Subscription' button in user settings, implement redirect flow to Stripe portal, handle return URL after portal actions, ensure portal configuration matches business rules",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Implement subscription status middleware",
+            "description": "Create middleware to check subscription status and enforce access control",
+            "dependencies": [
+              3,
+              7
+            ],
+            "details": "Create middleware.ts to check subscription status on protected routes, implement feature gating based on plan limits, add subscription status to user context, handle expired subscriptions gracefully, cache subscription status for performance, implement grace period handling",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Add comprehensive error handling and logging",
+            "description": "Implement error boundaries, retry logic, and detailed logging for payment flows",
+            "dependencies": [
+              4,
+              6,
+              7
+            ],
+            "details": "Add try-catch blocks with specific error messages, implement exponential backoff for failed webhook processing, create error logging with context (user, amount, error type), add Sentry or similar error tracking, implement user-friendly error messages, create admin alerts for critical payment failures",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Create comprehensive payment testing suite",
+            "description": "Implement end-to-end tests for all payment scenarios using Stripe test mode",
+            "dependencies": [
+              1,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
+            ],
+            "details": "Test successful subscription creation flow, test failed payment scenarios using Stripe test cards, verify webhook processing for all event types, test subscription upgrades/downgrades, validate cancellation and reactivation flows, test edge cases like duplicate webhooks, verify proper database state after each operation",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Create Minimal Onboarding Flow",
+        "description": "Build a simple 3-screen onboarding for new users",
+        "details": "Create onboarding flow at /onboarding with 3 screens max. Screen 1: Welcome message with value prop 'Your thoughts and time, beautifully unified' and continue button. Screen 2: Show drag-to-calendar animation (using Framer Motion) with 'Try it yourself' prompt. Screen 3: Choose plan with free vs pro comparison, emphasizing 7-day trial. Use @radix-ui/react-navigation-menu@1.1.4 for step indicators. Add skip button for impatient users. Store onboarding completion in user preferences. Create smooth transitions between screens (300ms slide). Add keyboard navigation (Enter to continue, Escape to skip). Pre-create sample note 'Welcome to NotesFlow' with tutorial content. Auto-focus on first interactive element. Track onboarding completion rate. Design with maximum whitespace and minimal text.",
+        "testStrategy": "Test onboarding flow from start to finish. Verify skip functionality works. Test keyboard navigation. Ensure onboarding only shows once per user. Test plan selection leads to correct flow. Verify sample note is created. Test on mobile viewport. Measure completion rate.",
+        "priority": "medium",
+        "dependencies": [
+          14
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create onboarding route and layout structure",
+            "description": "Set up the onboarding route with proper navigation guards and layout components to ensure users who haven't completed onboarding are redirected appropriately",
+            "dependencies": [],
+            "details": "Create app/(onboarding) folder structure with layout.tsx, implement route protection to redirect completed users, set up basic page structure for the 3-screen flow, and configure Next.js routing",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build welcome screen with branding and CTA",
+            "description": "Design and implement the first onboarding screen featuring the NotesFlow logo, tagline, and primary call-to-action button to begin the onboarding process",
+            "dependencies": [
+              1
+            ],
+            "details": "Create welcome page component with NotesFlow branding, implement responsive design with proper spacing, add 'Get Started' button with proper styling, ensure smooth transition to next screen",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement drag-to-calendar animation demo",
+            "description": "Create an interactive animation showing how notes can be dragged onto a calendar, demonstrating the core value proposition of the application",
+            "dependencies": [
+              1
+            ],
+            "details": "Build animated note component using Framer Motion, create mini calendar visualization, implement drag gesture animations, add auto-play functionality with pause on hover, ensure smooth performance across devices",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create plan selection screen with pricing tiers",
+            "description": "Build the plan selection interface showing available subscription tiers with features, pricing, and selection functionality",
+            "dependencies": [
+              1
+            ],
+            "details": "Design pricing cards for each tier (Free, Pro, Team), highlight features and limitations, implement selection state management, add 'Continue' button that respects selection, integrate with existing plan management system",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build step indicator navigation component",
+            "description": "Create a reusable navigation component showing progress through the 3-step onboarding flow with visual indicators and optional navigation controls",
+            "dependencies": [
+              1
+            ],
+            "details": "Design dot or progress bar indicators, show current step highlight, implement click-to-navigate functionality, add smooth transitions between steps, ensure accessibility with proper ARIA labels",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement keyboard navigation and accessibility",
+            "description": "Add comprehensive keyboard navigation support and ensure the entire onboarding flow meets accessibility standards",
+            "dependencies": [
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Implement arrow key navigation between screens, add Enter/Space key support for buttons, ensure proper focus management, add skip links, test with screen readers, implement escape key to exit onboarding",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Add sample note creation and completion tracking",
+            "description": "Implement the final onboarding step that creates a sample note and marks the onboarding as complete in the user's profile",
+            "dependencies": [
+              4
+            ],
+            "details": "Create API endpoint to generate sample note with example content, update user profile to mark onboarding complete, implement success animation, redirect to main dashboard, ensure proper error handling",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Design and Build Landing Page",
+        "description": "Create a stunning one-page landing site that converts visitors to users",
+        "details": "Create landing page at app root (/) with sections: Hero (tagline + demo video/gif), Problem (cluttered tools, disconnected time management), Solution (unified workspace with 3 key features), Testimonials (placeholder for now), and Pricing. Use Framer Motion for subtle scroll animations (fade in, slight y-movement). Create auto-playing demo video showing drag-to-calendar feature (use Loom or similar). Design with extreme minimalism: mostly white, one accent color, plenty of breathing room. Add sticky header with sign-in CTA. Implement smooth scroll to pricing section. Create responsive design that looks perfect on all devices. Add meta tags for SEO and social sharing. Include privacy policy and terms links (basic templates). Optimize for PageSpeed score >95. Add email capture for updates (store in Supabase). Create 404 page with clever message.",
+        "testStrategy": "Test on multiple devices and browsers. Verify all CTAs work correctly. Test page load speed (<2s). Validate SEO meta tags. Test social sharing previews. Ensure video plays on mobile. Test email capture works. Verify smooth scrolling. Check accessibility with screen reader.",
+        "priority": "high",
+        "dependencies": [
+          15
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Hero Section with Demo Video",
+            "description": "Create a compelling hero section featuring the product name, tagline, and embedded demo video with optimized loading and playback controls",
+            "dependencies": [],
+            "details": "Design hero section with Next.js 15.3 and React 19, implement video component with lazy loading, add play/pause controls with custom UI, optimize video format (WebM/MP4) for web delivery, ensure mobile responsiveness with appropriate aspect ratios",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build Problem/Solution Sections",
+            "description": "Design and implement problem identification and solution presentation sections with clear visual hierarchy and compelling copy structure",
+            "dependencies": [],
+            "details": "Create reusable section components using shadcn/ui primitives, implement grid layouts for problem points and solution features, add iconography using Lucide React, ensure proper semantic HTML structure for SEO",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create Testimonial Placeholder Components",
+            "description": "Build flexible testimonial components with placeholder content that can be easily updated with real customer feedback",
+            "dependencies": [],
+            "details": "Design testimonial cards with avatar, name, role, and quote fields, implement carousel/grid layout options, add star rating component, create loading skeletons for dynamic content, ensure accessibility with proper ARIA labels",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Develop Pricing Section",
+            "description": "Implement a clear, conversion-optimized pricing section with tier comparison and call-to-action buttons",
+            "dependencies": [],
+            "details": "Create pricing card components with feature lists, implement toggle for monthly/annual billing, add highlighted 'recommended' tier styling, integrate with Stripe pricing table or custom implementation, ensure proper contrast ratios for accessibility",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Scroll Animations with Framer Motion",
+            "description": "Add smooth scroll-triggered animations throughout the landing page using Framer Motion for enhanced user engagement",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Configure Framer Motion with React 19, implement fade-in animations for sections, add parallax effects for hero elements, create staggered animations for feature lists, optimize animation performance with will-change and GPU acceleration",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Responsive Design System",
+            "description": "Ensure all components and sections adapt seamlessly across mobile, tablet, and desktop viewports",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Configure Tailwind CSS breakpoints, implement mobile-first design approach, create responsive navigation with hamburger menu, optimize touch targets for mobile (min 44x44px), test on real devices using BrowserStack or similar",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "SEO Optimization Implementation",
+            "description": "Implement comprehensive SEO optimizations including metadata, structured data, and content optimization",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Configure Next.js metadata API for dynamic meta tags, implement JSON-LD structured data for organization and product schema, optimize heading hierarchy (H1-H6), add Open Graph and Twitter Card metadata, create XML sitemap generation",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Build Email Capture Form",
+            "description": "Create an optimized email capture form with validation, error handling, and integration with email service provider",
+            "dependencies": [],
+            "details": "Implement form using react-hook-form with Zod validation, add email validation and error states, integrate with Supabase or preferred email service API, implement honeypot and rate limiting for spam prevention, add success confirmation with toast notification",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Create Privacy Policy and Terms Pages",
+            "description": "Develop legally compliant privacy policy and terms of service pages with proper formatting and navigation",
+            "dependencies": [],
+            "details": "Create markdown-based content pages using Next.js dynamic routes, implement table of contents with smooth scrolling, add last updated timestamps, ensure GDPR/CCPA compliance mentions, style with consistent typography using Tailwind",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Performance Optimization for PageSpeed >95",
+            "description": "Implement advanced performance optimizations to achieve PageSpeed score above 95 on both mobile and desktop",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "details": "Optimize images with next/image and proper sizing, implement critical CSS inlining, configure font subsetting and preloading, enable Next.js Partial Pre-rendering, minimize JavaScript bundle with code splitting, implement resource hints (preconnect, dns-prefetch), optimize Core Web Vitals (LCP <2.5s, CLS <0.1)",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Implement Performance Monitoring and Analytics",
+        "description": "Set up monitoring to track performance metrics and user behavior",
+        "details": "Install @vercel/analytics@1.1.2 and @vercel/speed-insights@1.0.10 for basic metrics. Set up custom performance monitoring: track first paint, interactive time, typing latency, and sync delay. Create performance budget alerts: warn if any metric exceeds targets. Implement basic event tracking: sign-ups, note creation, time block creation, AI usage, and subscription conversions. Add error boundary at app level with error reporting to console (Sentry in future). Track Core Web Vitals with reporting to analytics. Create development performance dashboard at /dev/metrics (only in development). Add performance marks for key operations. Set up real user monitoring (RUM) for production. Respect DNT headers and add analytics opt-out. Create weekly performance summary (logged to console for now).",
+        "testStrategy": "Verify analytics events fire correctly. Test performance measurements are accurate. Ensure error boundary catches errors. Check that development dashboard shows metrics. Test DNT header respect. Verify no performance impact from monitoring itself. Test custom events track properly.",
+        "priority": "low",
+        "dependencies": [
+          16
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and Configure Vercel Analytics",
+            "description": "Set up Vercel Analytics package and basic configuration",
+            "dependencies": [],
+            "details": "Install @vercel/analytics package, configure the Analytics component in app/layout.tsx, set up environment variables for production tracking, and verify basic page view tracking is working",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Custom Performance Metric Tracking",
+            "description": "Create a system for tracking custom performance metrics beyond standard analytics",
+            "dependencies": [
+              1
+            ],
+            "details": "Build a performance tracking utility that captures custom metrics like component render times, API response times, and data fetching durations. Use the Performance API and integrate with Vercel Analytics custom events",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Set Up Performance Budget Alerts",
+            "description": "Implement automated alerts when performance metrics exceed defined thresholds",
+            "dependencies": [
+              2
+            ],
+            "details": "Create performance budget configuration, implement monitoring logic that compares actual metrics against budgets, set up notifications via console warnings in development and integrate with monitoring services for production alerts",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Build Event Tracking Implementation",
+            "description": "Create comprehensive event tracking for user interactions and custom events",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement tracking for user actions like clicks, form submissions, and navigation. Create reusable hooks and utilities for event tracking. Ensure events are properly typed and follow a consistent naming convention",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Configure Error Boundary Setup",
+            "description": "Implement error boundaries with analytics integration for error tracking",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Create custom error boundary components that capture and report errors to analytics. Implement error logging with context information, stack traces, and user session data. Set up different error boundaries for various app sections",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Core Web Vitals Monitoring",
+            "description": "Set up comprehensive Core Web Vitals tracking and reporting",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement monitoring for LCP, FID, CLS, and INP metrics. Use web-vitals library for accurate measurements. Create real-time reporting to analytics and set up threshold alerts for degraded performance",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create Development Analytics Dashboard",
+            "description": "Build a local development dashboard for real-time performance monitoring",
+            "dependencies": [
+              2,
+              3,
+              6
+            ],
+            "details": "Create a development-only dashboard component that displays real-time performance metrics, Core Web Vitals, and custom metrics. Include visual indicators for performance budgets and historical data visualization",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement Privacy Compliance and User Consent",
+            "description": "Add GDPR/privacy compliant analytics with user consent management",
+            "dependencies": [
+              1,
+              4,
+              5
+            ],
+            "details": "Implement consent management system for analytics tracking. Create cookie banner component, implement opt-in/opt-out functionality, ensure analytics respects user preferences, and add data anonymization where required",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Polish and Launch Preparation",
+        "description": "Final polish, testing, and preparation for ProductHunt launch",
+        "details": "Conduct thorough QA: test all user flows, fix any remaining bugs. Polish animations to feel perfect (adjust timing, easing). Ensure all empty states are beautiful and helpful. Add loading skeletons for all async operations. Create ProductHunt assets: gallery images (5), demo GIF, tagline variations. Write compelling description focusing on unique value. Set up launch day discount code (LAUNCH50 for 50% off first month). Create Twitter thread with story and demo video. Prepare HackerNews Show HN post. Set up support email with auto-responder. Create simple docs at /docs with getting started guide. Add Intercom chat widget for launch week support. Set up uptime monitoring with Better Uptime. Create backup and rollback plan. Test payment flow with real card. Invite 20 beta users for final feedback.",
+        "testStrategy": "Complete end-to-end testing of all features. Load test with 100 concurrent users. Test on slow 3G connection. Verify all marketing assets render correctly. Test launch discount code. Ensure support systems work. Practice deployment and rollback. Get sign-off from 5 beta users.",
+        "priority": "high",
+        "dependencies": [
+          17
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement comprehensive QA testing suite",
+            "description": "Create and execute thorough QA test cases covering all application features, user flows, and edge cases",
+            "dependencies": [],
+            "details": "Develop test scenarios for authentication, note creation/editing, search functionality, organization features, and error handling. Include cross-browser testing, mobile responsiveness checks, and accessibility compliance verification. Document all test results and track issues in a centralized bug tracking system.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Polish all UI animations and transitions",
+            "description": "Review and refine all interface animations to ensure smooth, performant, and consistent user experience",
+            "dependencies": [],
+            "details": "Audit existing animations for performance bottlenecks, adjust timing curves for natural motion, ensure animations respect reduced motion preferences, and implement subtle micro-interactions. Focus on page transitions, component reveals, hover states, and loading animations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Design and implement empty state interfaces",
+            "description": "Create engaging empty states for all areas where users might encounter no data",
+            "dependencies": [],
+            "details": "Design illustrations and copy for empty notes list, empty search results, empty folders, and first-time user states. Include helpful CTAs and onboarding hints. Ensure empty states align with brand voice and visual identity.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Build loading skeleton screens",
+            "description": "Implement skeleton loading states for all data-heavy components to improve perceived performance",
+            "dependencies": [],
+            "details": "Create skeleton screens for note lists, search results, dashboard widgets, and content areas. Implement smooth transitions from skeleton to loaded content. Ensure skeletons match actual content structure to minimize layout shift.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create ProductHunt launch assets",
+            "description": "Design and prepare all visual and written materials needed for ProductHunt submission",
+            "dependencies": [],
+            "details": "Create product gallery images showcasing key features, design an eye-catching thumbnail, write compelling tagline and description, prepare demo GIFs or video, and draft hunter's comment. Ensure all assets follow ProductHunt guidelines and best practices.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Write comprehensive marketing copy",
+            "description": "Develop all marketing copy for landing page, email campaigns, and promotional materials",
+            "dependencies": [],
+            "details": "Write hero section headline and subheadline, feature descriptions, benefit statements, pricing page copy, FAQ content, and email sequences. Ensure consistent tone of voice, clear value proposition, and compelling calls-to-action throughout all materials.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Configure discount code system",
+            "description": "Set up promotional discount codes for launch campaigns and early adopters",
+            "dependencies": [],
+            "details": "Implement discount code validation in payment system, create codes for different campaigns (early bird, ProductHunt, beta users), set expiration dates and usage limits, test code redemption flow, and integrate tracking for discount usage analytics.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Prepare social media content calendar",
+            "description": "Create and schedule social media posts for pre-launch, launch day, and post-launch promotion",
+            "dependencies": [
+              5,
+              6
+            ],
+            "details": "Design social media graphics for Twitter, LinkedIn, and Instagram, write engaging post copy with relevant hashtags, create teaser content for pre-launch buzz, plan launch day announcement posts, and schedule follow-up content highlighting features and user testimonials.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Write comprehensive documentation",
+            "description": "Create user guides, API documentation, and help center articles",
+            "dependencies": [
+              1
+            ],
+            "details": "Write getting started guide, feature tutorials with screenshots, API reference documentation, troubleshooting guides, and FAQ articles. Organize content in searchable help center structure. Include video tutorials for complex features.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Set up customer support system",
+            "description": "Implement support ticket system and configure automated responses",
+            "dependencies": [
+              9
+            ],
+            "details": "Choose and configure support platform, create ticket categories and priority levels, set up automated email responses, design support request forms, establish SLA policies, and create internal documentation for support team.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Configure application monitoring",
+            "description": "Set up comprehensive monitoring for application performance, errors, and user behavior",
+            "dependencies": [],
+            "details": "Implement error tracking with Sentry or similar, configure performance monitoring for API and frontend, set up uptime monitoring with alerts, implement user analytics tracking, and create monitoring dashboards for key metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Create disaster recovery plan",
+            "description": "Develop backup strategies and recovery procedures for potential system failures",
+            "dependencies": [
+              11
+            ],
+            "details": "Set up automated database backups with tested restore procedures, document rollback procedures for deployments, create incident response playbook, establish communication protocols for outages, and implement redundancy for critical services.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 13,
+            "title": "Recruit and onboard beta testers",
+            "description": "Find and prepare a group of beta users to test the application before public launch",
+            "dependencies": [
+              1,
+              10
+            ],
+            "details": "Create beta tester application form, screen and select diverse group of testers, set up private beta access, create beta testing guidelines and feedback forms, establish communication channel for beta feedback, and prepare incentives for participation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 14,
+            "title": "Conduct final payment flow testing",
+            "description": "Thoroughly test all payment scenarios including subscriptions, upgrades, and refunds",
+            "dependencies": [
+              7
+            ],
+            "details": "Test successful payment flows for all pricing tiers, verify failed payment handling, test subscription upgrades and downgrades, validate refund processing, ensure proper invoice generation, and verify payment confirmation emails.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 15,
+            "title": "Complete pre-launch checklist",
+            "description": "Execute final verification of all systems and preparations before launch",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14
+            ],
+            "details": "Review all QA test results and ensure critical bugs are fixed, verify all legal documents are in place, confirm DNS and SSL certificates, test email deliverability, verify backup systems are operational, ensure support team is trained, and get final stakeholder approval for launch.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-09T03:57:04.193Z",
+      "updated": "2025-07-09T03:57:04.193Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
