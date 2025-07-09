@@ -12,7 +12,7 @@ import { TimeBlockingCalendar } from '@/components/calendar/time-blocking-calend
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,16 +20,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Restore sidebar state from localStorage
-    const savedState = localStorage.getItem('sidebar-collapsed');
+    const savedState = localStorage.getItem('sidebar-hidden');
     if (savedState !== null) {
-      setSidebarCollapsed(JSON.parse(savedState));
-    }
-    // Auto-collapse sidebar on mobile/tablet
-    if (!isDesktop) {
-      setSidebarCollapsed(true);
+      setSidebarHidden(JSON.parse(savedState));
     }
     setIsLoading(false);
-  }, [isDesktop]);
+  }, []);
 
   // Listen for calendar toggle keyboard shortcut
   useEffect(() => {
@@ -39,13 +35,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleSidebar = () => {
-    const newState = !sidebarCollapsed;
-    setSidebarCollapsed(newState);
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(newState));
+    const newState = !sidebarHidden;
+    setSidebarHidden(newState);
+    localStorage.setItem('sidebar-hidden', JSON.stringify(newState));
   };
 
   if (isLoading) {
-    return <AppShellSkeleton sidebarCollapsed={sidebarCollapsed} />;
+    return <AppShellSkeleton sidebarCollapsed={false} />;
   }
 
   // Mobile layout with sheet
@@ -85,7 +81,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Mobile sidebar sheet */}
         <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
           <SheetContent side="left" className="w-[280px] p-0">
-            <Sidebar collapsed={false} onToggle={() => setMobileSidebarOpen(false)} />
+            <Sidebar onToggle={() => setMobileSidebarOpen(false)} />
           </SheetContent>
         </Sheet>
         
@@ -102,32 +98,55 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Desktop layout
   return (
-    <div
-      className={cn(
-        'app-shell min-h-screen bg-background',
-        'grid transition-all duration-300 ease-in-out',
-        sidebarCollapsed
-          ? 'grid-cols-[60px_1fr]'
-          : 'grid-cols-[280px_1fr]'
+    <div className="app-shell min-h-screen bg-background">
+      {/* Desktop header with hamburger when sidebar is hidden */}
+      {sidebarHidden && (
+        <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-14 items-center px-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="mr-2"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-bold tracking-tight">NotesFlow</span>
+              <span className="text-xs text-muted-foreground">v0.1</span>
+            </div>
+          </div>
+        </header>
       )}
-    >
-      <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
-      <main className="main-content overflow-hidden relative">
-        <div className="h-full w-full">{children}</div>
+      
+      <div
+        className={cn(
+          'grid',
+          sidebarHidden ? 'grid-cols-1 h-[calc(100vh-3.5rem)]' : 'grid-cols-[280px_1fr] h-screen'
+        )}
+      >
+        {/* Sidebar for desktop */}
+        {!sidebarHidden && (
+          <Sidebar onToggle={toggleSidebar} />
+        )}
         
-        {/* Bottom right controls */}
-        <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
-          <ThemeToggle />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setCalendarOpen(!calendarOpen)}
-            className="shadow-lg"
-          >
-            <Calendar className="h-5 w-5" />
-          </Button>
-        </div>
-      </main>
+        <main className="main-content overflow-hidden relative">
+          <div className="h-full w-full">{children}</div>
+          
+          {/* Bottom right controls */}
+          <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
+            <ThemeToggle />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCalendarOpen(!calendarOpen)}
+              className="shadow-lg"
+            >
+              <Calendar className="h-5 w-5" />
+            </Button>
+          </div>
+        </main>
+      </div>
       
       {/* Calendar sidebar */}
       <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
