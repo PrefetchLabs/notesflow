@@ -22,6 +22,13 @@
       "when": 1752059886405,
       "tag": "0002_left_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1752094835599,
+      "tag": "0003_magenta_slayback",
+      "breakpoints": true
     }
   ]
 }

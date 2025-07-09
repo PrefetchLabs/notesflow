@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { BlockNoteEditorComponent } from '@/components/editor/block-note-editor';
+import { BlockNoteAIEditor } from '@/components/editor/BlockNoteAIEditor';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -405,10 +405,11 @@ export default function NotePage() {
               </div>
             ) : (
               content && (
-                <BlockNoteEditorComponent
+                <BlockNoteAIEditor
                   key={noteId} // Force re-mount when note changes
                   initialContent={content}
                   onContentChange={handleContentChange}
+                  showAIUsage={true}
                 />
               )
             )}
