@@ -1,13 +1,15 @@
 'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronRight, FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/components/layouts/user-profile';
 import { FolderTree } from '@/components/layouts/folder-tree';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -15,6 +17,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const router = useRouter();
+
+  const handleCreateNote = () => {
+    const newNoteId = 'new-' + Date.now();
+    router.push(`/notes/${newNoteId}`);
+  };
+
   return (
     <motion.aside
       className="sidebar relative flex h-screen flex-col border-r bg-background"
@@ -62,6 +71,50 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* User Profile Section */}
       <div className="border-b p-4">
         <UserProfile collapsed={collapsed} />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="border-b p-2">
+        <div className="flex gap-2">
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size={collapsed ? "icon" : "sm"}
+                  className="w-full justify-start"
+                  onClick={handleCreateNote}
+                >
+                  <Plus className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                  {!collapsed && "New Note"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                Create new note
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/notes" className={cn("w-full", collapsed && "flex justify-center")}>
+                  <Button
+                    variant="ghost"
+                    size={collapsed ? "icon" : "sm"}
+                    className="w-full justify-start"
+                  >
+                    <FileText className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                    {!collapsed && "All Notes"}
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                View all notes
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       {/* Folder Tree Section */}
