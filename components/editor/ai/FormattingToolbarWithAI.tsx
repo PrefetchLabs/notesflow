@@ -23,16 +23,25 @@ export function FormattingToolbarWithAI() {
 
         const handleAIClick = () => {
           try {
-            const aiExtension = getAIExtension(editor);
-            if (aiExtension && editor.getSelection()) {
-              // Get the currently selected block
-              const textCursorPosition = editor.getTextCursorPosition();
-              if (textCursorPosition?.block) {
-                aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
-              }
+            // Simplest approach: insert /ai to trigger the AI menu
+            if (editor.getSelection()) {
+              // Save current selection
+              const selection = editor.getSelection();
+              
+              // Clear selection to insert /ai command
+              editor.focus();
+              
+              // Insert /ai at the current position to trigger AI menu
+              editor.insertText('/ai ');
+              
+              // The AI menu should appear automatically
+            } else {
+              // No selection, just insert /ai at cursor
+              editor.focus();
+              editor.insertText('/ai ');
             }
           } catch (error) {
-            console.error('AI Extension error:', error);
+            console.error('AI button error:', error);
           }
         };
 
