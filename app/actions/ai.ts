@@ -1,7 +1,7 @@
 'use server';
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { auth } from '@/lib/auth/auth-server';
+import { headers } from 'next/headers';
 import { db } from '@/lib/db';
 import { aiUsage } from '@/lib/db/schema';
 import { and, eq, gte, sum, sql } from 'drizzle-orm';
@@ -9,10 +9,11 @@ import { and, eq, gte, sum, sql } from 'drizzle-orm';
 const FREE_TIER_LIMIT = 10;
 
 export async function checkAIUsageLimit() {
-  const supabase = createServerActionClient({ cookies });
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  if (!session?.user) {
     throw new Error('User not authenticated');
   }
 
@@ -28,7 +29,7 @@ export async function checkAIUsageLimit() {
     .from(aiUsage)
     .where(
       and(
-        eq(aiUsage.userId, user.id),
+        eq(aiUsage.userId, session.user.id),
         gte(aiUsage.createdAt, startOfMonth)
       )
     );
@@ -45,10 +46,11 @@ export async function checkAIUsageLimit() {
 }
 
 export async function trackAIUsage(commandType: string, tokensUsed: number = 0) {
-  const supabase = createServerActionClient({ cookies });
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  if (!session?.user) {
     throw new Error('User not authenticated');
   }
 
@@ -60,7 +62,7 @@ export async function trackAIUsage(commandType: string, tokensUsed: number = 0) 
 
   // Track the usage
   await db.insert(aiUsage).values({
-    userId: user.id,
+    userId: session.user.id,
     tokensUsed,
     commandType,
     resetAt: sql`date_trunc('month', NOW()) + interval '1 month'`,

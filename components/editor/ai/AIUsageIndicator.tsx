@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles } from 'lucide-react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSession } from '@/contexts/session-context';
 import { toast } from 'sonner';
 
 const FREE_TIER_LIMIT = 10; // 10 AI calls per day for free tier
@@ -16,49 +16,24 @@ interface AIUsageData {
 export function AIUsageIndicator() {
   const [usage, setUsage] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const { user } = useSession();
 
   useEffect(() => {
-    fetchUsage();
-    
-    // Subscribe to usage changes
-    const channel = supabase
-      .channel('ai-usage-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'ai_usage',
-        },
-        () => {
-          fetchUsage();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    if (user) {
+      fetchUsage();
+    }
+  }, [user]);
 
   const fetchUsage = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('current_month_ai_usage')
-        .select('total_requests')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-        console.error('Error fetching AI usage:', error);
+      const response = await fetch('/api/ai/usage');
+      if (!response.ok) {
+        console.error('Failed to fetch AI usage');
         return;
       }
 
-      setUsage(data?.total_requests || 0);
+      const data = await response.json();
+      setUsage(data.currentUsage || 0);
     } catch (error) {
       console.error('Error fetching AI usage:', error);
     } finally {
