@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import * as schema from '@/lib/db/schema/auth';
 
 export const auth = betterAuth({
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  secret: process.env.AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema,
@@ -28,13 +30,15 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    generateId: () => {
-      // Use a more secure ID generation method
-      return crypto.randomUUID();
+    database: {
+      generateId: () => {
+        // Use a more secure ID generation method
+        return crypto.randomUUID();
+      },
     },
   },
   trustedOrigins: [
-    process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   ],
   plugins: [
     nextCookies(), // This must be the last plugin

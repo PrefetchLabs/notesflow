@@ -2,7 +2,7 @@ import { pgTable, text, timestamp, boolean, primaryKey } from 'drizzle-orm/pg-co
 import { relations } from 'drizzle-orm';
 
 // Users table
-export const users = pgTable('users', {
+export const user = pgTable('user', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false),
@@ -13,25 +13,27 @@ export const users = pgTable('users', {
 });
 
 // Sessions table
-export const sessions = pgTable('sessions', {
+export const session = pgTable('session', {
   id: text('id').primaryKey(),
   userId: text('user_id')
     .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
+    .references(() => user.id, { onDelete: 'cascade' }),
   expiresAt: timestamp('expires_at').notNull(),
   token: text('token').notNull().unique(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Accounts table (for OAuth providers)
-export const accounts = pgTable(
-  'accounts',
+export const account = pgTable(
+  'account',
   {
     id: text('id').notNull(),
     userId: text('user_id')
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+      .references(() => user.id, { onDelete: 'cascade' }),
     accountId: text('account_id').notNull(),
     providerId: text('provider_id').notNull(),
     accessToken: text('access_token'),
@@ -47,37 +49,35 @@ export const accounts = pgTable(
   })
 );
 
-// Verification tokens table (for magic links, email verification, etc.)
-export const verificationTokens = pgTable(
-  'verification_tokens',
+// Verification table (for magic links, email verification, etc.)
+export const verification = pgTable(
+  'verification',
   {
-    id: text('id').notNull(),
+    id: text('id').primaryKey(),
     identifier: text('identifier').notNull(),
-    token: text('token').notNull(),
+    value: text('value').notNull(),
     expiresAt: timestamp('expires_at').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.identifier, table.token] }),
-  })
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  }
 );
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  sessions: many(sessions),
-  accounts: many(accounts),
+export const userRelations = relations(user, ({ many }) => ({
+  sessions: many(session),
+  accounts: many(account),
 }));
 
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, {
-    fields: [sessions.userId],
-    references: [users.id],
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
   }),
 }));
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, {
-    fields: [accounts.userId],
-    references: [users.id],
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
   }),
 }));
