@@ -1415,7 +1415,7 @@
         "id": 11,
         "title": "Add AI Writing Assistant with OpenAI Integration",
         "description": "Implement the AI writing assistant using BlockNote's built-in AI features via @blocknote/xl-ai package for context-aware AI assistance",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           7
         ],
@@ -1483,7 +1483,7 @@
             "id": 6,
             "title": "Create custom Extract Tasks AI command with time block integration",
             "description": "Extract actionable tasks using BlockNote AI and create corresponding time blocks",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1,
               2
@@ -1495,7 +1495,7 @@
             "id": 7,
             "title": "Configure streaming responses through BlockNote AI",
             "description": "Set up streaming AI responses using BlockNote's built-in streaming capabilities",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1,
               2
@@ -1518,7 +1518,7 @@
             "id": 9,
             "title": "Integrate AI commands with slash menu",
             "description": "Add custom AI commands to BlockNote's slash menu system",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               2,
               3,
@@ -1533,7 +1533,7 @@
             "id": 10,
             "title": "Add error handling and fallback strategies",
             "description": "Implement comprehensive error handling for BlockNote AI features",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               1,
               2,
@@ -2498,7 +2498,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-09T21:08:06.353Z",
+      "updated": "2025-07-09T21:08:59.103Z",
       "description": "Tasks for master context"
     }
   }
