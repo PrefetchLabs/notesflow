@@ -101,18 +101,32 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
   const limits = subscription?.limits || defaultLimits;
   const usage = subscription?.usage || defaultUsage;
-  const isPro = subscription?.plan !== 'free';
-  const isFreeTier = subscription?.plan === 'free' || !subscription;
   
-  // Check if user is in any grace period
+  // Check if user is admin - admins get pro access
+  const isAdmin = user?.role === 'admin';
+  const isPro = isAdmin || subscription?.plan !== 'free';
+  const isFreeTier = !isAdmin && (subscription?.plan === 'free' || !subscription);
+  
+  // Check if user is in any grace period (admins don't have grace periods)
   const now = new Date();
-  const isInNewUserGracePeriod = subscription?.isNewUser && subscription?.newUserGracePeriodEnd && 
+  const isInNewUserGracePeriod = !isAdmin && subscription?.isNewUser && subscription?.newUserGracePeriodEnd && 
     new Date(subscription.newUserGracePeriodEnd) > now;
-  const isInOverageGracePeriod = subscription?.isInGracePeriod && subscription?.gracePeriodEnd && 
+  const isInOverageGracePeriod = !isAdmin && subscription?.isInGracePeriod && subscription?.gracePeriodEnd && 
     new Date(subscription.gracePeriodEnd) > now;
-  const isInGracePeriod = isInNewUserGracePeriod || isInOverageGracePeriod;
+  const isInGracePeriod = !isAdmin && (isInNewUserGracePeriod || isInOverageGracePeriod);
 
   const checkLimit = useCallback((feature: keyof SubscriptionLimits) => {
+    // Admins have unlimited access
+    if (isAdmin) {
+      return {
+        allowed: true,
+        current: 0,
+        limit: Infinity,
+        remaining: Infinity,
+        isInGracePeriod: false,
+      };
+    }
+
     const featureMap: Record<keyof SubscriptionLimits, keyof SubscriptionUsage> = {
       maxNotes: 'notesCount',
       maxFolders: 'foldersCount',
@@ -161,13 +175,16 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       remaining: Math.max(0, limit - currentUsage),
       isInGracePeriod: false,
     };
-  }, [limits, usage, isPro, isInNewUserGracePeriod, isInOverageGracePeriod]);
+  }, [limits, usage, isPro, isInNewUserGracePeriod, isInOverageGracePeriod, isAdmin]);
 
   const showUpgradePrompt = useCallback((feature: string, description?: string) => {
     showFeatureLockedToast(feature, description);
   }, []);
 
   const hasFeatureAccess = useCallback((feature: 'ai' | 'collaboration' | 'sharing' | 'unlimited' | 'themes' | 'export') => {
+    // Admins have access to all features
+    if (isAdmin) return true;
+    
     // During grace period, all features are available
     if (isInNewUserGracePeriod) return true;
     
@@ -188,7 +205,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       default:
         return false;
     }
-  }, [isPro, isInNewUserGracePeriod, checkLimit]);
+  }, [isPro, isInNewUserGracePeriod, checkLimit, isAdmin]);
 
   const checkAndShowLimit = useCallback((feature: keyof SubscriptionLimits, featureName: string, unit?: string) => {
     const result = checkLimit(feature);

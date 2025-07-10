@@ -3,16 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSubscription } from '@/lib/contexts/subscription-context';
+import { useAuth } from '@/lib/auth/auth-hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, CreditCard, Calendar, AlertCircle, ExternalLink } from 'lucide-react';
+import { Sparkles, CreditCard, Calendar, AlertCircle, ExternalLink, Shield } from 'lucide-react';
 import { format } from 'date-fns';
 import { ProBadge } from '@/components/upgrade/pro-badge';
 import { UsageIndicator } from '@/components/upgrade/usage-indicator';
+import { Badge } from '@/components/ui/badge';
 
 export default function SubscriptionPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   const {
     subscription,
     isPro,
@@ -22,6 +25,8 @@ export default function SubscriptionPage() {
     isInGracePeriod,
     gracePeriodDaysRemaining,
   } = useSubscription();
+  
+  const isAdmin = user?.role === 'admin';
 
   const handleManageSubscription = async () => {
     setIsLoading(true);
@@ -60,18 +65,23 @@ export default function SubscriptionPage() {
           <CardTitle className="flex items-center gap-2">
             Current Plan
             {isPro && <ProBadge />}
+            {isAdmin && <Badge variant="secondary" className="ml-2"><Shield className="h-3 w-3 mr-1" />Admin</Badge>}
           </CardTitle>
           <CardDescription>
-            {isPro ? 'You have full access to all features' : 'You are on the free plan with limited features'}
+            {isAdmin 
+              ? 'As an administrator, you have unlimited access to all features'
+              : isPro 
+              ? 'You have full access to all features' 
+              : 'You are on the free plan with limited features'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-2xl font-bold">
-                {isPro ? 'Pro' : 'Free'}
+                {isAdmin ? 'Administrator' : isPro ? 'Pro' : 'Free'}
               </p>
-              {subscription?.metadata?.interval && (
+              {!isAdmin && subscription?.metadata?.interval && (
                 <p className="text-sm text-muted-foreground">
                   Billed {subscription.metadata.interval}ly
                 </p>
@@ -79,11 +89,13 @@ export default function SubscriptionPage() {
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold">
-                ${isPro ? (subscription?.metadata?.interval === 'year' ? '80' : '8') : '0'}
+                {isAdmin ? 'Unlimited' : isPro ? (subscription?.metadata?.interval === 'year' ? '$80' : '$8') : '$0'}
               </p>
-              <p className="text-sm text-muted-foreground">
-                per {subscription?.metadata?.interval || 'month'}
-              </p>
+              {!isAdmin && (
+                <p className="text-sm text-muted-foreground">
+                  per {subscription?.metadata?.interval || 'month'}
+                </p>
+              )}
             </div>
           </div>
 
@@ -101,7 +113,7 @@ export default function SubscriptionPage() {
             </div>
           )}
 
-          {isInGracePeriod && (
+          {!isAdmin && isInGracePeriod && (
             <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5" />
@@ -119,7 +131,11 @@ export default function SubscriptionPage() {
           )}
         </CardContent>
         <CardFooter>
-          {isPro ? (
+          {isAdmin ? (
+            <div className="text-sm text-muted-foreground">
+              Admin accounts have unrestricted access to all features.
+            </div>
+          ) : isPro ? (
             <Button
               onClick={handleManageSubscription}
               disabled={isLoading}
@@ -153,25 +169,25 @@ export default function SubscriptionPage() {
             <UsageIndicator
               label="Notes"
               used={usage.notesCount}
-              limit={isPro ? Infinity : limits.maxNotes}
+              limit={isAdmin || isPro ? Infinity : limits.maxNotes}
               unit="notes"
             />
             <UsageIndicator
               label="Folders"
               used={usage.foldersCount}
-              limit={isPro ? Infinity : limits.maxFolders}
+              limit={isAdmin || isPro ? Infinity : limits.maxFolders}
               unit="folders"
             />
             <UsageIndicator
               label="AI Requests"
               used={usage.aiCallsCount}
-              limit={isPro ? Infinity : limits.maxAiCalls}
+              limit={isAdmin || isPro ? Infinity : limits.maxAiCalls}
               unit="requests"
             />
             <UsageIndicator
               label="Collaborators"
               used={usage.collaboratorsCount}
-              limit={isPro ? Infinity : limits.maxCollaborators}
+              limit={isAdmin || isPro ? Infinity : limits.maxCollaborators}
               unit="people"
             />
           </div>
@@ -179,7 +195,7 @@ export default function SubscriptionPage() {
       </Card>
 
       {/* Billing History Link */}
-      {isPro && (
+      {!isAdmin && isPro && (
         <div className="mt-6 text-center">
           <Button
             variant="link"
