@@ -1,7 +1,5 @@
 import { requireAdmin } from '@/lib/auth/admin-auth';
 import { DashboardStats } from '@/components/admin/dashboard-stats';
-import { RecentActivity } from '@/components/admin/recent-activity';
-import { QuickActions } from '@/components/admin/quick-actions';
 
 export default async function AdminDashboard() {
   const { user, isSystemAdmin } = await requireAdmin();
@@ -26,19 +24,6 @@ export default async function AdminDashboard() {
 
       {/* Stats Grid */}
       <DashboardStats />
-
-      {/* Main Content Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* Recent Activity - Takes up more space */}
-        <div className="col-span-full lg:col-span-4">
-          <RecentActivity />
-        </div>
-
-        {/* Quick Actions - Smaller section */}
-        <div className="col-span-full lg:col-span-3">
-          <QuickActions />
-        </div>
-      </div>
     </div>
   );
 }

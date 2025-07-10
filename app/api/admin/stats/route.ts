@@ -56,10 +56,6 @@ export async function GET(request: NextRequest) {
       );
     const newUsersToday = Number(newUsersTodayResult[0]?.count || 0);
 
-    // Calculate growth percentages (mock for now, could be calculated from historical data)
-    const userGrowth = totalUsers > 0 ? 12 : 0;
-    const notesGrowth = totalNotes > 0 ? 8 : 0;
-
     return NextResponse.json({
       stats: {
         totalUsers,
@@ -67,14 +63,6 @@ export async function GET(request: NextRequest) {
         totalNotes,
         totalFolders,
         newUsersToday,
-        storageUsed: '2.4 GB', // Mock for now
-        apiCalls: '45.2K', // Mock for now
-        trends: {
-          users: { value: userGrowth, isPositive: true },
-          notes: { value: notesGrowth, isPositive: true },
-          storage: { value: 3, isPositive: false },
-          api: { value: 18, isPositive: true },
-        },
       },
     });
   } catch (error) {

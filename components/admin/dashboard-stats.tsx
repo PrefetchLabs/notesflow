@@ -33,22 +33,6 @@ function StatCard({ title, value, description, icon, trend }: StatCardProps) {
           {description && (
             <p className="text-xs text-muted-foreground mt-1">{description}</p>
           )}
-          {trend && (
-            <div className="flex items-center mt-2">
-              <TrendingUp
-                className={`h-3 w-3 mr-1 ${
-                  trend.isPositive ? 'text-green-500' : 'text-red-500'
-                }`}
-              />
-              <span
-                className={`text-xs ${
-                  trend.isPositive ? 'text-green-500' : 'text-red-500'
-                }`}
-              >
-                {trend.isPositive ? '+' : ''}{trend.value}%
-              </span>
-            </div>
-          )}
         </CardContent>
       </Card>
     </motion.div>
@@ -67,7 +51,6 @@ export function DashboardStats() {
         
         const data = await response.json();
         const apiStats = data.stats;
-        const trends = data.stats.trends;
 
         setStats([
           {
@@ -75,28 +58,24 @@ export function DashboardStats() {
             value: apiStats.totalUsers.toLocaleString(),
             description: `${apiStats.activeUsers} active in last 30 days`,
             icon: <Users className="h-4 w-4" />,
-            trend: trends.users,
           },
           {
             title: 'Total Notes',
             value: apiStats.totalNotes.toLocaleString(),
             description: 'Notes created across all users',
             icon: <FileText className="h-4 w-4" />,
-            trend: trends.notes,
           },
           {
-            title: 'Storage Used',
-            value: apiStats.storageUsed,
-            description: 'Of 10 GB allocated',
+            title: 'Total Folders',
+            value: apiStats.totalFolders.toLocaleString(),
+            description: 'Folders created across all users',
             icon: <Activity className="h-4 w-4" />,
-            trend: trends.storage,
           },
           {
-            title: 'API Calls',
-            value: apiStats.apiCalls,
-            description: 'In the last 24 hours',
+            title: 'New Users Today',
+            value: apiStats.newUsersToday.toLocaleString(),
+            description: 'Users registered today',
             icon: <TrendingUp className="h-4 w-4" />,
-            trend: trends.api,
           },
         ]);
       } catch (error) {
