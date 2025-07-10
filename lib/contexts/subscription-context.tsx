@@ -109,7 +109,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   }, [fetchSubscription]);
 
   // Check if user is admin - admins get pro access
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'system_admin';
   const isBeta = subscription?.plan === 'beta';
   const isPro = isAdmin || (subscription && (subscription.plan === 'pro_monthly' || subscription.plan === 'pro_yearly' || subscription.plan === 'early_bird'));
   const isFreeTier = !isAdmin && !isPro && !isBeta;

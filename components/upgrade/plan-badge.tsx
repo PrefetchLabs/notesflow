@@ -15,7 +15,7 @@ export function PlanBadge({ className, size = 'sm', showIcon = true }: PlanBadge
   const { isPro, isBeta, isFreeTier, subscription } = useSubscription();
   
   // Check admin status first, before subscription status
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'system_admin';
 
   const sizeClasses = {
     sm: 'text-xs px-1.5 py-0',

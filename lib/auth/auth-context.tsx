@@ -12,7 +12,9 @@ import { authClient, useSession as useAuthSession } from './auth-client';
 import type { auth } from './config';
 
 type Session = typeof auth.$Infer.Session;
-type User = Session['user'];
+type User = Session['user'] & {
+  role?: 'user' | 'admin' | 'system_admin';
+};
 
 interface AuthContextType {
   user: User | null;

@@ -18,6 +18,7 @@ export async function GET() {
         email: session.user.email,
         name: session.user.name,
         image: session.user.image,
+        role: session.user.role,
       },
     });
   } catch (error) {
