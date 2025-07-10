@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { CollaborativeEditor } from '@/components/editor/collaborative-editor';
+import { CollaborativeEditorFinal as CollaborativeEditor } from '@/components/editor/collaborative-editor-final';
 import { toast } from 'sonner';
 import { User } from 'lucide-react';
 import { Input } from '@/components/ui/input';

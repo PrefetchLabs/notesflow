@@ -88,9 +88,52 @@ export async function PUT(
     const body = await request.json();
     const { title, content, folderId } = body;
     
+    // First check if the note exists and if user has permission
+    const [note] = await db
+      .select()
+      .from(notes)
+      .where(
+        and(
+          eq(notes.id, id),
+          isNull(notes.deletedAt)
+        )
+      );
+
+    if (!note) {
+      return NextResponse.json({ error: 'Note not found' }, { status: 404 });
+    }
+
+    // Check if user is owner
+    const isOwner = note.userId === session.user.id;
+    let hasEditPermission = isOwner;
+
+    // If not owner, check if user is a collaborator with edit permission
+    if (!isOwner) {
+      const [collaboration] = await db
+        .select()
+        .from(collaborators)
+        .where(
+          and(
+            eq(collaborators.noteId, id),
+            eq(collaborators.userId, session.user.id),
+            or(
+              eq(collaborators.permissionLevel, 'edit'),
+              eq(collaborators.permissionLevel, 'admin')
+            )
+          )
+        );
+      
+      hasEditPermission = !!collaboration;
+    }
+
+    if (!hasEditPermission) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     // Build update object
     const updateData: any = {
       updatedAt: new Date(),
+      lastEditedBy: session.user.id,
     };
     
     if (title !== undefined) updateData.title = title;
@@ -103,14 +146,13 @@ export async function PUT(
       .where(
         and(
           eq(notes.id, id),
-          eq(notes.userId, session.user.id),
           isNull(notes.deletedAt)
         )
       )
       .returning();
 
     if (!updated) {
-      return NextResponse.json({ error: 'Note not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Failed to update note' }, { status: 500 });
     }
 
     return NextResponse.json({ note: updated });

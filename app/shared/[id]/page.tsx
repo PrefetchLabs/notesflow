@@ -44,6 +44,22 @@ export default async function SharedNotePage({ params }: SharedNotePageProps) {
     notFound();
   }
 
+  // Ensure content is properly formatted
+  let parsedContent = note.content;
+  if (typeof parsedContent === 'string') {
+    try {
+      parsedContent = JSON.parse(parsedContent);
+    } catch (e) {
+      // If parsing fails, create default content
+      parsedContent = [{ type: "paragraph", content: "" }];
+    }
+  }
+  
+  // Ensure it's an array
+  if (!Array.isArray(parsedContent)) {
+    parsedContent = [{ type: "paragraph", content: "" }];
+  }
+
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
@@ -61,7 +77,7 @@ export default async function SharedNotePage({ params }: SharedNotePageProps) {
         <div className="h-full max-w-7xl mx-auto px-6 py-4">
           <SharedNoteEditor
             noteId={id}
-            initialContent={note.content as any}
+            initialContent={parsedContent}
             noteTitle={note.title}
           />
         </div>

@@ -35,11 +35,18 @@ interface CollaborativeEditorFinalProps {
 
 export function CollaborativeEditorFinal({
   noteId,
-  initialContent = [{ type: "paragraph", content: "" }],
+  initialContent,
   onContentChange,
   editable = true,
   className,
 }: CollaborativeEditorFinalProps) {
+  // Ensure we have valid initial content
+  const safeInitialContent = useMemo(() => {
+    if (!initialContent || !Array.isArray(initialContent) || initialContent.length === 0) {
+      return [{ type: "paragraph", content: "" }];
+    }
+    return initialContent;
+  }, [initialContent]);
   const { resolvedTheme } = useTheme();
   const { user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
@@ -104,6 +111,7 @@ export function CollaborativeEditorFinal({
     return indexeddbProvider;
   }, [noteId, ydoc]);
   
+  
   // Track active users
   useEffect(() => {
     if (!provider) return;
@@ -135,7 +143,9 @@ export function CollaborativeEditorFinal({
   
   // Create editor
   const editor = useCreateBlockNote({
-    initialContent,
+    // Only provide initialContent when NOT using collaboration
+    // When using collaboration, content comes from Y.Doc
+    initialContent: provider ? undefined : safeInitialContent,
     dictionary: {
       ...en,
       ai: aiEn
@@ -164,6 +174,53 @@ export function CollaborativeEditorFinal({
     } : undefined,
   }, [provider, ydoc, user, userColor]);
   
+  // Initialize Y.Doc content when provider and editor are ready
+  useEffect(() => {
+    if (!provider || !ydoc || !editor) return;
+    
+    let initialized = false;
+    
+    const initializeContent = () => {
+      if (initialized) return;
+      
+      const fragment = ydoc.getXmlFragment("document-store");
+      
+      // If document is empty and we have initial content
+      if (fragment.length === 0 && safeInitialContent && safeInitialContent.length > 0) {
+        console.log('[CollaborativeEditor] Initializing Y.Doc with content');
+        initialized = true;
+        
+        // Use a transaction to avoid conflicts
+        ydoc.transact(() => {
+          try {
+            // Initialize the editor content
+            editor.replaceBlocks(editor.document, safeInitialContent);
+          } catch (error) {
+            console.error('[CollaborativeEditor] Error setting initial content:', error);
+          }
+        });
+      }
+    };
+    
+    // Try to initialize when provider is synced
+    const handleSync = (synced: boolean) => {
+      if (synced) {
+        setTimeout(initializeContent, 100); // Small delay to ensure everything is ready
+      }
+    };
+    
+    provider.on('sync', handleSync);
+    
+    // Also try if already synced
+    if (provider.synced) {
+      setTimeout(initializeContent, 100);
+    }
+    
+    return () => {
+      provider.off('sync', handleSync);
+    };
+  }, [provider, ydoc, editor, safeInitialContent]);
+  
   // Handle content changes
   useEffect(() => {
     if (!editor) return;
@@ -171,8 +228,12 @@ export function CollaborativeEditorFinal({
     console.log('[CollaborativeEditor] Editor initialized');
     
     const unsubscribe = editor.onChange(() => {
-      if (onContentChange) {
-        onContentChange(editor.document);
+      try {
+        if (onContentChange && editor.document) {
+          onContentChange(editor.document);
+        }
+      } catch (error) {
+        console.error('[CollaborativeEditor] Error in onChange:', error);
       }
     });
     
@@ -253,9 +314,11 @@ export function CollaborativeEditorFinal({
         editable={editable}
         theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
         className="h-full"
+        formattingToolbar={false}
+        slashMenu={false}
       >
         <AIMenuController />
-        <FormattingToolbarWithAI editor={editor} />
+        <FormattingToolbarWithAI />
         <SuggestionMenuWithAI editor={editor} />
       </BlockNoteView>
     </div>

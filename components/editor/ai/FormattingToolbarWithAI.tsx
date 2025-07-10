@@ -12,22 +12,18 @@ import {
   UnnestBlockButton,
   CreateLinkButton
 } from '@blocknote/react';
-import { BlockNoteEditor } from '@blocknote/core';
 import { getAIExtension } from '@blocknote/xl-ai';
 import { Sparkles } from 'lucide-react';
 import { AIDropdownMenu } from './AIDropdownMenu';
 import { toast } from 'sonner';
 
-interface FormattingToolbarWithAIProps {
-  editor: BlockNoteEditor;
-}
-
-export function FormattingToolbarWithAI({ editor: fullEditor }: FormattingToolbarWithAIProps) {
+export function FormattingToolbarWithAI() {
   return (
     <FormattingToolbarController
       formattingToolbar={(props) => {
         const [showAIMenu, setShowAIMenu] = useState(false);
         const aiButtonRef = useRef<HTMLButtonElement>(null);
+        const { editor: fullEditor } = props;
 
         const handleAIClick = () => {
           setShowAIMenu(!showAIMenu);
