@@ -9,11 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { createAuthClient } from 'better-auth/react';
 
 const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  baseURL: process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
 });
 
 export default function LoginPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 

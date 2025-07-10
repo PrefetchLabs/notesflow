@@ -61,7 +61,7 @@ export default function DashboardPage() {
     return (
       <div className="flex h-full items-center justify-center bg-background">
         <Welcome 
-          userName={user?.name?.split(' ')[0]} 
+          userName={user?.name?.split(' ')[0] || undefined} 
           onGetStarted={handleGetStarted}
         />
       </div>

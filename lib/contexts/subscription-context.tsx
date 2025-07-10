@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useSession } from '@/lib/hooks/useSession';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { useAuth } from '@/lib/auth/auth-hooks';
 import type { Subscription } from '@/lib/db/schema/subscriptions';
 import { showUsageLimitToast, showFeatureLockedToast } from '@/components/upgrade/usage-limit-toast';
 
@@ -68,7 +68,7 @@ const defaultUsage: SubscriptionUsage = {
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useSession();
+  const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
