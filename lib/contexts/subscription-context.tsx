@@ -104,7 +104,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   
   // Check if user is admin - admins get pro access
   const isAdmin = user?.role === 'admin';
-  const isPro = isAdmin || subscription?.plan !== 'free';
+  const isPro = isAdmin || (subscription && subscription.plan !== 'free');
   const isFreeTier = !isAdmin && (subscription?.plan === 'free' || !subscription);
   
   // Check if user is in any grace period (admins don't have grace periods)
