@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { headers } from 'next/headers';
+import { db } from '@/lib/db';
+import { subscriptions, aiUsage } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   try {
@@ -16,8 +19,40 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check subscription for AI access
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, session.user.id));
+
+    if (!subscription || subscription.plan === 'free') {
+      return NextResponse.json(
+        { 
+          error: 'AI features are only available for Pro users',
+          requiresUpgrade: true,
+          feature: 'ai_assistant'
+        },
+        { status: 403 }
+      );
+    }
+
     // Get the request body
     const body = await req.json();
+
+    // Track AI usage
+    await db.insert(aiUsage).values({
+      id: crypto.randomUUID(),
+      userId: session.user.id,
+      model: body.model || 'gpt-4o-mini',
+      endpoint: 'chat.completions',
+      inputTokens: JSON.stringify(body).length / 4, // Rough estimate
+      outputTokens: 0, // Will be updated after response
+      cost: 0, // Calculate based on model pricing
+      metadata: {
+        noteId: body.metadata?.noteId,
+        feature: body.metadata?.feature || 'editor',
+      },
+    });
 
     // Forward the request to OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

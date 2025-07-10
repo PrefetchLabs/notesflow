@@ -24,6 +24,7 @@ import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { useAuth } from "@/lib/auth/auth-hooks";
+import { useAIAccess } from "@/hooks/useAIAccess";
 
 interface CollaborativeEditorFinalProps {
   noteId: string;
@@ -51,6 +52,7 @@ export function CollaborativeEditorFinal({
   }, [initialContent]);
   const { resolvedTheme } = useTheme();
   const { user } = useAuth();
+  const { hasAIAccess } = useAIAccess();
   const [isConnected, setIsConnected] = useState(false);
   const [activeUsers, setActiveUsers] = useState<Array<{ id: number; user: any }>>([]);
   const [shouldUseCollaboration, setShouldUseCollaboration] = useState(forceCollaboration);
@@ -212,7 +214,7 @@ export function CollaborativeEditorFinal({
       ...en,
       ai: aiEn
     },
-    extensions: [
+    extensions: hasAIAccess ? [
       createAIExtension({
         model,
         stream: true,
@@ -222,7 +224,7 @@ export function CollaborativeEditorFinal({
           color: "#8bc6ff"
         }
       })
-    ],
+    ] : [],
     blockSpecs: {
       ...defaultBlockSpecs,
     },
@@ -389,8 +391,8 @@ export function CollaborativeEditorFinal({
         formattingToolbar={false}
         slashMenu={false}
       >
-        <AIMenuController />
-        <FormattingToolbarWithAI />
+        {hasAIAccess && <AIMenuController />}
+        <FormattingToolbarWithAI showAI={hasAIAccess} />
         <SuggestionMenuWithAI editor={editor} />
       </BlockNoteView>
     </div>
