@@ -30,6 +30,9 @@ import {
   Pencil,
   Trash2,
   FileText,
+  Users,
+  Eye,
+  Edit3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -51,6 +54,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { FolderWithNotes, Note } from '@/hooks/useFoldersWithNotes';
 import { useRouter } from 'next/navigation';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
@@ -115,7 +119,33 @@ function SortableNoteItem({ note, collapsed, isSelected, onClick }: SortableNote
     >
       <FileText className="h-4 w-4 text-muted-foreground" />
       {!collapsed && (
-        <span className="truncate">{note.title}</span>
+        <>
+          <span className="truncate flex-1">{note.title}</span>
+          {note.isShared && (
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1">
+                    {note.permissionLevel === 'view' ? (
+                      <Eye className="h-3 w-3 text-muted-foreground" />
+                    ) : note.permissionLevel === 'edit' ? (
+                      <Edit3 className="h-3 w-3 text-muted-foreground" />
+                    ) : (
+                      <Users className="h-3 w-3 text-muted-foreground" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>Shared by {note.owner?.name || note.owner?.email || 'Unknown'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {note.permissionLevel === 'view' ? 'View only' : 
+                     note.permissionLevel === 'edit' ? 'Can edit' : 'Owner'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </>
       )}
     </div>
   );

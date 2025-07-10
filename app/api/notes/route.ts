@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
-import { notes, folders } from '@/lib/db/schema';
-import { eq, desc, and, isNull } from 'drizzle-orm';
-import { getTableColumns } from 'drizzle-orm';
+import { notes, collaborators, user } from '@/lib/db/schema';
+import { eq, and, isNull, or, ne } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,25 +14,106 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const notesList = await db
-      .select({
-        ...getTableColumns(notes),
-        folder: {
-          id: folders.id,
-          name: folders.name,
-        },
-      })
+    // Get notes owned by the user
+    const ownedNotes = await db
+      .select()
       .from(notes)
-      .leftJoin(folders, eq(notes.folderId, folders.id))
       .where(
         and(
           eq(notes.userId, session.user.id),
           isNull(notes.deletedAt)
         )
-      )
-      .orderBy(desc(notes.updatedAt));
+      );
 
-    return NextResponse.json({ notes: notesList });
+    // Get notes shared with the user
+    const sharedCollaborations = await db
+      .select({
+        noteId: collaborators.noteId,
+        permissionLevel: collaborators.permissionLevel,
+      })
+      .from(collaborators)
+      .where(
+        and(
+          eq(collaborators.userId, session.user.id),
+          ne(collaborators.noteId, 'public-access') // This ensures we don't get public-only shares
+        )
+      );
+
+    // Get details of shared notes if any
+    let sharedNotesData: any[] = [];
+    if (sharedCollaborations.length > 0) {
+      const sharedNoteIds = sharedCollaborations.map(c => c.noteId);
+      
+      // Fetch the shared notes with owner info
+      const sharedNotesQuery = await db
+        .select({
+          note: notes,
+          ownerName: user.name,
+          ownerEmail: user.email,
+        })
+        .from(notes)
+        .leftJoin(user, eq(notes.userId, user.id))
+        .where(
+          and(
+            or(...sharedNoteIds.map(id => eq(notes.id, id))),
+            isNull(notes.deletedAt)
+          )
+        );
+
+      // Map the shared notes with permission info
+      sharedNotesData = sharedNotesQuery.map(({ note, ownerName, ownerEmail }) => {
+        const collaboration = sharedCollaborations.find(c => c.noteId === note.id);
+        return {
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          folderId: note.folderId,
+          tags: note.tags,
+          isPinned: note.isPinned,
+          isArchived: note.isArchived,
+          isTrashed: note.isTrashed,
+          createdAt: note.createdAt,
+          updatedAt: note.updatedAt,
+          folder: null,
+          isShared: true,
+          permissionLevel: collaboration?.permissionLevel || 'view',
+          owner: {
+            id: note.userId,
+            name: ownerName,
+            email: ownerEmail,
+          },
+        };
+      });
+    }
+
+    // Format owned notes
+    const formattedOwnedNotes = ownedNotes.map(note => ({
+      id: note.id,
+      title: note.title,
+      content: note.content,
+      folderId: note.folderId,
+      tags: note.tags,
+      isPinned: note.isPinned,
+      isArchived: note.isArchived,
+      isTrashed: note.isTrashed,
+      createdAt: note.createdAt,
+      updatedAt: note.updatedAt,
+      folder: null,
+      isShared: false,
+      permissionLevel: 'admin' as const,
+      owner: {
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+      },
+    }));
+
+    // Combine and sort all notes
+    const allNotes = [...formattedOwnedNotes, ...sharedNotesData].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+
+    return NextResponse.json({ notes: allNotes });
   } catch (error) {
     console.error('Error fetching notes:', error);
     return NextResponse.json(

@@ -11,7 +11,7 @@ import { user } from './auth';
 import { notes } from './notes';
 
 // Permission levels for collaborators
-export const permissionEnum = pgEnum('permission_level', ['view', 'edit']);
+export const permissionEnum = pgEnum('permission_level', ['view', 'edit', 'admin']);
 
 // Collaborators junction table for note sharing
 export const collaborators = pgTable(

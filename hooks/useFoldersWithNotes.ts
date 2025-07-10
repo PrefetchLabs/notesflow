@@ -8,6 +8,13 @@ export interface Note {
   folderId: string | null;
   createdAt: string;
   updatedAt: string;
+  isShared?: boolean;
+  permissionLevel?: 'view' | 'edit' | 'admin';
+  owner?: {
+    id: string;
+    name: string | null;
+    email: string | null;
+  };
 }
 
 export interface FolderWithNotes {
@@ -28,6 +35,7 @@ export interface FolderWithNotes {
 export function useFoldersWithNotes() {
   const [folders, setFolders] = useState<FolderWithNotes[]>([]);
   const [rootNotes, setRootNotes] = useState<Note[]>([]);
+  const [sharedNotes, setSharedNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load folders and notes
@@ -45,9 +53,21 @@ export function useFoldersWithNotes() {
       const { folders: folderData } = await foldersResponse.json();
       const { notes: notesData } = await notesResponse.json();
 
-      // Group notes by folder
-      const notesByFolder = new Map<string | null, Note[]>();
+      // Separate shared and owned notes
+      const sharedNotesArray: Note[] = [];
+      const ownedNotes: Note[] = [];
+      
       notesData.forEach((note: Note) => {
+        if (note.isShared) {
+          sharedNotesArray.push(note);
+        } else {
+          ownedNotes.push(note);
+        }
+      });
+      
+      // Group owned notes by folder
+      const notesByFolder = new Map<string | null, Note[]>();
+      ownedNotes.forEach((note: Note) => {
         const folderId = note.folderId || null;
         if (!notesByFolder.has(folderId)) {
           notesByFolder.set(folderId, []);
@@ -67,6 +87,7 @@ export function useFoldersWithNotes() {
 
       setFolders(foldersWithNotes);
       setRootNotes(rootNotes);
+      setSharedNotes(sharedNotesArray);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load folders and notes');
@@ -196,9 +217,22 @@ export function useFoldersWithNotes() {
     loadData();
   }, [loadData]);
 
+  // Listen for refresh events
+  useEffect(() => {
+    const handleRefresh = () => {
+      loadData();
+    };
+
+    window.addEventListener('refresh-notes', handleRefresh);
+    return () => {
+      window.removeEventListener('refresh-notes', handleRefresh);
+    };
+  }, [loadData]);
+
   return {
     folders,
     rootNotes,
+    sharedNotes,
     isLoading,
     createFolder,
     updateFolder,

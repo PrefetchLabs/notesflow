@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { BlockNoteAIEditor } from '@/components/editor/BlockNoteAIEditor';
+import { CollaborativeEditor } from '@/components/editor/collaborative-editor';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight } from 'lucide-react';
+import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
   DropdownMenu,
@@ -39,6 +41,11 @@ export default function NotePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isCollaborationEnabled, setIsCollaborationEnabled] = useState(false);
+  const [hasEditPermission, setHasEditPermission] = useState(true); // Default to true for owned notes
+  const [isOwnNote, setIsOwnNote] = useState(true);
+  const [permissionsChecked, setPermissionsChecked] = useState(false);
   
   // Debounce both title and content changes for autosave
   const debouncedTitle = useDebounce(title, 2000);
@@ -53,6 +60,9 @@ export default function NotePage() {
 
   // Load note data
   useEffect(() => {
+    // Reset permissions check when note changes
+    setPermissionsChecked(false);
+    
     const loadNote = async () => {
       setIsLoading(true);
       try {
@@ -117,6 +127,58 @@ export default function NotePage() {
     };
     
     loadNote();
+    
+    // Check permissions and sharing status
+    const checkPermissions = async () => {
+      if (!noteId || noteId.startsWith('new-') || permissionsChecked) return;
+      
+      setPermissionsChecked(true);
+      
+      try {
+        // First check if we own the note
+        const meResponse = await fetch('/api/me');
+        if (!meResponse.ok) return;
+        const { user: currentUser } = await meResponse.json();
+        
+        // We need to fetch the note info to check ownership
+        const noteResponse = await fetch(`/api/notes/${noteId}`);
+        if (!noteResponse.ok) return;
+        const { note: noteData } = await noteResponse.json();
+        
+        const isOwner = noteData?.userId === currentUser?.id;
+        setIsOwnNote(isOwner);
+        
+        if (!isOwner) {
+          // Check if we're a collaborator
+          const collabResponse = await fetch(`/api/notes/${noteId}/collaborators`);
+          if (collabResponse.ok) {
+            const data = await collabResponse.json();
+            const myCollaboration = data.collaborators?.find((c: any) => c.userId === currentUser?.id);
+            if (myCollaboration) {
+              setHasEditPermission(myCollaboration.permissionLevel === 'edit' || myCollaboration.permissionLevel === 'admin');
+              setIsCollaborationEnabled(true);
+            } else {
+              // Not a collaborator, shouldn't have access
+              toast.error('You do not have access to this note');
+              router.push('/dashboard');
+            }
+          }
+        } else {
+          // Owner always has edit permission
+          setHasEditPermission(true);
+          // Check if collaboration is enabled (other users invited)
+          const collabResponse = await fetch(`/api/notes/${noteId}/collaborators`);
+          if (collabResponse.ok) {
+            const data = await collabResponse.json();
+            setIsCollaborationEnabled(data.collaborators?.length > 0 || data.publicAccess);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check permissions:', error);
+      }
+    };
+    
+    checkPermissions();
   }, [noteId, router]);
 
   // Add to recent notes when note is loaded
@@ -202,8 +264,7 @@ export default function NotePage() {
   }, [noteId, router]);
 
   const handleShare = () => {
-    // TODO: Implement sharing functionality
-    toast.info('Sharing coming soon!');
+    setIsShareDialogOpen(true);
   };
 
   const handleMoveToFolder = async (folderId: string | null) => {
@@ -362,10 +423,12 @@ export default function NotePage() {
                   ))}
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
-              <DropdownMenuItem onClick={handleShare}>
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
-              </DropdownMenuItem>
+              {isOwnNote && (
+                <DropdownMenuItem onClick={handleShare}>
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleDelete}
@@ -405,17 +468,55 @@ export default function NotePage() {
               </div>
             ) : (
               content && (
-                <BlockNoteAIEditor
-                  key={noteId} // Force re-mount when note changes
-                  initialContent={content}
-                  onContentChange={handleContentChange}
-                  showAIUsage={true}
-                />
+                hasEditPermission ? (
+                  isCollaborationEnabled ? (
+                    <CollaborativeEditor
+                      key={`collab-${noteId}`} // Force re-mount when note changes
+                      noteId={noteId}
+                      initialContent={content}
+                      onContentChange={handleContentChange}
+                    />
+                  ) : (
+                    <BlockNoteAIEditor
+                      key={noteId} // Force re-mount when note changes
+                      initialContent={content}
+                      onContentChange={handleContentChange}
+                      showAIUsage={true}
+                    />
+                  )
+                ) : (
+                  // View-only mode for collaborators without edit permission
+                  <div className="rounded-lg border bg-muted/10 p-8">
+                    <BlockNoteAIEditor
+                      key={`readonly-${noteId}`}
+                      initialContent={content}
+                      onContentChange={() => {}} // No-op for read-only
+                      showAIUsage={false}
+                      editable={false}
+                    />
+                    <p className="mt-4 text-center text-sm text-muted-foreground">
+                      You have view-only access to this note.
+                    </p>
+                  </div>
+                )
               )
             )}
           </div>
         </div>
       </main>
+
+      {/* Share Dialog */}
+      <ShareDialogV2 
+        noteId={noteId} 
+        noteTitle={title}
+        open={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+        onSharingEnabled={() => {
+          setIsCollaborationEnabled(true);
+          // Force page reload to switch to collaborative editor
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

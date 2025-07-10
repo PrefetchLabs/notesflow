@@ -1,0 +1,168 @@
+/* Enhanced cursor animations for BlockNote collaboration */
+
+/* Cursor appearance animation */
+@keyframes cursor-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Cursor disappearance animation */
+@keyframes cursor-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Cursor movement trail effect */
+@keyframes cursor-trail {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* Apply animations to BlockNote cursors */
+.bn-collab-cursor {
+  animation: cursor-fade-in 0.3s ease-out;
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  position: relative;
+}
+
+/* Cursor label animations */
+.bn-collab-cursor-label {
+  animation: cursor-fade-in 0.4s ease-out;
+  transition: all 0.2s ease-out;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode cursor label */
+.dark .bn-collab-cursor-label {
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: white;
+}
+
+/* Cursor selection animation */
+.bn-collab-selection {
+  animation: cursor-fade-in 0.2s ease-out;
+  opacity: 0.3;
+  transition: opacity 0.1s ease-out;
+}
+
+/* Enhanced cursor caret */
+.bn-collab-cursor::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 2px;
+  height: 100%;
+  background: inherit;
+  animation: cursor-blink 1s infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Cursor trail effect for movement */
+.bn-collab-cursor-trail {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: cursor-trail 0.5s ease-out forwards;
+}
+
+/* User join/leave notification animations */
+@keyframes notification-slide-in {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notification-slide-out {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.collab-notification {
+  animation: notification-slide-in 0.3s ease-out;
+}
+
+.collab-notification.leaving {
+  animation: notification-slide-out 0.3s ease-out forwards;
+}
+
+/* Smooth color transitions */
+.bn-collab-cursor,
+.bn-collab-selection,
+.bn-collab-cursor-label {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Hover effects for cursor labels */
+.bn-collab-cursor-label:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Activity indicator pulse */
+@keyframes activity-pulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  100% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+.bn-collab-cursor.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: activity-pulse 1s ease-out;
+}

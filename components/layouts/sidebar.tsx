@@ -1,16 +1,17 @@
 'use client';
 
-import { ChevronRight, FileText, Plus, Trash2 } from 'lucide-react';
+import { ChevronRight, FileText, Plus, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { UserProfile } from '@/components/layouts/user-profile';
 import { FolderTreeWithNotes } from '@/components/layouts/folder-tree-with-notes';
+import { SharedNotesSection } from '@/components/layouts/shared-notes-section';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFoldersWithNotes } from '@/hooks/useFoldersWithNotes';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SidebarProps {
   onToggle: () => void;
@@ -19,7 +20,12 @@ interface SidebarProps {
 export function Sidebar({ onToggle }: SidebarProps) {
   const router = useRouter();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
-  const { folders, rootNotes, isLoading, createFolder, updateFolder, deleteFolder, updateFolderPositions, moveNoteToFolder } = useFoldersWithNotes();
+  const { folders, rootNotes, sharedNotes, isLoading, createFolder, updateFolder, deleteFolder, updateFolderPositions, moveNoteToFolder, refresh } = useFoldersWithNotes();
+
+  // Force refresh on mount to ensure we have latest shared notes
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const handleCreateNote = async () => {
     try {
@@ -125,18 +131,29 @@ export function Sidebar({ onToggle }: SidebarProps) {
               <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
             </div>
           ) : (
-            <FolderTreeWithNotes
-              folders={folders}
-              rootNotes={rootNotes}
-              collapsed={false}
-              onCreateFolder={createFolder}
-              onUpdateFolder={updateFolder}
-              onDeleteFolder={deleteFolder}
-              onUpdatePositions={updateFolderPositions}
-              onMoveNoteToFolder={moveNoteToFolder}
-              onSelectFolder={setSelectedFolderId}
-              selectedFolderId={selectedFolderId}
-            />
+            <>
+              {/* Shared Notes Section */}
+              {sharedNotes.length > 0 && (
+                <SharedNotesSection 
+                  notes={sharedNotes} 
+                  collapsed={false}
+                />
+              )}
+              
+              {/* My Notes Section */}
+              <FolderTreeWithNotes
+                folders={folders}
+                rootNotes={rootNotes}
+                collapsed={false}
+                onCreateFolder={createFolder}
+                onUpdateFolder={updateFolder}
+                onDeleteFolder={deleteFolder}
+                onUpdatePositions={updateFolderPositions}
+                onMoveNoteToFolder={moveNoteToFolder}
+                onSelectFolder={setSelectedFolderId}
+                selectedFolderId={selectedFolderId}
+              />
+            </>
           )}
         </div>
       </ScrollArea>

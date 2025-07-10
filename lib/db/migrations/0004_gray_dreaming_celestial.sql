@@ -1,0 +1,1 @@
+ALTER TYPE "public"."permission_level" ADD VALUE 'admin';
