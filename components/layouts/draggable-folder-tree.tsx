@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   DndContext, 
   closestCenter,
@@ -94,6 +94,32 @@ function RootDropZone({ isActive }: { isActive: boolean }) {
       Drop here to move to root
     </div>
   );
+}
+
+function TrashDropZone({ isActive, onDrop }: { isActive: boolean; onDrop: (folderId: string) => void }) {
+  const { isOver, setNodeRef, active } = useDroppable({
+    id: 'trash',
+  });
+
+  React.useEffect(() => {
+    // Add drop zone to the trash button
+    const trashElement = document.getElementById('trash-drop-zone');
+    if (trashElement && isActive) {
+      trashElement.classList.add('transition-all');
+      if (isOver) {
+        trashElement.classList.add('bg-destructive/20', 'scale-105');
+      } else {
+        trashElement.classList.remove('bg-destructive/20', 'scale-105');
+      }
+    }
+    return () => {
+      if (trashElement) {
+        trashElement.classList.remove('bg-destructive/20', 'scale-105', 'transition-all');
+      }
+    };
+  }, [isActive, isOver]);
+
+  return <div ref={setNodeRef} className="absolute inset-0" style={{ pointerEvents: 'none' }} />;
 }
 
 function SortableFolderItem({
@@ -191,7 +217,11 @@ function SortableFolderItem({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => onDelete(folder.id)}
+              onClick={() => {
+                if (confirm(`Are you sure you want to delete "${folder.name}" and all its contents?`)) {
+                  onDelete(folder.id);
+                }
+              }}
               className="text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" />
@@ -265,6 +295,16 @@ export function DraggableFolderTree({
     const activeFolder = findFolder(folders, active.id as string);
     
     if (!activeFolder) {
+      setActiveId(null);
+      setOverId(null);
+      return;
+    }
+
+    // Handle drop on trash
+    if (over.id === 'trash') {
+      if (confirm(`Are you sure you want to delete "${activeFolder.name}" and all its contents?`)) {
+        onDeleteFolder(active.id as string);
+      }
       setActiveId(null);
       setOverId(null);
       return;
@@ -441,6 +481,7 @@ export function DraggableFolderTree({
           onDragEnd={handleDragEnd}
         >
           <RootDropZone isActive={!!activeId} />
+          <TrashDropZone isActive={!!activeId} onDrop={onDeleteFolder} />
           
           <SortableContext
             items={allFolderIds}

@@ -76,6 +76,8 @@ export default function TrashPage() {
       // Remove from local state
       setNotes(notes.filter(n => n.id !== noteId));
       toast.success('Note restored successfully');
+      // Trigger refresh event to update the sidebar
+      window.dispatchEvent(new Event('refresh-notes'));
     } catch (error) {
       toast.error('Failed to restore note');
     }
@@ -96,6 +98,8 @@ export default function TrashPage() {
       toast.success('Note permanently deleted');
       setShowDeleteDialog(false);
       setSelectedNote(null);
+      // Trigger refresh event in case the note was in a folder
+      window.dispatchEvent(new Event('refresh-notes'));
     } catch (error) {
       toast.error('Failed to delete note permanently');
     }
@@ -115,6 +119,8 @@ export default function TrashPage() {
         
         setNotes([]);
         toast.success('Trash emptied successfully');
+        // Trigger refresh event to update the sidebar
+        window.dispatchEvent(new Event('refresh-notes'));
       } catch (error) {
         toast.error('Failed to empty trash');
       }

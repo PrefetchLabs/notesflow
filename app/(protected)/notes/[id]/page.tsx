@@ -256,6 +256,8 @@ export default function NotePage() {
         if (!response.ok) throw new Error('Failed to delete');
         
         toast.success('Note moved to trash');
+        // Trigger refresh event to update the sidebar
+        window.dispatchEvent(new Event('refresh-notes'));
         router.push('/dashboard');
       } catch {
         toast.error('Failed to delete note');
@@ -283,6 +285,8 @@ export default function NotePage() {
       
       const folderName = folderId ? folders.find(f => f.id === folderId)?.name : 'root';
       toast.success(`Note moved to ${folderName || 'folder'}`);
+      // Trigger refresh event to update the sidebar
+      window.dispatchEvent(new Event('refresh-notes'));
     } catch (error) {
       toast.error('Failed to move note');
     }

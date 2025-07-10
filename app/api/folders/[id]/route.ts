@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
 import { folders, notes } from '@/lib/db/schema';
-import { eq, and, like } from 'drizzle-orm';
+import { eq, and, like, inArray } from 'drizzle-orm';
 
 export async function PUT(
   request: NextRequest,
@@ -114,38 +114,53 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if folder has notes
-    const noteCount = await db
+    // Get the folder to ensure it exists and belongs to user
+    const [folder] = await db
       .select()
-      .from(notes)
-      .where(
-        and(
-          eq(notes.folderId, id),
-          eq(notes.userId, session.user.id)
-        )
-      );
-
-    if (noteCount && noteCount.length > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete folder with notes' },
-        { status: 400 }
-      );
-    }
-
-    // Delete the folder (cascades to child folders)
-    const [deleted] = await db
-      .delete(folders)
+      .from(folders)
       .where(
         and(
           eq(folders.id, id),
           eq(folders.userId, session.user.id)
         )
-      )
-      .returning();
+      );
 
-    if (!deleted) {
+    if (!folder) {
       return NextResponse.json({ error: 'Folder not found' }, { status: 404 });
     }
+
+    // Find all descendant folders (including the folder itself)
+    const descendantFolders = await db
+      .select({ id: folders.id })
+      .from(folders)
+      .where(
+        and(
+          eq(folders.userId, session.user.id),
+          like(folders.path, `${folder.path}%`)
+        )
+      );
+
+    const folderIds = [id, ...descendantFolders.map(f => f.id)];
+
+    // Delete all notes in this folder and all descendant folders
+    await db
+      .delete(notes)
+      .where(
+        and(
+          eq(notes.userId, session.user.id),
+          inArray(notes.folderId, folderIds)
+        )
+      );
+
+    // Delete all descendant folders and the folder itself
+    await db
+      .delete(folders)
+      .where(
+        and(
+          eq(folders.userId, session.user.id),
+          inArray(folders.id, folderIds)
+        )
+      );
 
     return NextResponse.json({ success: true });
   } catch (error) {

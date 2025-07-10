@@ -55,6 +55,8 @@ export function Sidebar({ onToggle }: SidebarProps) {
       if (!response.ok) throw new Error('Failed to create note');
       
       const { note } = await response.json();
+      // Trigger refresh event to update the sidebar
+      window.dispatchEvent(new Event('refresh-notes'));
       router.push(`/notes/${note.id}`);
     } catch (error) {
       console.error('Error creating note:', error);
@@ -163,16 +165,18 @@ export function Sidebar({ onToggle }: SidebarProps) {
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link href="/trash" className="block">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Trash
-                </Button>
-              </Link>
+              <div id="trash-drop-zone">
+                <Link href="/trash" className="block">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Trash
+                  </Button>
+                </Link>
+              </div>
             </TooltipTrigger>
             <TooltipContent side="right">
               View deleted notes
