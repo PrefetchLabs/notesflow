@@ -129,38 +129,47 @@ export async function DELETE(
       return NextResponse.json({ error: 'Folder not found' }, { status: 404 });
     }
 
-    // Find all descendant folders (including the folder itself)
+    // Find all descendant folders (not including the folder itself)
+    // We need to be careful with the path matching to avoid matching all folders
     const descendantFolders = await db
       .select({ id: folders.id })
       .from(folders)
       .where(
         and(
           eq(folders.userId, session.user.id),
-          like(folders.path, `${folder.path}%`)
+          like(folders.path, `${folder.path}${id}/%`)
         )
       );
 
     const folderIds = [id, ...descendantFolders.map(f => f.id)];
+    
+    // Safety check: log what we're about to delete
+    console.log(`Deleting folder ${id} with path ${folder.path}`);
+    console.log(`Will delete ${folderIds.length} folders total:`, folderIds);
 
     // Delete all notes in this folder and all descendant folders
-    await db
-      .delete(notes)
-      .where(
-        and(
-          eq(notes.userId, session.user.id),
-          inArray(notes.folderId, folderIds)
-        )
-      );
+    if (folderIds.length > 0) {
+      await db
+        .delete(notes)
+        .where(
+          and(
+            eq(notes.userId, session.user.id),
+            inArray(notes.folderId, folderIds)
+          )
+        );
+    }
 
     // Delete all descendant folders and the folder itself
-    await db
-      .delete(folders)
-      .where(
-        and(
-          eq(folders.userId, session.user.id),
-          inArray(folders.id, folderIds)
-        )
-      );
+    if (folderIds.length > 0) {
+      await db
+        .delete(folders)
+        .where(
+          and(
+            eq(folders.userId, session.user.id),
+            inArray(folders.id, folderIds)
+          )
+        );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
