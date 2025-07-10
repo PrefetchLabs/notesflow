@@ -1,0 +1,103 @@
+# Task ID: 10
+# Title: Implement Drag Text to Calendar Feature
+# Status: pending
+# Dependencies: 9
+# Priority: medium
+# Description: Create the killer feature: dragging selected text from notes to create time blocks
+# Details:
+Implement text selection detection in BlockNote editor. Add drag handler for selected text with visual feedback (cursor change, selected text highlight). Create drop zones in calendar that highlight when dragging text over them. On drop, create time block with selected text as title, default 30-minute duration. Add smart parsing: if text contains time references ('2 hours', '30 min'), set duration accordingly. Show preview of time block while dragging. Implement edge scrolling when dragging near calendar boundaries. Add undo/redo support for drag operations. Create floating tooltip during drag showing 'Drop to schedule' hint. If text is a list item, offer to create multiple time blocks. Animate the created block with subtle scale effect. Update note content to show linked time indicator next to scheduled text.
+
+# Test Strategy:
+Test dragging various text selections to calendar. Verify time parsing works for different formats. Test edge scrolling behavior. Ensure undo/redo works correctly. Test multi-line text selection. Verify visual feedback appears at all stages. Test that linked indicators appear in notes. Measure drag performance stays smooth.
+
+# Subtasks:
+## 1. Implement BlockNote selection API integration [pending]
+### Dependencies: None
+### Description: Create a custom selection detection system that integrates with BlockNote's internal selection API to capture text selections in real-time
+### Details:
+Research BlockNote's selection API, implement event listeners for selection changes, create a selection state manager that tracks selected text, position, and block references. Handle edge cases like multi-block selections and nested content.
+
+## 2. Build drag handler UI component [pending]
+### Dependencies: 10.1
+### Description: Create a visual drag handler that appears near selected text in the BlockNote editor
+### Details:
+Design and implement a floating drag handle component that appears on text selection, position it correctly relative to selected text, ensure it doesn't interfere with editor functionality, add hover states and visual indicators.
+
+## 3. Implement custom drag event system [pending]
+### Dependencies: 10.1, 10.2
+### Description: Create a custom drag-and-drop system that works with BlockNote's content model
+### Details:
+Override native drag behavior to work with BlockNote's virtual DOM, create custom drag data transfer format, handle drag start/move/end events, ensure compatibility with editor's undo/redo system.
+
+## 4. Create calendar drop zone detection [pending]
+### Dependencies: None
+### Description: Implement drop zone detection logic for the calendar component
+### Details:
+Add drop target detection to calendar time slots, calculate precise drop positions based on mouse coordinates, handle different calendar views (day/week/month), create visual indicators for valid drop zones.
+
+## 5. Build drag preview component [pending]
+### Dependencies: 10.3
+### Description: Create a visual preview of the content being dragged
+### Details:
+Generate a preview element showing the selected text, add visual styling to indicate it's being dragged, implement ghost image replacement, ensure preview follows cursor smoothly.
+
+## 6. Implement smart text parsing engine [pending]
+### Dependencies: None
+### Description: Create an AI-powered text parser to extract time duration and event details from selected text
+### Details:
+Integrate NLP to parse natural language time expressions, detect event titles and descriptions, handle various time formats (2 hours, 2h, 120 min), extract recurring patterns, implement fallback parsing logic.
+
+## 7. Build visual feedback system [pending]
+### Dependencies: 10.3, 10.4, 10.5
+### Description: Create comprehensive visual feedback during the entire drag operation
+### Details:
+Implement hover effects on calendar slots, show time duration preview while hovering, add visual connection lines between source and target, create smooth transitions and animations.
+
+## 8. Implement time block creation logic [pending]
+### Dependencies: 10.4, 10.6
+### Description: Create the system to generate calendar events from dropped content
+### Details:
+Convert parsed text data into calendar event objects, calculate event duration and position, handle time zone conversions, integrate with existing calendar data model, support recurring events.
+
+## 9. Build edge scrolling mechanism [pending]
+### Dependencies: 10.3, 10.7
+### Description: Implement automatic scrolling when dragging near viewport edges
+### Details:
+Detect when drag cursor approaches viewport edges, implement smooth auto-scrolling in both editor and calendar, adjust scroll speed based on cursor distance from edge, handle scroll boundaries correctly.
+
+## 10. Create undo/redo integration [pending]
+### Dependencies: 10.3, 10.8
+### Description: Integrate drag-drop operations with the application's undo/redo system
+### Details:
+Track all drag-drop operations in undo history, implement reversible actions for both note changes and calendar events, ensure state consistency across components, handle edge cases like deleted source content.
+
+## 11. Build tooltip hint system [pending]
+### Dependencies: 10.2, 10.7
+### Description: Create contextual tooltips to guide users through the drag-drop process
+### Details:
+Show tooltips on hover over drag handle, display keyboard shortcuts and tips, implement smart tooltip positioning, add progressive disclosure for advanced features, ensure accessibility compliance.
+
+## 12. Implement multi-line selection handling [pending]
+### Dependencies: 10.1, 10.3
+### Description: Handle complex text selections spanning multiple lines and blocks
+### Details:
+Detect and handle multi-paragraph selections, preserve formatting during drag operations, handle mixed content types (text, lists, etc.), implement selection boundary validation.
+
+## 13. Create animation system for dropped blocks [pending]
+### Dependencies: 10.8
+### Description: Build smooth animations for calendar blocks appearing after drop
+### Details:
+Implement entrance animations for new calendar blocks, add success feedback animations, create smooth transitions from preview to final position, handle animation queuing for multiple drops.
+
+## 14. Build linked indicator system [pending]
+### Dependencies: 10.8, 10.10
+### Description: Create visual indicators showing connections between notes and calendar events
+### Details:
+Add visual markers in notes showing linked calendar events, implement bi-directional navigation between linked items, create hover previews of linked content, handle deletion and updates of linked items.
+
+## 15. Implement cross-component state management [pending]
+### Dependencies: 10.3, 10.8, 10.10, 10.14
+### Description: Create a robust state management system for drag-drop operations across components
+### Details:
+Design centralized drag-drop state store, implement event bus for cross-component communication, ensure state persistence across navigation, handle concurrent operations and race conditions, implement performance optimizations.
+

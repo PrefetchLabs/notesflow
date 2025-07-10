@@ -1,0 +1,67 @@
+# Task ID: 7
+# Title: Integrate BlockNote Editor for Rich Text Editing
+# Status: done
+# Dependencies: 5
+# Priority: high
+# Description: Implement BlockNote as the core editor with clean, distraction-free interface
+# Details:
+Install @blocknote/core@0.12.0 and @blocknote/react@0.12.0. Configure BlockNote with minimal toolbar that appears on text selection only. Customize theme to match minimalist design: remove all unnecessary UI elements, use system font stack, subtle selection colors. Implement auto-save with debounce (1 second) showing subtle 'Saving...' indicator. Configure allowed blocks: paragraph, headings (h1-h3), bullet lists, numbered lists, and basic formatting (bold, italic, link). Remove complex features like tables, images, and code blocks for v1. Set up content storage as JSONB in database. Implement focus mode where UI fades when typing (reduce opacity to 0.3 after 2 seconds of typing). Add keyboard shortcuts: Cmd/Ctrl+S for manual save, Cmd/Ctrl+B for bold, Cmd/Ctrl+I for italic. Ensure typing latency stays under 30ms.
+
+# Test Strategy:
+Test all basic formatting options work correctly. Verify auto-save triggers after 1 second of inactivity. Test that content persists across page refreshes. Measure typing latency with performance profiler. Test focus mode UI fading behavior. Validate keyboard shortcuts work on both Mac and Windows.
+
+# Subtasks:
+## 1. Install and configure BlockNote editor dependencies [done]
+### Dependencies: None
+### Description: Set up BlockNote React component library with necessary peer dependencies and TypeScript types
+### Details:
+Install @blocknote/react, @blocknote/core, and @blocknote/mantine packages. Configure TypeScript definitions and ensure compatibility with Next.js 15.3 and React 19. Set up basic editor instance with minimal configuration to verify installation.
+
+## 2. Create minimalist custom theme for BlockNote [done]
+### Dependencies: 7.1
+### Description: Design and implement a clean, minimal theme that aligns with the overall app design aesthetics
+### Details:
+Create custom CSS theme using CSS variables for BlockNote components. Override default styles to achieve minimalist look with reduced visual clutter. Implement light/dark mode support using Tailwind CSS classes. Focus on typography, spacing, and subtle borders.
+
+## 3. Configure toolbar with selected features only [done]
+### Dependencies: 7.1
+### Description: Customize BlockNote toolbar to show only essential formatting options for note-taking
+### Details:
+Configure toolbar to include only: bold, italic, underline, strikethrough, code, headings (H1-H3), bullet lists, numbered lists, checkboxes, and links. Remove unnecessary features like tables, images, and advanced formatting. Implement responsive toolbar that adapts to screen size.
+
+## 4. Implement auto-save with debouncing mechanism [done]
+### Dependencies: 7.1
+### Description: Create efficient auto-save functionality that saves content changes with proper debouncing
+### Details:
+Implement debounced save function with 2-second delay after typing stops. Use React hooks to track editor content changes. Create visual indicator for save status (saving, saved, error). Handle network failures gracefully with retry logic and offline queue.
+
+## 5. Set up JSONB content storage in database [done]
+### Dependencies: 7.4
+### Description: Configure Drizzle ORM schema and Supabase for storing BlockNote content as JSONB
+### Details:
+Create notes table with JSONB column for BlockNote document structure. Set up Drizzle schema with proper TypeScript types. Implement database migrations. Create API endpoints for saving and retrieving note content. Ensure proper indexing for performance.
+
+## 6. Implement focus mode with UI fading [done]
+### Dependencies: 7.2, 7.3
+### Description: Create distraction-free writing mode that fades out UI elements except the editor
+### Details:
+Implement focus mode toggle that gradually fades navigation, sidebar, and toolbar. Use Framer Motion for smooth opacity transitions. Maintain editor visibility while dimming surrounding UI to 20% opacity. Add keyboard shortcut (Cmd/Ctrl + Shift + F) to toggle focus mode.
+
+## 7. Configure comprehensive keyboard shortcuts [done]
+### Dependencies: 7.3, 7.6
+### Description: Set up keyboard shortcuts for all editor actions and app navigation
+### Details:
+Implement standard text formatting shortcuts (Cmd/Ctrl + B/I/U). Add custom shortcuts for heading levels, lists, and checkboxes. Configure app-level shortcuts for navigation, search, and focus mode. Create keyboard shortcut help modal accessible via Cmd/Ctrl + /.
+
+## 8. Optimize performance for sub-30ms typing latency [done]
+### Dependencies: 7.1, 7.2, 7.3, 7.4
+### Description: Fine-tune editor performance to achieve smooth typing experience with minimal latency
+### Details:
+Implement virtual scrolling for long documents. Optimize re-renders using React.memo and useMemo. Configure BlockNote with performance-focused settings. Profile and eliminate unnecessary computations during typing. Implement requestIdleCallback for non-critical updates.
+
+## 9. Test editor across different browsers and devices [done]
+### Dependencies: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8
+### Description: Comprehensive testing to ensure consistent experience across all supported platforms
+### Details:
+Test on Chrome, Firefox, Safari, and Edge browsers. Verify mobile responsiveness on iOS and Android devices. Test keyboard shortcuts on different operating systems. Measure and document typing latency across platforms. Create automated E2E tests for critical editor functions.
+

@@ -1,0 +1,61 @@
+# Task ID: 17
+# Title: Implement Performance Monitoring and Analytics
+# Status: done
+# Dependencies: 16
+# Priority: low
+# Description: Set up monitoring to track performance metrics and user behavior
+# Details:
+Install @vercel/analytics@1.1.2 and @vercel/speed-insights@1.0.10 for basic metrics. Set up custom performance monitoring: track first paint, interactive time, typing latency, and sync delay. Create performance budget alerts: warn if any metric exceeds targets. Implement basic event tracking: sign-ups, note creation, time block creation, AI usage, and subscription conversions. Add error boundary at app level with error reporting to console (Sentry in future). Track Core Web Vitals with reporting to analytics. Create development performance dashboard at /dev/metrics (only in development). Add performance marks for key operations. Set up real user monitoring (RUM) for production. Respect DNT headers and add analytics opt-out. Create weekly performance summary (logged to console for now).
+
+# Test Strategy:
+Verify analytics events fire correctly. Test performance measurements are accurate. Ensure error boundary catches errors. Check that development dashboard shows metrics. Test DNT header respect. Verify no performance impact from monitoring itself. Test custom events track properly.
+
+# Subtasks:
+## 1. Install and Configure Vercel Analytics [done]
+### Dependencies: None
+### Description: Set up Vercel Analytics package and basic configuration
+### Details:
+Install @vercel/analytics package, configure the Analytics component in app/layout.tsx, set up environment variables for production tracking, and verify basic page view tracking is working
+
+## 2. Implement Custom Performance Metric Tracking [done]
+### Dependencies: 17.1
+### Description: Create a system for tracking custom performance metrics beyond standard analytics
+### Details:
+Build a performance tracking utility that captures custom metrics like component render times, API response times, and data fetching durations. Use the Performance API and integrate with Vercel Analytics custom events
+
+## 3. Set Up Performance Budget Alerts [done]
+### Dependencies: 17.2
+### Description: Implement automated alerts when performance metrics exceed defined thresholds
+### Details:
+Create performance budget configuration, implement monitoring logic that compares actual metrics against budgets, set up notifications via console warnings in development and integrate with monitoring services for production alerts
+
+## 4. Build Event Tracking Implementation [done]
+### Dependencies: 17.1
+### Description: Create comprehensive event tracking for user interactions and custom events
+### Details:
+Implement tracking for user actions like clicks, form submissions, and navigation. Create reusable hooks and utilities for event tracking. Ensure events are properly typed and follow a consistent naming convention
+
+## 5. Configure Error Boundary Setup [done]
+### Dependencies: 17.1, 17.4
+### Description: Implement error boundaries with analytics integration for error tracking
+### Details:
+Create custom error boundary components that capture and report errors to analytics. Implement error logging with context information, stack traces, and user session data. Set up different error boundaries for various app sections
+
+## 6. Implement Core Web Vitals Monitoring [done]
+### Dependencies: 17.1, 17.2
+### Description: Set up comprehensive Core Web Vitals tracking and reporting
+### Details:
+Implement monitoring for LCP, FID, CLS, and INP metrics. Use web-vitals library for accurate measurements. Create real-time reporting to analytics and set up threshold alerts for degraded performance
+
+## 7. Create Development Analytics Dashboard [done]
+### Dependencies: 17.2, 17.3, 17.6
+### Description: Build a local development dashboard for real-time performance monitoring
+### Details:
+Create a development-only dashboard component that displays real-time performance metrics, Core Web Vitals, and custom metrics. Include visual indicators for performance budgets and historical data visualization
+
+## 8. Implement Privacy Compliance and User Consent [done]
+### Dependencies: 17.1, 17.4, 17.5
+### Description: Add GDPR/privacy compliant analytics with user consent management
+### Details:
+Implement consent management system for analytics tracking. Create cookie banner component, implement opt-in/opt-out functionality, ensure analytics respects user preferences, and add data anonymization where required
+

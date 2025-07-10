@@ -62,8 +62,8 @@ export async function checkDatabaseConnection() {
   }
 }
 
-// Graceful shutdown
-if (process.env.NODE_ENV !== 'production') {
+// Graceful shutdown - only in Node.js runtime
+if (typeof process !== 'undefined' && process.on && process.env.NODE_ENV !== 'production') {
   process.on('SIGINT', async () => {
     await queryClient.end();
     process.exit(0);

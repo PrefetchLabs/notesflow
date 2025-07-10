@@ -1,0 +1,73 @@
+# Task ID: 13
+# Title: Build Free/Pro Tier System with Limitations
+# Status: pending
+# Dependencies: 8, 11
+# Priority: medium
+# Description: Implement usage limitations for free tier and pro upgrade prompts
+# Details:
+Create subscription status check in auth context (isPro boolean). Implement free tier limits: max 10 notes (show counter in sidebar), max 3 folders, no AI assistant access, single device only (using device fingerprinting), no real-time collaboration. Add gentle upgrade prompts when limits are reached (non-blocking modal with benefits list). Create usage tracking hooks for notes count and AI calls. Show upgrade button in sidebar for free users with 'Pro' badge. Implement soft limits: allow creating 11th note but show persistent upgrade banner. Add localStorage detection for device limit (warn on second device). Create upgrade flow trigger functions. Design limit messages to be encouraging, not punishing ('Unlock unlimited notes with Pro'). Add visual indicators for pro features (subtle lock icon). Implement grace period: full features for first 7 days.
+
+# Test Strategy:
+Test all limit enforcements work correctly. Verify upgrade prompts appear at right times. Test device detection works across browsers. Ensure pro users have no limitations. Test grace period behavior. Verify usage counters are accurate. Test that limits don't break core functionality.
+
+# Subtasks:
+## 1. Integrate subscription status in auth context [pending]
+### Dependencies: None
+### Description: Add subscription plan details (free/pro) and limits to the existing auth context to make them accessible throughout the app
+### Details:
+Extend the auth context to include subscription plan type, plan limits (notes, folders, devices), current usage counts, and subscription expiry date. Create TypeScript interfaces for subscription data structure.
+
+## 2. Implement note limit enforcement [pending]
+### Dependencies: 13.1
+### Description: Add validation logic to prevent creating notes beyond the plan limit (10 for free, unlimited for pro)
+### Details:
+Implement a pre-creation check in the note creation flow. Show appropriate error messages when limit is reached. Consider allowing read/edit of existing notes even at limit.
+
+## 3. Implement folder limit enforcement [pending]
+### Dependencies: 13.1
+### Description: Add validation to restrict folder creation based on plan limits (3 for free, unlimited for pro)
+### Details:
+Add folder count validation before allowing new folder creation. Implement UI feedback when folder limit is reached. Allow organizing existing notes within current folders.
+
+## 4. Implement AI feature access control [pending]
+### Dependencies: 13.1
+### Description: Gate AI-powered features (chat, search, suggestions) behind pro subscription
+### Details:
+Create a higher-order component or hook to wrap AI features. Show upgrade prompts when free users try to access AI features. Disable AI UI elements for free users with tooltips.
+
+## 5. Implement device fingerprinting system [pending]
+### Dependencies: 13.1
+### Description: Create a reliable device identification system for enforcing single-device limit on free plan
+### Details:
+Use combination of browser fingerprinting techniques (user agent, screen resolution, timezone, etc.) to generate unique device IDs. Store device IDs in database with last access timestamp.
+
+## 6. Gate collaboration features for pro users [pending]
+### Dependencies: 13.1
+### Description: Restrict sharing, commenting, and real-time collaboration to pro subscribers
+### Details:
+Add subscription checks to collaboration endpoints and UI. Hide collaboration UI elements for free users. Show upgrade prompts when free users attempt to share notes.
+
+## 7. Create upgrade prompt UI components [pending]
+### Dependencies: 13.1
+### Description: Design and implement reusable upgrade prompt modals and banners
+### Details:
+Create modal component for limit-reached scenarios. Design inline upgrade banners for disabled features. Include pricing information and clear CTA buttons. Make prompts dismissible but memorable.
+
+## 8. Implement usage tracking hooks [pending]
+### Dependencies: 13.1, 13.2, 13.3
+### Description: Create React hooks to track and display current usage against limits
+### Details:
+Build useSubscriptionLimits hook to fetch current usage. Create useFeatureAccess hook to check feature availability. Add real-time usage updates when notes/folders are created/deleted.
+
+## 9. Add visual indicators for pro features [pending]
+### Dependencies: 13.4, 13.6, 13.7
+### Description: Implement UI elements that clearly indicate which features require pro subscription
+### Details:
+Add 'PRO' badges to premium features. Use consistent visual treatment (opacity, lock icons) for disabled features. Implement tooltips explaining feature restrictions.
+
+## 10. Implement grace period system [pending]
+### Dependencies: 13.2, 13.3, 13.5, 13.8
+### Description: Create a soft-limit system that allows temporary access beyond limits with warnings
+### Details:
+Allow 10% overage on limits with persistent warnings. Implement 7-day grace period for device limit violations. Track grace period usage in database. Send email notifications about limit overages.
+

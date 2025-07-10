@@ -3,6 +3,7 @@ import './globals.css';
 import { WebVitals } from '@/components/web-vitals';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { AdminProvider } from '@/components/providers/admin-provider';
 
 export const metadata: Metadata = {
   title: 'NotesFlow - Your thoughts and time, beautifully unified',
@@ -32,7 +33,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <AdminProvider>
+              {children}
+            </AdminProvider>
           </ThemeProvider>
         </QueryProvider>
       </body>

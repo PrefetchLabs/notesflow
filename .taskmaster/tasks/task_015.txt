@@ -1,0 +1,55 @@
+# Task ID: 15
+# Title: Create Minimal Onboarding Flow
+# Status: pending
+# Dependencies: 14
+# Priority: medium
+# Description: Build a simple 3-screen onboarding for new users
+# Details:
+Create onboarding flow at /onboarding with 3 screens max. Screen 1: Welcome message with value prop 'Your thoughts and time, beautifully unified' and continue button. Screen 2: Show drag-to-calendar animation (using Framer Motion) with 'Try it yourself' prompt. Screen 3: Choose plan with free vs pro comparison, emphasizing 7-day trial. Use @radix-ui/react-navigation-menu@1.1.4 for step indicators. Add skip button for impatient users. Store onboarding completion in user preferences. Create smooth transitions between screens (300ms slide). Add keyboard navigation (Enter to continue, Escape to skip). Pre-create sample note 'Welcome to NotesFlow' with tutorial content. Auto-focus on first interactive element. Track onboarding completion rate. Design with maximum whitespace and minimal text.
+
+# Test Strategy:
+Test onboarding flow from start to finish. Verify skip functionality works. Test keyboard navigation. Ensure onboarding only shows once per user. Test plan selection leads to correct flow. Verify sample note is created. Test on mobile viewport. Measure completion rate.
+
+# Subtasks:
+## 1. Create onboarding route and layout structure [pending]
+### Dependencies: None
+### Description: Set up the onboarding route with proper navigation guards and layout components to ensure users who haven't completed onboarding are redirected appropriately
+### Details:
+Create app/(onboarding) folder structure with layout.tsx, implement route protection to redirect completed users, set up basic page structure for the 3-screen flow, and configure Next.js routing
+
+## 2. Build welcome screen with branding and CTA [pending]
+### Dependencies: 15.1
+### Description: Design and implement the first onboarding screen featuring the NotesFlow logo, tagline, and primary call-to-action button to begin the onboarding process
+### Details:
+Create welcome page component with NotesFlow branding, implement responsive design with proper spacing, add 'Get Started' button with proper styling, ensure smooth transition to next screen
+
+## 3. Implement drag-to-calendar animation demo [pending]
+### Dependencies: 15.1
+### Description: Create an interactive animation showing how notes can be dragged onto a calendar, demonstrating the core value proposition of the application
+### Details:
+Build animated note component using Framer Motion, create mini calendar visualization, implement drag gesture animations, add auto-play functionality with pause on hover, ensure smooth performance across devices
+
+## 4. Create plan selection screen with pricing tiers [pending]
+### Dependencies: 15.1
+### Description: Build the plan selection interface showing available subscription tiers with features, pricing, and selection functionality
+### Details:
+Design pricing cards for each tier (Free, Pro, Team), highlight features and limitations, implement selection state management, add 'Continue' button that respects selection, integrate with existing plan management system
+
+## 5. Build step indicator navigation component [pending]
+### Dependencies: 15.1
+### Description: Create a reusable navigation component showing progress through the 3-step onboarding flow with visual indicators and optional navigation controls
+### Details:
+Design dot or progress bar indicators, show current step highlight, implement click-to-navigate functionality, add smooth transitions between steps, ensure accessibility with proper ARIA labels
+
+## 6. Implement keyboard navigation and accessibility [pending]
+### Dependencies: 15.2, 15.3, 15.4, 15.5
+### Description: Add comprehensive keyboard navigation support and ensure the entire onboarding flow meets accessibility standards
+### Details:
+Implement arrow key navigation between screens, add Enter/Space key support for buttons, ensure proper focus management, add skip links, test with screen readers, implement escape key to exit onboarding
+
+## 7. Add sample note creation and completion tracking [pending]
+### Dependencies: 15.4
+### Description: Implement the final onboarding step that creates a sample note and marks the onboarding as complete in the user's profile
+### Details:
+Create API endpoint to generate sample note with example content, update user profile to mark onboarding complete, implement success animation, redirect to main dashboard, ensure proper error handling
+

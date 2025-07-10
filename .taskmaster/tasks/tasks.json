@@ -2494,11 +2494,116 @@
             "testStrategy": ""
           }
         ]
+      },
+      {
+        "id": 19,
+        "title": "Implement System-Wide Admin User Type with Full Platform Management",
+        "description": "Create a comprehensive admin user type with elevated privileges for platform management, including user management, content moderation, subscription overrides, system configuration, and analytics access",
+        "status": "pending",
+        "dependencies": [
+          2,
+          3,
+          5,
+          8
+        ],
+        "priority": "high",
+        "details": "Extend the user type system by adding 'admin' role to the existing user schema. Update database schema with admin-specific fields: isAdmin boolean flag, adminLevel (super/regular), adminPermissions JSON field for granular permissions, lastAdminActivityAt timestamp. Create comprehensive permission system with modules: USER_MANAGEMENT (view all users, suspend/unsuspend accounts, reset passwords, force logout), CONTENT_MODERATION (view all notes/folders, delete inappropriate content, flag/unflag content, view reports), SUBSCRIPTION_OVERRIDE (grant/revoke pro status, extend trials, view billing history, issue refunds), SYSTEM_CONFIG (manage feature flags, update system settings, maintenance mode control, API rate limits), ANALYTICS_ACCESS (view platform metrics, export data, custom queries, user behavior tracking). Implement admin middleware extending existing auth middleware to check admin status and specific permissions before allowing access to admin routes. Build admin dashboard at /admin with clean, data-dense interface featuring: User Management section with searchable user list, quick actions (suspend, reset password, view activity), bulk operations support; Content Moderation queue showing flagged content, recent uploads, suspicious activity patterns; System Stats displaying real-time metrics (active users, storage usage, API calls, error rates); Configuration panel for feature toggles, system limits, maintenance scheduling. Use React Query for data fetching with 30-second refresh intervals. Implement row-level security for admin operations in Supabase. Create admin-specific API routes under /api/admin/* with proper authentication and rate limiting. Use shadcn/ui data-table component for user lists with sorting, filtering, and pagination. Implement command palette (Cmd+K) for quick admin actions. Create admin onboarding flow for new admins with permission overview.",
+        "testStrategy": "Test admin role assignment and permission inheritance. Verify middleware blocks non-admin users from admin routes. Test each permission module independently: create test scenarios for user management (suspend/unsuspend flow), content moderation (flag and delete content), subscription overrides (grant pro status), system configuration (toggle features), and analytics access (view metrics). Test admin dashboard performance with 10,000+ users. Verify real-time updates work for system metrics. Test command palette functionality and keyboard shortcuts. Ensure RLS policies prevent data leaks. Test permission granularity by creating limited admin accounts. Validate bulk operations don't timeout. Test admin actions are atomic and don't leave system in inconsistent state.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Database Schema Changes for Admin Fields",
+            "description": "Implement database schema modifications to support admin user roles and permissions",
+            "dependencies": [],
+            "details": "Add admin-specific fields to user table (role, permissions, admin_level), create admin_permissions table for granular access control, update RLS policies to accommodate admin roles, create migration scripts for existing users\n<info added on 2025-07-10T13:18:51.387Z>\nStarting implementation for admin user schema changes. Adding role enum field with values ('user', 'admin', 'system_admin'), isSystemAdmin boolean flag for quick admin checks, adminPermissions JSON field for storing granular permission arrays, and lastAdminActivityAt timestamp for tracking admin activity. Will create database migration scripts to handle existing user records and ensure proper defaults are set. Migration will need to handle data transformation for existing users (all set to 'user' role by default) and add proper indexes for performance on admin queries.\n</info added on 2025-07-10T13:18:51.387Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Permission System Architecture with Granular Controls",
+            "description": "Design and implement a comprehensive permission system for admin role management",
+            "dependencies": [
+              1
+            ],
+            "details": "Create permission constants/enums, implement permission checking utilities, design role hierarchy (super_admin, admin, moderator), create permission validation middleware, implement context-aware permission checks\n<info added on 2025-07-10T13:20:41.243Z>\nDatabase schema migration completed successfully with all admin-related fields added to users table. Created comprehensive admin-permissions.ts file with permission constants (MANAGE_USERS, MANAGE_CONTENT, MANAGE_ANALYTICS, etc.), role hierarchy definitions, and helper functions for permission validation. Ready to implement the full permission system architecture including role-based access control and context-aware permission checking.\n</info added on 2025-07-10T13:20:41.243Z>\n<info added on 2025-07-10T13:22:43.425Z>\nSuccessfully implemented comprehensive permission system architecture including AdminService class with role-based permission checking methods, useAdminPermissions React hook for client-side permission validation, AdminGuard component for protecting routes, AdminProvider context for managing global admin state, and API endpoint for fetching user permissions. The system now supports full role hierarchy (user/admin/system_admin) with granular permission controls and is ready for integration with route protection middleware.\n</info added on 2025-07-10T13:22:43.425Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Admin Middleware for Route Protection",
+            "description": "Implement middleware to protect admin routes and validate permissions",
+            "dependencies": [
+              2
+            ],
+            "details": "Create admin authentication middleware, implement permission-based route guards, add admin session validation, create redirect logic for unauthorized access, integrate with existing auth system\n<info added on 2025-07-10T13:23:56.287Z>\nStarting implementation of admin middleware for Next.js App Router. Creating middleware function that will:\n\n1. Intercept requests to /admin/* routes\n2. Check for valid user session using existing auth system\n3. Verify admin permissions from user profile/database\n4. Handle unauthorized access with proper redirects to login or error pages\n5. Integrate with current Supabase auth patterns\n6. Provide proper error handling for permission failures\n7. Support both server-side and client-side route protection\n\nImplementation will follow Next.js 15 middleware patterns with proper type safety and error boundaries. Will need to coordinate with existing auth provider and permission system from previous subtasks.\n</info added on 2025-07-10T13:23:56.287Z>\n<info added on 2025-07-10T13:26:46.494Z>\nImplementation completed with comprehensive admin route protection system:\n\n✅ Created Next.js 15 middleware.ts with admin route protection for /admin/* paths\n✅ Implemented server-side admin authentication helpers (requireAdmin, checkAdminAuth) \n✅ Built client-side AdminRouteGuard component for additional protection layer\n✅ Created admin layout with dual protection (server-side + client-side validation)\n✅ Added test admin dashboard page to verify functionality\n✅ Implemented API endpoints for admin authentication testing\n✅ Full integration with existing Better Auth system\n✅ Granular permission checking capabilities implemented\n✅ Proper error handling and redirect logic for unauthorized access\n✅ Type-safe implementation following Next.js 15 patterns\n\nThe middleware successfully intercepts admin route requests, validates user sessions, checks admin permissions, and handles unauthorized access with appropriate redirects. System is ready for admin dashboard development.\n</info added on 2025-07-10T13:26:46.494Z>",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Admin Dashboard UI Framework",
+            "description": "Build the core admin dashboard interface and navigation structure",
+            "dependencies": [
+              3
+            ],
+            "details": "Create admin layout component, implement sidebar navigation, add dashboard overview page, create responsive design for admin panels, implement theme consistency with main app",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "User Management Interface",
+            "description": "Build comprehensive user management tools for admin users",
+            "dependencies": [
+              4
+            ],
+            "details": "Create user list/search interface, implement user detail views, add user role modification capabilities, build user suspension/activation features, create bulk user operations",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Content Moderation Tools",
+            "description": "Implement content moderation features for admin oversight",
+            "dependencies": [
+              4
+            ],
+            "details": "Create content review dashboard, implement flagged content management, add content approval/rejection workflows, build content search and filtering, create moderation action history",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "System Configuration Panel",
+            "description": "Build system-wide configuration management interface",
+            "dependencies": [
+              4
+            ],
+            "details": "Create settings management UI, implement feature toggle controls, add subscription override functionality, build system maintenance tools, create configuration backup/restore features",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Comprehensive Testing and Validation",
+            "description": "Implement thorough testing and security validation for admin system",
+            "dependencies": [
+              5,
+              6,
+              7
+            ],
+            "details": "Create unit tests for permission system, implement integration tests for admin workflows, add security penetration testing, validate RLS policies, create admin user acceptance tests, performance testing for admin operations",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-09T22:43:14.865Z",
+      "updated": "2025-07-10T13:26:52.203Z",
       "description": "Tasks for master context"
     }
   }

@@ -1,5 +1,8 @@
-import { pgTable, text, timestamp, boolean, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, primaryKey, pgEnum, jsonb } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
+// Role enum for user types
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'system_admin']);
 
 // Users table
 export const user = pgTable('user', {
@@ -8,6 +11,11 @@ export const user = pgTable('user', {
   emailVerified: boolean('email_verified').default(false),
   name: text('name'),
   image: text('image'),
+  // Admin-specific fields
+  role: userRoleEnum('role').default('user').notNull(),
+  isSystemAdmin: boolean('is_system_admin').default(false).notNull(),
+  adminPermissions: jsonb('admin_permissions').$type<string[]>().default([]),
+  lastAdminActivityAt: timestamp('last_admin_activity_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

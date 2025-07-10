@@ -1,4 +1,6 @@
 // User types
+export type UserRole = 'user' | 'admin' | 'system_admin';
+
 export interface User {
   id: string;
   email: string;
@@ -6,6 +8,11 @@ export interface User {
   avatar?: string;
   isPro: boolean;
   stripeCustomerId?: string;
+  // Admin-specific fields
+  role: UserRole;
+  isSystemAdmin: boolean;
+  adminPermissions: string[];
+  lastAdminActivityAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

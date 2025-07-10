@@ -1,0 +1,85 @@
+# Task ID: 6
+# Title: Implement Folder Tree with Drag-and-Drop
+# Status: done
+# Dependencies: 5
+# Priority: medium
+# Description: Create a collapsible, draggable folder structure for organizing notes
+# Details:
+Install @dnd-kit/sortable@8.0.0, @dnd-kit/core@6.1.0, and @dnd-kit/utilities@3.2.2 for drag-and-drop functionality. Create FolderTree component with recursive rendering for nested folders. Implement folder CRUD operations: create folder with inline editing, rename with double-click, delete with confirmation. Add drag-and-drop to reorder folders and move between parents. Use optimistic updates for all operations with rollback on error. Implement folder collapse state persistence in localStorage. Add subtle hover effects and smooth expand/collapse animations (150ms). Create context menu (right-click) with new folder, rename, and delete options. Limit nesting to 3 levels for simplicity. Show note count per folder with subtle gray text.
+
+# Test Strategy:
+Test folder creation, rename, and deletion operations. Verify drag-and-drop works correctly for reordering and nesting. Test that folder state persists across sessions. Ensure animations are smooth and under 200ms. Test edge cases like moving parent into child. Validate optimistic updates and error rollback behavior.
+
+# Subtasks:
+## 1. Install and configure drag-and-drop library [done]
+### Dependencies: None
+### Description: Install @dnd-kit/sortable and set up the DndContext provider in the main layout
+### Details:
+Install @dnd-kit/core, @dnd-kit/sortable, and @dnd-kit/utilities. Configure the DndContext provider at the app level with appropriate sensors for mouse and touch interactions. Set up collision detection algorithms for nested structures.
+
+## 2. Create recursive folder component structure [done]
+### Dependencies: 6.1
+### Description: Build a FolderItem component that can render itself recursively for nested folders
+### Details:
+Create FolderItem component with props for folder data, depth level, and expanded state. Implement recursive rendering logic to display child folders. Include proper TypeScript types for folder structure with id, name, parentId, children array, and noteCount.
+
+## 3. Implement folder CRUD operations [done]
+### Dependencies: 6.2
+### Description: Create functions for creating, reading, updating, and deleting folders with proper state management
+### Details:
+Implement createFolder, updateFolder, deleteFolder, and moveFolder functions. Use Zustand store for state management. Ensure operations maintain referential integrity and update parent-child relationships correctly.
+
+## 4. Add drag handlers for folder reordering [done]
+### Dependencies: 6.2, 6.3
+### Description: Implement useSortable hook integration for draggable folder items
+### Details:
+Integrate useSortable hook from @dnd-kit/sortable into FolderItem. Configure drag handle UI element, implement transform and transition styles, and handle isDragging state for visual feedback. Ensure proper accessibility attributes.
+
+## 5. Implement drop zone logic for folder nesting [done]
+### Dependencies: 6.4
+### Description: Create drop zones that allow folders to be nested within other folders
+### Details:
+Implement onDragOver and onDragEnd handlers to detect valid drop targets. Create visual indicators for drop zones with hover states. Handle logic for preventing circular references and invalid nesting scenarios.
+
+## 6. Build optimistic update system with rollback [done]
+### Dependencies: 6.3, 6.5
+### Description: Create a system for immediate UI updates with ability to rollback on failure
+### Details:
+Implement optimistic updates using temporary state changes. Create rollback mechanism that reverts to previous state on API failure. Use try-catch blocks with proper error handling and user notifications via toast messages.
+
+## 7. Implement localStorage persistence layer [done]
+### Dependencies: 6.6
+### Description: Add localStorage integration for offline functionality and state persistence
+### Details:
+Create localStorage adapter with methods for saving and loading folder structure. Implement debounced auto-save on state changes. Add migration logic for schema changes and handle storage quota exceeded errors.
+
+## 8. Add smooth animations for folder operations [done]
+### Dependencies: 6.5, 6.6
+### Description: Implement Framer Motion animations for all folder interactions
+### Details:
+Add AnimatePresence for enter/exit animations. Implement layout animations for reordering, expand/collapse animations with height transitions, and subtle spring animations for drag operations. Ensure animations are performant and respect prefers-reduced-motion.
+
+## 9. Create context menu for folder actions [done]
+### Dependencies: 6.3, 6.8
+### Description: Build a right-click context menu for folder operations
+### Details:
+Implement context menu using Radix UI or custom solution. Include options for rename, delete, create subfolder, and move operations. Add keyboard shortcuts and ensure proper positioning logic to keep menu within viewport.
+
+## 10. Enforce nesting depth limits [done]
+### Dependencies: 6.5, 6.6
+### Description: Implement validation to prevent excessive folder nesting beyond defined limits
+### Details:
+Create MAX_NESTING_DEPTH constant and validation function. Prevent drop operations that would exceed depth limit. Show visual indicators or tooltips when depth limit is reached. Consider performance implications of deep nesting.
+
+## 11. Add note count display with updates [done]
+### Dependencies: 6.2, 6.3, 6.7
+### Description: Display note counts for each folder and update them when notes are moved
+### Details:
+Add noteCount to folder data structure. Create aggregation logic to calculate total notes including subfolders. Update counts when notes are created, deleted, or moved between folders. Display counts with appropriate styling and consider zero states.
+
+## 12. Comprehensive interaction testing [done]
+### Dependencies: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11
+### Description: Test all drag-and-drop scenarios and edge cases thoroughly
+### Details:
+Write unit tests for CRUD operations and state management. Create integration tests for drag-and-drop scenarios including multi-level nesting. Test edge cases like circular references, maximum depth, and concurrent operations. Verify accessibility with keyboard navigation and screen readers.
+

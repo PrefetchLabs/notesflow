@@ -1,0 +1,73 @@
+# Task ID: 16
+# Title: Design and Build Landing Page
+# Status: pending
+# Dependencies: 15
+# Priority: high
+# Description: Create a stunning one-page landing site that converts visitors to users
+# Details:
+Create landing page at app root (/) with sections: Hero (tagline + demo video/gif), Problem (cluttered tools, disconnected time management), Solution (unified workspace with 3 key features), Testimonials (placeholder for now), and Pricing. Use Framer Motion for subtle scroll animations (fade in, slight y-movement). Create auto-playing demo video showing drag-to-calendar feature (use Loom or similar). Design with extreme minimalism: mostly white, one accent color, plenty of breathing room. Add sticky header with sign-in CTA. Implement smooth scroll to pricing section. Create responsive design that looks perfect on all devices. Add meta tags for SEO and social sharing. Include privacy policy and terms links (basic templates). Optimize for PageSpeed score >95. Add email capture for updates (store in Supabase). Create 404 page with clever message.
+
+# Test Strategy:
+Test on multiple devices and browsers. Verify all CTAs work correctly. Test page load speed (<2s). Validate SEO meta tags. Test social sharing previews. Ensure video plays on mobile. Test email capture works. Verify smooth scrolling. Check accessibility with screen reader.
+
+# Subtasks:
+## 1. Implement Hero Section with Demo Video [pending]
+### Dependencies: None
+### Description: Create a compelling hero section featuring the product name, tagline, and embedded demo video with optimized loading and playback controls
+### Details:
+Design hero section with Next.js 15.3 and React 19, implement video component with lazy loading, add play/pause controls with custom UI, optimize video format (WebM/MP4) for web delivery, ensure mobile responsiveness with appropriate aspect ratios
+
+## 2. Build Problem/Solution Sections [pending]
+### Dependencies: None
+### Description: Design and implement problem identification and solution presentation sections with clear visual hierarchy and compelling copy structure
+### Details:
+Create reusable section components using shadcn/ui primitives, implement grid layouts for problem points and solution features, add iconography using Lucide React, ensure proper semantic HTML structure for SEO
+
+## 3. Create Testimonial Placeholder Components [pending]
+### Dependencies: None
+### Description: Build flexible testimonial components with placeholder content that can be easily updated with real customer feedback
+### Details:
+Design testimonial cards with avatar, name, role, and quote fields, implement carousel/grid layout options, add star rating component, create loading skeletons for dynamic content, ensure accessibility with proper ARIA labels
+
+## 4. Develop Pricing Section [pending]
+### Dependencies: None
+### Description: Implement a clear, conversion-optimized pricing section with tier comparison and call-to-action buttons
+### Details:
+Create pricing card components with feature lists, implement toggle for monthly/annual billing, add highlighted 'recommended' tier styling, integrate with Stripe pricing table or custom implementation, ensure proper contrast ratios for accessibility
+
+## 5. Implement Scroll Animations with Framer Motion [pending]
+### Dependencies: 16.1, 16.2, 16.3, 16.4
+### Description: Add smooth scroll-triggered animations throughout the landing page using Framer Motion for enhanced user engagement
+### Details:
+Configure Framer Motion with React 19, implement fade-in animations for sections, add parallax effects for hero elements, create staggered animations for feature lists, optimize animation performance with will-change and GPU acceleration
+
+## 6. Implement Responsive Design System [pending]
+### Dependencies: 16.1, 16.2, 16.3, 16.4
+### Description: Ensure all components and sections adapt seamlessly across mobile, tablet, and desktop viewports
+### Details:
+Configure Tailwind CSS breakpoints, implement mobile-first design approach, create responsive navigation with hamburger menu, optimize touch targets for mobile (min 44x44px), test on real devices using BrowserStack or similar
+
+## 7. SEO Optimization Implementation [pending]
+### Dependencies: 16.1, 16.2
+### Description: Implement comprehensive SEO optimizations including metadata, structured data, and content optimization
+### Details:
+Configure Next.js metadata API for dynamic meta tags, implement JSON-LD structured data for organization and product schema, optimize heading hierarchy (H1-H6), add Open Graph and Twitter Card metadata, create XML sitemap generation
+
+## 8. Build Email Capture Form [pending]
+### Dependencies: None
+### Description: Create an optimized email capture form with validation, error handling, and integration with email service provider
+### Details:
+Implement form using react-hook-form with Zod validation, add email validation and error states, integrate with Supabase or preferred email service API, implement honeypot and rate limiting for spam prevention, add success confirmation with toast notification
+
+## 9. Create Privacy Policy and Terms Pages [pending]
+### Dependencies: None
+### Description: Develop legally compliant privacy policy and terms of service pages with proper formatting and navigation
+### Details:
+Create markdown-based content pages using Next.js dynamic routes, implement table of contents with smooth scrolling, add last updated timestamps, ensure GDPR/CCPA compliance mentions, style with consistent typography using Tailwind
+
+## 10. Performance Optimization for PageSpeed >95 [pending]
+### Dependencies: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 16.8, 16.9
+### Description: Implement advanced performance optimizations to achieve PageSpeed score above 95 on both mobile and desktop
+### Details:
+Optimize images with next/image and proper sizing, implement critical CSS inlining, configure font subsetting and preloading, enable Next.js Partial Pre-rendering, minimize JavaScript bundle with code splitting, implement resource hints (preconnect, dns-prefetch), optimize Core Web Vitals (LCP <2.5s, CLS <0.1)
+

@@ -1,0 +1,58 @@
+# Task ID: 5
+# Title: Create Minimal UI Shell with Sidebar and Editor Layout
+# Status: done
+# Dependencies: 2, 4
+# Priority: high
+# Description: Build the core application shell with a minimalist sidebar for navigation and main editor area
+# Details:
+Create the main application layout in /app/(app)/layout.tsx with a fixed 200px sidebar and fluid main content area. Implement sidebar component with: user avatar and name at top, folder tree in middle (using radix-ui/react-collapsible@1.0.3 for smooth animations), and minimal settings link at bottom. Design with 80% whitespace principle: generous padding (24-32px), clean borders (1px solid #e5e5e5), and subtle hover states. Use CSS Grid for layout to ensure proper responsiveness. Implement loading states with subtle skeleton screens. Add smooth transitions using Framer Motion for sidebar collapse/expand. Create empty state component with beautiful typography encouraging users to create their first note. Ensure all interactions feel instant (<50ms response time) using optimistic updates.
+
+# Test Strategy:
+Test layout responsiveness on different screen sizes (minimum 1280px width for MLP). Verify sidebar maintains 200px width consistently. Test animation performance using Chrome DevTools. Ensure loading states appear for operations over 100ms. Test keyboard navigation through sidebar. Validate empty state renders correctly for new users.
+
+# Subtasks:
+## 1. Create main layout component with CSS Grid [done]
+### Dependencies: None
+### Description: Implement the base layout structure using CSS Grid for optimal performance and flexibility
+### Details:
+Create a main layout component that uses CSS Grid to define the overall structure with a collapsible sidebar (280px expanded, 60px collapsed) and main content area. Implement the grid system to handle responsive behavior and ensure smooth transitions. Use CSS custom properties for dynamic sizing.
+
+## 2. Implement sidebar component structure [done]
+### Dependencies: 5.1
+### Description: Build the sidebar component with collapse/expand functionality and proper state management
+### Details:
+Create the sidebar component with Zustand for collapse state management. Include the collapse/expand button with smooth width transitions. Structure the sidebar to contain user profile section at top and folder tree below. Implement proper overflow handling and scrollable areas.
+
+## 3. Design and implement user profile section [done]
+### Dependencies: 5.2
+### Description: Create the user profile component for the sidebar with avatar, name, and settings access
+### Details:
+Design a clean user profile section that displays user avatar (with fallback), name, and email. Include a settings gear icon for quick access. Ensure the design works in both expanded and collapsed sidebar states with appropriate tooltips in collapsed mode.
+
+## 4. Build folder tree placeholder component [done]
+### Dependencies: 5.2
+### Description: Create a placeholder structure for the folder tree with proper indentation and icons
+### Details:
+Implement a folder tree placeholder component that will later be populated with actual data. Include folder/file icons from Lucide React, proper indentation levels, and hover states. Design for both expanded and collapsed sidebar views with icon-only display when collapsed.
+
+## 5. Implement loading state components with skeleton screens [done]
+### Dependencies: 5.1, 5.2
+### Description: Create reusable skeleton screen components for smooth loading experiences
+### Details:
+Build skeleton screen components for the sidebar (profile skeleton, folder tree skeleton) and main content area. Use subtle shimmer animations and match the exact dimensions of actual content. Create variants for different content types and ensure they respect the 80% whitespace principle.
+
+## 6. Design empty state components [done]
+### Dependencies: 5.1
+### Description: Create engaging empty state designs for when no content is available
+### Details:
+Design empty state components for scenarios like no folders, no notes, or first-time user experience. Include helpful illustrations or icons, clear messaging, and call-to-action buttons. Ensure designs align with the minimalist aesthetic and 80% whitespace principle.
+
+## 7. Set up Framer Motion animations and responsive design [done]
+### Dependencies: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6
+### Description: Implement smooth animations and ensure responsive behavior across all breakpoints
+### Details:
+Configure Framer Motion for sidebar collapse/expand animations, page transitions, and micro-interactions. Implement responsive breakpoints using custom hooks (useMediaQuery, useWindowSize). Ensure mobile-first design with appropriate navigation patterns for different screen sizes. Add subtle hover and focus states throughout.
+<info added on 2025-07-09T06:43:13.691Z>
+Performance optimization needed due to detected lag issues. Root causes likely include excessive re-renders from animation state changes, non-optimized Framer Motion configurations, and heavy computations blocking the main thread. Priority fixes: implement useCallback/useMemo for animation handlers, configure Framer Motion with will-change CSS properties, use transform-only animations, debounce resize handlers in useWindowSize/useMediaQuery hooks, and consider lazy loading for non-critical animations. Monitor re-render patterns in React DevTools and measure animation performance with browser profiling tools.
+</info added on 2025-07-09T06:43:13.691Z>
+

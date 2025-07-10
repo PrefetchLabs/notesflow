@@ -1,0 +1,76 @@
+# Task ID: 2
+# Title: Implement Google OAuth with Better-Auth
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Set up Google OAuth authentication using better-auth library for secure user sign-in
+# Details:
+Install better-auth@0.3.0 and configure Google OAuth provider. Set up OAuth credentials in Google Cloud Console with proper redirect URIs for development and production. Create auth configuration in /lib/auth.ts with Better-Auth setup. Implement auth API routes in /app/api/auth/[...all]/route.ts. Create a simple sign-in page at /app/auth/signin/page.tsx with Google sign-in button. Set up middleware.ts to protect routes and redirect unauthenticated users. Create auth context provider for client-side auth state management. Implement user session management with proper token handling and refresh logic. Store minimal user data (id, email, name, avatar) in session.
+
+# Test Strategy:
+Test complete OAuth flow from sign-in to sign-out. Verify redirect behavior for protected routes. Confirm session persistence across page refreshes. Test token refresh mechanism. Validate that user data is properly stored and accessible throughout the app. Test error handling for failed authentication attempts.
+
+# Subtasks:
+## 1. Set up Google Cloud Console OAuth 2.0 credentials [done]
+### Dependencies: None
+### Description: Create and configure OAuth 2.0 credentials in Google Cloud Console for the application
+### Details:
+Navigate to Google Cloud Console, create a new project or select existing one, enable Google+ API, create OAuth 2.0 credentials with proper redirect URIs (http://localhost:3000/api/auth/callback/google for development and production URL), download credentials JSON, and store client ID and secret securely in environment variables
+<info added on 2025-07-09T05:35:45.081Z>
+Created comprehensive Google OAuth setup documentation at docs/google-oauth-setup.md with step-by-step instructions for Google Cloud Console configuration. Documentation includes creating/selecting a project, enabling Google+ API, creating OAuth 2.0 credentials, configuring redirect URIs for both development (http://localhost:3000/api/auth/callback/google) and production environments, and securely storing Client ID and Client Secret in .env.local file. Currently waiting for user to complete the Google Cloud Console setup process before proceeding with better-auth package installation and configuration.
+</info added on 2025-07-09T05:35:45.081Z>
+
+## 2. Install and configure better-auth package [done]
+### Dependencies: 2.1
+### Description: Install better-auth and its dependencies, set up basic configuration with Google provider
+### Details:
+Run 'bun add better-auth @better-auth/client', create auth configuration file at lib/auth/config.ts, configure better-auth with Google OAuth provider using environment variables, set up database adapter for Drizzle ORM, configure session options and token settings
+
+## 3. Create auth database schema with Drizzle [done]
+### Dependencies: 2.2
+### Description: Define database schema for users, sessions, and OAuth accounts using Drizzle ORM
+### Details:
+Create schema file at lib/db/schema/auth.ts, define users table with id, email, name, image, emailVerified fields, create sessions table with id, userId, expiresAt, create accounts table for OAuth provider data, add necessary indexes and relations, generate and run migrations
+
+## 4. Implement auth API routes for better-auth [done]
+### Dependencies: 2.2, 2.3
+### Description: Create Next.js API routes to handle authentication endpoints
+### Details:
+Create app/api/auth/[...auth]/route.ts to handle all better-auth endpoints, implement GET and POST handlers that proxy to better-auth, ensure proper CORS and security headers, handle callback URLs for OAuth flow, implement error handling for failed auth attempts
+
+## 5. Create sign-in page UI with shadcn/ui components [done]
+### Dependencies: 2.4
+### Description: Build a responsive sign-in page using shadcn/ui components and integrate with better-auth client
+### Details:
+Create app/(auth)/login/page.tsx, implement responsive layout with Card component, add Google sign-in button using Button component from shadcn/ui, integrate better-auth client hooks for authentication, add loading states and animations with framer-motion, implement proper error display using toast notifications
+
+## 6. Set up Next.js middleware for route protection [done]
+### Dependencies: 2.4
+### Description: Implement middleware to protect authenticated routes and handle redirects
+### Details:
+Create middleware.ts in project root, implement session verification using better-auth, define protected route patterns (dashboard, api routes), handle unauthenticated redirects to login page, implement proper matcher configuration, add public route exceptions
+
+## 7. Create auth context provider and hooks [done]
+### Dependencies: 2.4, 2.5
+### Description: Implement React context for auth state management and custom hooks for authentication
+### Details:
+Create lib/auth/auth-context.tsx with AuthProvider component, implement useAuth hook for accessing auth state, integrate with better-auth client for session management, handle auth state persistence and rehydration, create useRequireAuth hook for protected components, implement proper TypeScript types
+
+## 8. Implement session management and token handling [done]
+### Dependencies: 2.7
+### Description: Set up secure session management with automatic token refresh and expiration handling
+### Details:
+Configure better-auth session settings with appropriate expiration times, implement automatic token refresh before expiration, handle session persistence across browser sessions, set up secure cookie configuration for production, implement logout functionality that clears all session data
+
+## 9. Add comprehensive error handling and user feedback [done]
+### Dependencies: 2.5, 2.7, 2.8
+### Description: Implement error boundaries, failed auth handling, and user-friendly error messages
+### Details:
+Create custom error boundary for auth-related errors, implement retry logic for failed OAuth attempts, add user-friendly error messages using Sonner toast, handle network errors and API failures gracefully, implement fallback UI states, log errors to monitoring service
+
+## 10. Write tests for complete authentication flow [done]
+### Dependencies: 2.9
+### Description: Create comprehensive test suite for authentication functionality
+### Details:
+Write unit tests for auth hooks and utilities, create integration tests for API routes, implement E2E tests for complete sign-in flow using Playwright, test error scenarios and edge cases, verify middleware protection works correctly, test session persistence and token refresh
+

@@ -1,0 +1,79 @@
+# Task ID: 4
+# Title: Integrate Supabase for Real-time and Database
+# Status: deferred
+# Dependencies: 3
+# Priority: high
+# Description: Set up Supabase client for database operations and real-time synchronization
+# Details:
+Install @supabase/supabase-js@2.39.3 and @supabase/ssr@0.1.0. Create Supabase project and configure environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY). Set up Supabase client singleton in /lib/supabase/client.ts for client-side usage and /lib/supabase/server.ts for server-side operations. Configure Row Level Security (RLS) policies for all tables: users can only access their own data, collaborators can access shared notes, public read for shared notes. Set up real-time subscriptions for notes and time blocks tables. Implement connection management with automatic reconnection. Create database functions for complex operations like folder tree retrieval. Set up Supabase Edge Functions project structure for future AI integration.
+
+# Test Strategy:
+Test RLS policies by attempting unauthorized data access. Verify real-time updates work across multiple browser sessions. Test connection recovery after network interruption. Measure real-time sync latency (<500ms target). Test database performance with 1000+ notes and folders. Validate that offline changes sync correctly when connection is restored.
+
+# Subtasks:
+## 1. Create Supabase project and configure initial settings [done]
+### Dependencies: None
+### Description: Set up a new Supabase project, configure authentication providers, and establish basic project settings
+### Details:
+Create a new Supabase project through the dashboard, configure email/password authentication, enable Google OAuth provider, set up custom SMTP settings if needed, configure password policies and email templates
+
+## 2. Install Supabase client libraries and dependencies [pending]
+### Dependencies: None
+### Description: Install @supabase/supabase-js and @supabase/ssr packages with proper version management
+### Details:
+Run bun add @supabase/supabase-js@2.x @supabase/ssr@latest, ensure compatibility with Next.js 15.3 and React 19, update package.json with exact versions
+
+## 3. Configure environment variables for Supabase [done]
+### Dependencies: 4.1
+### Description: Set up all required Supabase environment variables in .env.local and ensure proper security
+### Details:
+Add NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY to .env.local, create .env.example with placeholders, update .gitignore to exclude .env files
+
+## 4. Implement Supabase server client singleton [pending]
+### Dependencies: 4.2, 4.3
+### Description: Create server-side Supabase client with proper cookie handling for SSR
+### Details:
+Create lib/supabase/server.ts with createServerClient function using @supabase/ssr, implement cookie adapter for Next.js cookies(), add proper TypeScript types, handle async cookie operations
+
+## 5. Implement Supabase browser client singleton [pending]
+### Dependencies: 4.2, 4.3
+### Description: Create client-side Supabase client with proper configuration and type safety
+### Details:
+Create lib/supabase/client.ts with createBrowserClient singleton pattern, implement proper TypeScript generics for database types, add environment variable validation
+
+## 6. Create RLS policies for all database tables [pending]
+### Dependencies: 4.1
+### Description: Implement Row Level Security policies for user data protection across all tables
+### Details:
+Create policies for SELECT, INSERT, UPDATE, DELETE operations, implement user_id based access control, add policies for public read access where appropriate, test policies with different user roles
+
+## 7. Set up real-time subscription infrastructure [pending]
+### Dependencies: 4.4, 4.5
+### Description: Implement real-time subscription system with proper cleanup and error handling
+### Details:
+Create hooks/useRealtimeSubscription.ts for React components, implement subscription cleanup on unmount, add reconnection logic, create subscription manager for multiple channels
+
+## 8. Implement connection management with reconnection logic [pending]
+### Dependencies: 4.7
+### Description: Create robust connection management system with automatic reconnection and state tracking
+### Details:
+Implement exponential backoff for reconnection attempts, add connection state management with Zustand, create connection status indicators, handle offline/online transitions gracefully
+
+## 9. Create database functions for complex queries [pending]
+### Dependencies: 4.6
+### Description: Implement PostgreSQL functions for complex operations and aggregations
+### Details:
+Create functions for common aggregations, implement stored procedures for multi-table operations, add functions for search functionality, optimize with proper indexing
+
+## 10. Set up Edge Functions project structure [pending]
+### Dependencies: 4.1
+### Description: Initialize Supabase Edge Functions with proper TypeScript configuration and deployment setup
+### Details:
+Create supabase/functions directory structure, implement shared utilities and types, set up local development with Deno, configure CORS and authentication middleware
+
+## 11. Implement comprehensive security testing and performance benchmarking [pending]
+### Dependencies: 4.6, 4.7, 4.8, 4.9, 4.10
+### Description: Create test suite for security validation and performance metrics collection
+### Details:
+Write tests for RLS policy enforcement, test authentication flows and token handling, benchmark query performance, load test real-time subscriptions, implement security headers validation
+

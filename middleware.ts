@@ -7,6 +7,10 @@ const protectedRoutes = ['/dashboard', '/notes', '/settings'];
 // Routes that are only for non-authenticated users
 const authRoutes = ['/login', '/register'];
 
+// Admin routes - only check session in middleware
+// Actual permission checks are done in the route handlers
+const adminRoutes = ['/admin'];
+
 export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
@@ -19,11 +23,23 @@ export async function middleware(request: NextRequest) {
   // Check if the current route is an auth route
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
+  // Check if the current route is an admin route
+  const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route));
+
   // Don't redirect from root path - let the landing page be accessible to all
   // Users can click sign in or get started buttons to go to login
 
   // Redirect to login if accessing protected route without session
-  if (isProtectedRoute && !sessionCookie) {
+  if ((isProtectedRoute || isAdminRoute) && !sessionCookie) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // For admin routes, we only check if there's a session in middleware
+  // The actual admin permission checks are done in the route handlers/layouts
+  // This is because middleware runs in Edge Runtime and can't access database
+  if (isAdminRoute && !sessionCookie) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);

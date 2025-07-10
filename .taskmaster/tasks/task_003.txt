@@ -1,0 +1,120 @@
+# Task ID: 3
+# Title: Design and Implement Database Schema with Drizzle ORM
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Create the database schema using Drizzle ORM with PostgreSQL for all core data models
+# Details:
+Install drizzle-orm@0.29.3, drizzle-kit@0.20.14, and @neondatabase/serverless@0.9.0 (or postgres@3.4.3 for local dev). Create database schema in /db/schema.ts with tables for: users (id, email, name, avatar, isPro, stripeCustomerId, createdAt, updatedAt), folders (id, userId, name, parentId, position, createdAt, updatedAt), notes (id, userId, folderId, title, content as JSONB, lastEditedBy, createdAt, updatedAt), timeBlocks (id, userId, noteId, title, date, startTime, duration, completed, createdAt), and collaborators (noteId, userId, addedAt). Set up proper indexes for performance: userId indexes on all tables, composite indexes for folder hierarchy queries, and datetime indexes for time blocks. Configure Drizzle with connection pooling and prepared statements. Create migration files and seed data for development.
+
+# Test Strategy:
+Write unit tests for all database operations using Vitest. Test CRUD operations for each model. Verify foreign key constraints work correctly. Test cascade deletes for user data. Benchmark query performance for common operations like folder tree retrieval and time block queries. Test connection pooling under load.
+
+# Subtasks:
+## 1. Install Drizzle ORM and PostgreSQL driver [done]
+### Dependencies: None
+### Description: Install Drizzle ORM, PostgreSQL driver (pg), and necessary type definitions
+### Details:
+Run: bun add drizzle-orm pg @types/pg
+Install Drizzle Kit for migrations: bun add -d drizzle-kit
+Verify installations in package.json
+
+## 2. Configure database connection with environment variables [done]
+### Dependencies: 3.1
+### Description: Set up database connection configuration using Drizzle and environment variables
+### Details:
+Create lib/db/index.ts with connection setup
+Configure DATABASE_URL in .env.local
+Implement connection singleton pattern for Next.js
+Add connection error handling and logging
+
+## 3. Create user table schema with authentication fields [done]
+### Dependencies: 3.2
+### Description: Design and implement the users table schema with Supabase auth integration
+### Details:
+Create lib/db/schema/users.ts
+Define users table with: id (UUID), email, username, avatar_url, created_at, updated_at
+Link to Supabase auth.users table via foreign key
+Add unique constraints on email and username
+
+## 4. Design folder hierarchy schema with self-referential relationships [done]
+### Dependencies: 3.3
+### Description: Create folders table with parent-child relationships for nested folder structure
+### Details:
+Create lib/db/schema/folders.ts
+Implement: id, name, parent_id (self-referential), user_id, color, icon, order, created_at, updated_at
+Add foreign key to users table
+Implement path materialization for efficient querying
+
+## 5. Implement notes table with JSONB content field [done]
+### Dependencies: 3.4
+### Description: Create notes table with flexible JSONB storage for rich content
+### Details:
+Create lib/db/schema/notes.ts
+Define: id, title, content (JSONB), folder_id, user_id, tags (array), is_pinned, is_archived, created_at, updated_at
+Implement content schema validation
+Add foreign keys to users and folders
+
+## 6. Design time blocks schema for scheduling [done]
+### Dependencies: 3.5
+### Description: Create time_blocks table for calendar integration and time management
+### Details:
+Create lib/db/schema/timeBlocks.ts
+Implement: id, note_id, user_id, start_time, end_time, title, color, recurrence_rule, reminder_minutes, created_at, updated_at
+Add check constraints for time validation
+Implement recurrence pattern storage
+
+## 7. Create collaborators junction table [done]
+### Dependencies: 3.5
+### Description: Implement many-to-many relationship for note collaboration
+### Details:
+Create lib/db/schema/collaborators.ts
+Define: id, note_id, user_id, permission_level (view/edit), invited_at, accepted_at
+Add composite unique constraint on (note_id, user_id)
+Implement permission enum type
+
+## 8. Add performance indexes to all tables [done]
+### Dependencies: 3.3, 3.4, 3.5, 3.6, 3.7
+### Description: Create database indexes for optimal query performance
+### Details:
+Add indexes on: users.email, folders.user_id, folders.parent_id, notes.user_id, notes.folder_id, time_blocks.user_id, time_blocks.start_time
+Create composite indexes for common query patterns
+Add GIN index on notes.content for JSONB searches
+
+## 9. Generate and configure migration files [done]
+### Dependencies: 3.8
+### Description: Set up Drizzle Kit configuration and generate initial migration
+### Details:
+Create drizzle.config.ts with PostgreSQL configuration
+Run: bun drizzle-kit generate:pg
+Review generated SQL migration files
+Add migration scripts to package.json
+
+## 10. Create comprehensive seed data script [done]
+### Dependencies: 3.9
+### Description: Implement seed data for development and testing
+### Details:
+Create lib/db/seed.ts with sample data
+Generate test users, folders hierarchy, notes with rich content
+Add time blocks and collaborations
+Implement idempotent seeding logic
+
+## 11. Configure connection pooling and optimization [done]
+### Dependencies: 3.2
+### Description: Set up database connection pooling for production performance
+### Details:
+Configure pg pool settings: max connections, idle timeout, connection timeout
+Implement connection health checks
+Add query logging for development
+Set up connection retry logic
+
+## 12. Implement comprehensive database testing setup [done]
+### Dependencies: 3.10, 3.11
+### Description: Create test suite for database schema and operations
+### Details:
+Set up test database configuration
+Create schema validation tests
+Implement CRUD operation tests for each table
+Add relationship integrity tests
+Configure test data cleanup
+

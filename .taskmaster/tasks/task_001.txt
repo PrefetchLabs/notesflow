@@ -1,0 +1,64 @@
+# Task ID: 1
+# Title: Initialize Next.js 15 Project with Core Dependencies
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Set up the foundational Next.js 15 project with TypeScript, Tailwind CSS, and essential dependencies for the NotesFlow MLP
+# Details:
+Create a new Next.js 15 project using the latest app router. Install and configure: next@15.0.3, react@19.0.0, react-dom@19.0.0, typescript@5.3.3, tailwindcss@3.4.1, @tailwindcss/typography@0.5.10, framer-motion@11.0.3, and postcss@8.4.33. Set up TypeScript with strict mode enabled. Configure Tailwind with a minimalist theme using system font stack and limited color palette (black, white, single accent color). Set up project structure with /app directory for Next.js 15 app router, /components for reusable UI components, /lib for utilities, and /types for TypeScript interfaces. Ensure the development server runs with sub-50ms response times.
+
+# Test Strategy:
+Verify project initialization by running 'npm run dev' and checking that the development server starts successfully. Confirm TypeScript compilation works without errors. Test that Tailwind CSS is properly configured by creating a test component with utility classes. Measure initial page load performance to ensure it meets <1s first paint target.
+
+# Subtasks:
+## 1. Create Next.js 15 project with create-next-app [done]
+### Dependencies: None
+### Description: Initialize a new Next.js 15 project using create-next-app with TypeScript and Tailwind CSS options
+### Details:
+Run `npx create-next-app@latest notesflow --typescript --tailwind --app --use-bun` to create the project with App Router, TypeScript, and Tailwind CSS support. Ensure Next.js 15.3+ is installed.
+
+## 2. Configure TypeScript with strict mode [done]
+### Dependencies: 1.1
+### Description: Update tsconfig.json to enable strict mode and configure advanced TypeScript 5+ settings
+### Details:
+Enable strict mode in tsconfig.json, configure module resolution, path aliases, and ensure compatibility with React 19 and Next.js 15.3. Add strict null checks, no implicit any, and other recommended strict settings.
+
+## 3. Install and configure essential dependencies [done]
+### Dependencies: 1.1
+### Description: Install core dependencies including React 19, shadcn/ui, Drizzle ORM, Supabase, and other essential packages
+### Details:
+Install dependencies: @radix-ui/react-*, @supabase/supabase-js@2.x, @supabase/ssr@latest, drizzle-orm@latest, @tanstack/react-query@5.x, react-hook-form@7.x, zod@3.x, lucide-react@latest, sonner@latest, framer-motion@11.x, zustand@4.x, openai@4.x, class-variance-authority@latest, clsx@latest, tailwind-merge@latest
+
+## 4. Set up Tailwind CSS with custom theme configuration [done]
+### Dependencies: 1.3
+### Description: Configure Tailwind CSS with custom theme, colors, breakpoints, and integrate with shadcn/ui
+### Details:
+Update tailwind.config.ts with custom theme configuration, set up CSS variables for shadcn/ui components, configure responsive breakpoints for mobile-first design, and set up globals.css with base styles and CSS custom properties.
+
+## 5. Create project directory structure [done]
+### Dependencies: 1.1
+### Description: Set up the complete project structure following Next.js 15 App Router conventions without src directory
+### Details:
+Create directories: app/(auth), app/(dashboard), app/api, components/ui, components/forms, components/wizards, components/modals, components/layouts, components/dashboard, components/features, lib/db, lib/supabase, lib/store, lib/validations, lib/hooks, lib/api, lib/constants, lib/utils, types/, config/, hooks/, styles/
+
+## 6. Configure development environment and tooling [done]
+### Dependencies: 1.2, 1.3
+### Description: Set up ESLint, Prettier, environment variables, and development scripts
+### Details:
+Configure ESLint with Next.js and TypeScript rules, set up Prettier for code formatting, create .env.local with Supabase and OpenAI placeholders, update package.json scripts for development workflow including db:generate, db:push, db:studio, lint, and type-check commands.
+
+## 7. Establish performance baseline and monitoring [done]
+### Dependencies: 1.5, 1.6
+### Description: Set up performance monitoring tools and establish Core Web Vitals baseline
+### Details:
+Configure @next/bundle-analyzer, set up basic performance monitoring hooks, create instrumentation for Core Web Vitals tracking (LCP < 2.5s, FID < 100ms, CLS < 0.1, INP < 200ms), and document baseline metrics.
+<info added on 2025-07-09T05:33:02.961Z>
+Performance monitoring setup completed successfully. Implemented comprehensive Web Vitals tracking with attribution support for all Core Web Vitals metrics (LCP, FID, CLS, INP). Added @next/bundle-analyzer with npm scripts for analyzing both client and server bundles. Created WebVitals component with optional debug mode accessible via ?debug=true query parameter for development debugging. Developed usePerformance custom hook for component-level performance tracking capabilities. Set up instrumentation.ts file for server-side performance monitoring integration. Established performance baseline documentation and monitoring guidelines for ongoing development team reference.
+</info added on 2025-07-09T05:33:02.961Z>
+
+## 8. Initialize Git repository with comprehensive .gitignore [done]
+### Dependencies: 1.5
+### Description: Set up Git repository with proper .gitignore configuration for Next.js project
+### Details:
+Initialize Git repository, create comprehensive .gitignore including node_modules, .env*, .next/, out/, build/, dist/, .DS_Store, *.log, .vercel, and other common patterns. Make initial commit with project structure.
+

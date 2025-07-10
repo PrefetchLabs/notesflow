@@ -1,0 +1,85 @@
+# Task ID: 14
+# Title: Integrate Stripe Checkout for Payments
+# Status: pending
+# Dependencies: 13
+# Priority: high
+# Description: Implement Stripe payment processing for Pro subscriptions
+# Details:
+Install stripe@14.14.0 and @stripe/stripe-js@2.4.0. Set up Stripe account with products: Pro Monthly ($8/month), Pro Yearly ($80/year), and Early Bird Special ($4/month lifetime for first 100). Create API routes for checkout session creation at /api/stripe/checkout. Implement webhook handler at /api/stripe/webhook for payment events. Set up subscription management: handle checkout.session.completed, customer.subscription.updated, and customer.subscription.deleted. Update user isPro status and stripeCustomerId in database. Create checkout flow with loading state and error handling. Implement success page at /welcome that shows pro features. Add billing portal link for subscription management. Set up test mode for development with test cards. Create StipeProvider component for client-side Stripe elements. Add proper error logging for failed payments.
+
+# Test Strategy:
+Test complete payment flow with Stripe test cards. Verify webhooks update user status correctly. Test subscription lifecycle: create, update, cancel. Ensure billing portal works. Test error cases like declined cards. Verify early bird pricing applies correctly. Test both monthly and yearly subscriptions.
+
+# Subtasks:
+## 1. Create Stripe account and configure products [pending]
+### Dependencies: None
+### Description: Set up Stripe account, create subscription products with pricing tiers, and configure tax settings
+### Details:
+Sign up for Stripe account, navigate to Products section, create subscription products for different tiers (Basic, Pro, Enterprise), set up monthly and annual pricing for each tier, configure tax collection settings if needed, and obtain API keys for both test and production environments
+
+## 2. Install and configure Stripe SDK [pending]
+### Dependencies: 14.1
+### Description: Install Stripe SDK for Next.js and configure with environment variables
+### Details:
+Run 'bun add stripe @stripe/stripe-js', create lib/stripe/client.ts for browser client initialization, create lib/stripe/server.ts for server-side Stripe instance, add STRIPE_PUBLISHABLE_KEY and STRIPE_SECRET_KEY to .env files, configure Stripe webhook endpoint secret
+
+## 3. Design subscription database schema [pending]
+### Dependencies: None
+### Description: Create Drizzle ORM schema for subscriptions, plans, and billing history
+### Details:
+Define tables: subscriptions (id, userId, stripeCustomerId, stripeSubscriptionId, status, currentPeriodEnd), plans (id, name, stripePriceId, features, limits), billing_history (id, userId, amount, status, invoiceUrl), add foreign key relationships and indexes, create migration files
+
+## 4. Implement checkout session API endpoint [pending]
+### Dependencies: 14.2, 14.3
+### Description: Create API route to generate Stripe checkout sessions for subscription purchases
+### Details:
+Create app/api/stripe/checkout/route.ts, implement POST handler that creates checkout session with selected price ID, include success_url and cancel_url, add metadata for user identification, implement proper error handling and validation, ensure authentication before session creation
+
+## 5. Create subscription management UI components [pending]
+### Dependencies: 14.2
+### Description: Build pricing cards, plan selector, and checkout button components
+### Details:
+Create components/pricing/PricingCard.tsx with plan features display, implement PlanSelector.tsx for monthly/annual toggle, create CheckoutButton.tsx that calls checkout API, use shadcn/ui components for consistent styling, implement loading states and error handling
+
+## 6. Implement webhook endpoint for Stripe events [pending]
+### Dependencies: 14.2, 14.3
+### Description: Create secure webhook endpoint to receive and process Stripe events
+### Details:
+Create app/api/stripe/webhook/route.ts, implement signature verification using stripe.webhooks.constructEvent, add raw body parsing for webhook verification, implement event routing based on event type, add logging for all incoming events, ensure idempotent event processing
+
+## 7. Handle subscription lifecycle events [pending]
+### Dependencies: 14.6
+### Description: Process checkout.session.completed, subscription updated/deleted events
+### Details:
+Implement handlers for: checkout.session.completed (create subscription record), customer.subscription.updated (update status/plan), customer.subscription.deleted (cancel subscription), payment_intent.succeeded (log successful payments), invoice.payment_failed (handle failed payments), update database accordingly for each event
+
+## 8. Create success and cancel pages [pending]
+### Dependencies: 14.5
+### Description: Build post-checkout success page and cancellation handling page
+### Details:
+Create app/(dashboard)/checkout/success/page.tsx with order confirmation, implement session retrieval to show purchase details, create cancel page for abandoned checkouts, add email notification trigger on success, implement proper loading and error states
+
+## 9. Integrate Stripe customer portal [pending]
+### Dependencies: 14.2, 14.7
+### Description: Enable customers to manage subscriptions through Stripe's hosted portal
+### Details:
+Configure customer portal in Stripe dashboard, create API endpoint to generate portal sessions, add 'Manage Subscription' button in user settings, implement redirect flow to Stripe portal, handle return URL after portal actions, ensure portal configuration matches business rules
+
+## 10. Implement subscription status middleware [pending]
+### Dependencies: 14.3, 14.7
+### Description: Create middleware to check subscription status and enforce access control
+### Details:
+Create middleware.ts to check subscription status on protected routes, implement feature gating based on plan limits, add subscription status to user context, handle expired subscriptions gracefully, cache subscription status for performance, implement grace period handling
+
+## 11. Add comprehensive error handling and logging [pending]
+### Dependencies: 14.4, 14.6, 14.7
+### Description: Implement error boundaries, retry logic, and detailed logging for payment flows
+### Details:
+Add try-catch blocks with specific error messages, implement exponential backoff for failed webhook processing, create error logging with context (user, amount, error type), add Sentry or similar error tracking, implement user-friendly error messages, create admin alerts for critical payment failures
+
+## 12. Create comprehensive payment testing suite [pending]
+### Dependencies: 14.1, 14.4, 14.5, 14.6, 14.7, 14.8, 14.9, 14.10, 14.11
+### Description: Implement end-to-end tests for all payment scenarios using Stripe test mode
+### Details:
+Test successful subscription creation flow, test failed payment scenarios using Stripe test cards, verify webhook processing for all event types, test subscription upgrades/downgrades, validate cancellation and reactivation flows, test edge cases like duplicate webhooks, verify proper database state after each operation
+
