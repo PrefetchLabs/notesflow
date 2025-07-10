@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
-import { notes, collaborators, user } from '@/lib/db/schema';
-import { eq, and, isNull, or, ne } from 'drizzle-orm';
+import { notes, collaborators, user, subscriptions } from '@/lib/db/schema';
+import { eq, and, isNull, or, ne, count } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -131,6 +131,40 @@ export async function POST(request: NextRequest) {
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check subscription limits
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, session.user.id));
+
+    if (subscription && subscription.plan === 'free') {
+      // Count existing notes
+      const [notesCount] = await db
+        .select({ count: count() })
+        .from(notes)
+        .where(
+          and(
+            eq(notes.userId, session.user.id),
+            isNull(notes.deletedAt)
+          )
+        );
+
+      const noteLimit = subscription.limits?.maxNotes || 10;
+      const currentCount = notesCount?.count || 0;
+
+      if (currentCount >= noteLimit) {
+        return NextResponse.json(
+          { 
+            error: `Note limit reached. Free plan allows ${noteLimit} notes.`,
+            limit: noteLimit,
+            current: currentCount,
+            requiresUpgrade: true
+          },
+          { status: 403 }
+        );
+      }
     }
 
     const body = await request.json();

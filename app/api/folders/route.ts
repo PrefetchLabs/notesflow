@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
-import { folders } from '@/lib/db/schema';
-import { eq, and, desc, asc, isNull } from 'drizzle-orm';
+import { folders, subscriptions } from '@/lib/db/schema';
+import { eq, and, desc, asc, isNull, count } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -63,6 +63,35 @@ export async function POST(request: NextRequest) {
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check subscription limits
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, session.user.id));
+
+    if (subscription && subscription.plan === 'free') {
+      // Count existing folders
+      const [foldersCount] = await db
+        .select({ count: count() })
+        .from(folders)
+        .where(eq(folders.userId, session.user.id));
+
+      const folderLimit = subscription.limits?.maxFolders || 3;
+      const currentCount = foldersCount?.count || 0;
+
+      if (currentCount >= folderLimit) {
+        return NextResponse.json(
+          { 
+            error: `Folder limit reached. Free plan allows ${folderLimit} folders.`,
+            limit: folderLimit,
+            current: currentCount,
+            requiresUpgrade: true
+          },
+          { status: 403 }
+        );
+      }
     }
 
     const body = await request.json();

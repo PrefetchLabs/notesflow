@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFoldersWithNotes } from '@/hooks/useFoldersWithNotes';
 import { useState, useEffect } from 'react';
+import { useSubscription } from '@/lib/contexts/subscription-context';
+import { toast } from 'sonner';
 
 interface SidebarProps {
   onToggle: () => void;
@@ -21,6 +23,7 @@ export function Sidebar({ onToggle }: SidebarProps) {
   const router = useRouter();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const { folders, rootNotes, sharedNotes, isLoading, createFolder, updateFolder, deleteFolder, updateFolderPositions, moveNoteToFolder, refresh } = useFoldersWithNotes();
+  const { checkLimit, refreshSubscription } = useSubscription();
 
   // Force refresh on mount to ensure we have latest shared notes
   useEffect(() => {
@@ -28,6 +31,21 @@ export function Sidebar({ onToggle }: SidebarProps) {
   }, [refresh]);
 
   const handleCreateNote = async () => {
+    // Check note limit before creating
+    const noteLimit = checkLimit('maxNotes');
+    if (!noteLimit.allowed) {
+      toast.error(
+        `You've reached the limit of ${noteLimit.limit} notes on the free plan. Upgrade to Pro for unlimited notes!`,
+        {
+          action: {
+            label: 'Upgrade to Pro',
+            onClick: () => router.push('/upgrade'),
+          },
+        }
+      );
+      return;
+    }
+
     try {
       const defaultContent = [
         {
@@ -52,14 +70,29 @@ export function Sidebar({ onToggle }: SidebarProps) {
         }),
       });
       
-      if (!response.ok) throw new Error('Failed to create note');
+      if (!response.ok) {
+        const error = await response.json();
+        if (error.requiresUpgrade) {
+          toast.error(error.error, {
+            action: {
+              label: 'Upgrade to Pro',
+              onClick: () => router.push('/upgrade'),
+            },
+          });
+          return;
+        }
+        throw new Error('Failed to create note');
+      }
       
       const { note } = await response.json();
       // Trigger refresh event to update the sidebar
       window.dispatchEvent(new Event('refresh-notes'));
+      // Refresh subscription to update usage counts
+      await refreshSubscription();
       router.push(`/notes/${note.id}`);
     } catch (error) {
       console.error('Error creating note:', error);
+      toast.error('Failed to create note');
     }
   };
 

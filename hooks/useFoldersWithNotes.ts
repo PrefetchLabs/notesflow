@@ -106,7 +106,19 @@ export function useFoldersWithNotes() {
         body: JSON.stringify({ name, parentId }),
       });
       
-      if (!response.ok) throw new Error('Failed to create folder');
+      if (!response.ok) {
+        const error = await response.json();
+        if (error.requiresUpgrade) {
+          toast.error(error.error, {
+            action: {
+              label: 'Upgrade to Pro',
+              onClick: () => window.location.href = '/upgrade',
+            },
+          });
+          return null;
+        }
+        throw new Error('Failed to create folder');
+      }
       
       const { folder } = await response.json();
       await loadData(); // Reload to get updated tree
