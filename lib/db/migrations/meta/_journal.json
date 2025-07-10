@@ -71,6 +71,13 @@
       "when": 1752183019194,
       "tag": "0009_blushing_longshot",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1752184107550,
+      "tag": "0010_gigantic_micromax",
+      "breakpoints": true
     }
   ]
 }

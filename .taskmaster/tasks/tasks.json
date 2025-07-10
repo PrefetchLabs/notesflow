@@ -1713,7 +1713,7 @@
         "id": 13,
         "title": "Build Free/Pro Tier System with Limitations",
         "description": "Implement usage limitations for free tier and pro upgrade prompts",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           8,
           11
@@ -1726,7 +1726,7 @@
             "id": 1,
             "title": "Integrate subscription status in auth context",
             "description": "Add subscription plan details (free/pro) and limits to the existing auth context to make them accessible throughout the app",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Extend the auth context to include subscription plan type, plan limits (notes, folders), current usage counts, and subscription expiry date. Create TypeScript interfaces for subscription data structure.",
             "testStrategy": ""
@@ -1735,7 +1735,7 @@
             "id": 2,
             "title": "Implement note limit enforcement",
             "description": "Add validation logic to prevent creating notes beyond the plan limit (10 for free, unlimited for pro)",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -1746,7 +1746,7 @@
             "id": 3,
             "title": "Implement folder limit enforcement",
             "description": "Add validation to restrict folder creation based on plan limits (3 for free, unlimited for pro)",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -1757,7 +1757,7 @@
             "id": 4,
             "title": "Implement AI feature access control",
             "description": "Gate AI-powered features (chat, search, suggestions) behind pro subscription",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -1768,7 +1768,7 @@
             "id": 5,
             "title": "Gate collaboration features for pro users",
             "description": "Restrict sharing, commenting, and real-time collaboration to pro subscribers",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -1779,7 +1779,7 @@
             "id": 6,
             "title": "Create upgrade prompt UI components",
             "description": "Design and implement reusable upgrade prompt modals and banners",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -1816,7 +1816,7 @@
             "id": 9,
             "title": "Implement grace period system",
             "description": "Create a soft-limit system that allows temporary access beyond limits with warnings",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               2,
               3,
@@ -2591,7 +2591,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-10T21:47:16.988Z",
+      "updated": "2025-07-10T21:52:59.056Z",
       "description": "Tasks for master context"
     }
   }

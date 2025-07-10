@@ -11,6 +11,7 @@ import { useResponsive } from '@/hooks/useResponsive';
 import { useSubscription } from '@/lib/contexts/subscription-context';
 import { UsageIndicator } from '@/components/upgrade/usage-indicator';
 import { UpgradeBanner } from '@/components/upgrade/upgrade-banner';
+import { GracePeriodBanner } from '@/components/upgrade/grace-period-banner';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -80,7 +81,10 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-muted-foreground">
+          {/* Grace Period Banner */}
+          <GracePeriodBanner />
+          
+          <p className="text-muted-foreground mt-4">
             Welcome back! Your notes and folders will appear here.
           </p>
           

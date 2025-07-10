@@ -39,9 +39,14 @@ interface SubscriptionContextType {
     current: number;
     limit: number;
     remaining: number;
+    isInGracePeriod?: boolean;
+    gracePeriodType?: 'new_user' | 'overage';
+    isSoftLimitWarning?: boolean;
   };
   showUpgradePrompt: (feature: string, description?: string) => void;
   checkAndShowLimit: (feature: keyof SubscriptionLimits, featureName: string, unit?: string) => boolean;
+  isInNewUserGracePeriod: boolean;
+  gracePeriodDaysRemaining: number;
 }
 
 const defaultLimits: SubscriptionLimits = {
@@ -94,7 +99,14 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const usage = subscription?.usage || defaultUsage;
   const isPro = subscription?.plan !== 'free';
   const isFreeTier = subscription?.plan === 'free' || !subscription;
-  const isInGracePeriod = subscription?.isInGracePeriod || false;
+  
+  // Check if user is in any grace period
+  const now = new Date();
+  const isInNewUserGracePeriod = subscription?.isNewUser && subscription?.newUserGracePeriodEnd && 
+    new Date(subscription.newUserGracePeriodEnd) > now;
+  const isInOverageGracePeriod = subscription?.isInGracePeriod && subscription?.gracePeriodEnd && 
+    new Date(subscription.gracePeriodEnd) > now;
+  const isInGracePeriod = isInNewUserGracePeriod || isInOverageGracePeriod;
 
   const checkLimit = useCallback((feature: keyof SubscriptionLimits) => {
     const featureMap: Record<keyof SubscriptionLimits, keyof SubscriptionUsage> = {
@@ -109,22 +121,52 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     const currentUsage = usage[usageKey];
     const limit = limits[feature];
     
+    // Calculate soft limit (10% over the base limit)
+    const softLimit = Math.floor(limit * 1.1);
+    
+    // During grace periods, allow full access or soft limits
+    if (isInNewUserGracePeriod) {
+      // New users get unlimited access for 7 days
+      return {
+        allowed: true,
+        current: currentUsage,
+        limit: limit,
+        remaining: Infinity,
+        isInGracePeriod: true,
+        gracePeriodType: 'new_user',
+      };
+    }
+    
+    if (isInOverageGracePeriod && currentUsage <= softLimit) {
+      // Users in overage grace period can go 10% over
+      return {
+        allowed: true,
+        current: currentUsage,
+        limit: limit,
+        remaining: Math.max(0, softLimit - currentUsage),
+        isInGracePeriod: true,
+        gracePeriodType: 'overage',
+        isSoftLimitWarning: currentUsage > limit,
+      };
+    }
+    
     return {
       allowed: currentUsage < limit || isPro,
       current: currentUsage,
       limit: limit,
       remaining: Math.max(0, limit - currentUsage),
+      isInGracePeriod: false,
     };
-  }, [limits, usage, isPro]);
+  }, [limits, usage, isPro, isInNewUserGracePeriod, isInOverageGracePeriod]);
 
   const showUpgradePrompt = useCallback((feature: string, description?: string) => {
     showFeatureLockedToast(feature, description);
   }, []);
 
   const checkAndShowLimit = useCallback((feature: keyof SubscriptionLimits, featureName: string, unit?: string) => {
-    const { allowed, current, limit } = checkLimit(feature);
+    const result = checkLimit(feature);
     
-    if (!allowed) {
+    if (!result.allowed) {
       const featureUnits: Record<keyof SubscriptionLimits, string> = {
         maxNotes: 'notes',
         maxFolders: 'folders',
@@ -135,15 +177,44 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       
       showUsageLimitToast({
         feature: featureName,
-        limit,
-        current,
+        limit: result.limit,
+        current: result.current,
         unit: unit || featureUnits[feature],
       });
       return true; // Limit reached
     }
     
-    return false; // No limit reached
+    // Show soft limit warning if applicable
+    if (result.isSoftLimitWarning) {
+      showUsageLimitToast({
+        feature: featureName,
+        limit: result.limit,
+        current: result.current,
+        unit: unit || 'items',
+      });
+    }
+    
+    return false; // No hard limit reached
   }, [checkLimit]);
+
+  // Calculate days remaining in grace period
+  const gracePeriodDaysRemaining = useMemo(() => {
+    if (!subscription) return 0;
+    
+    const endDate = subscription.isNewUser && subscription.newUserGracePeriodEnd
+      ? new Date(subscription.newUserGracePeriodEnd)
+      : subscription.gracePeriodEnd
+      ? new Date(subscription.gracePeriodEnd)
+      : null;
+      
+    if (!endDate) return 0;
+    
+    const now = new Date();
+    const diffTime = endDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return Math.max(0, diffDays);
+  }, [subscription]);
 
   const value: SubscriptionContextType = {
     subscription,
@@ -161,6 +232,8 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     checkLimit,
     showUpgradePrompt,
     checkAndShowLimit,
+    isInNewUserGracePeriod,
+    gracePeriodDaysRemaining,
   };
 
   return (

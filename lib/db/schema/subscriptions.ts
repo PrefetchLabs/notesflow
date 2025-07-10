@@ -83,6 +83,21 @@ export const subscriptions = pgTable('subscriptions', {
   gracePeriodEnd: timestamp('grace_period_end'),
   isInGracePeriod: boolean('is_in_grace_period').default(false),
   
+  // Soft limit overage tracking (10% over limits)
+  softLimitOverages: jsonb('soft_limit_overages').$type<{
+    notesOverage: number;
+    foldersOverage: number;
+    aiCallsOverage: number;
+  }>().default({
+    notesOverage: 0,
+    foldersOverage: 0,
+    aiCallsOverage: 0
+  }),
+  
+  // New user grace period (7 days of full features)
+  isNewUser: boolean('is_new_user').default(true),
+  newUserGracePeriodEnd: timestamp('new_user_grace_period_end'),
+  
   // Early bird special
   isEarlyBird: boolean('is_early_bird').default(false),
   
