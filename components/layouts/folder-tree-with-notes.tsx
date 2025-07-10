@@ -60,7 +60,7 @@ import { useRouter } from 'next/navigation';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { useSubscription } from '@/lib/contexts/subscription-context';
-import { ProBadge } from '@/components/ui/pro-badge';
+import { PlanBadge } from '@/components/upgrade/plan-badge';
 
 interface FolderTreeWithNotesProps {
   folders: FolderWithNotes[];
@@ -623,11 +623,12 @@ export function FolderTreeWithNotes({
           <h3 className={cn('text-xs font-semibold uppercase text-muted-foreground', collapsed && 'sr-only')}>
             Folders
           </h3>
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            <PlanBadge size="sm" />
             <Button
               variant="ghost"
               size="icon"
-              className={cn("h-6 w-6", !isPro && "opacity-60")}
+              className="h-6 w-6"
               onClick={() => {
                 if (checkAndShowLimit('maxFolders', 'Folder creation')) {
                   return;
@@ -637,15 +638,10 @@ export function FolderTreeWithNotes({
                 setEditingFolder(null);
                 setDialogOpen(true);
               }}
-              title={isPro ? "Create new folder" : "Create new folder (Pro feature)"}
+              title="Create new folder"
             >
               <Plus className="h-4 w-4" />
             </Button>
-            {!isPro && (
-              <div className="absolute -top-1 -right-1 pointer-events-none">
-                <ProBadge size="sm" showIcon={false} />
-              </div>
-            )}
           </div>
         </div>
 

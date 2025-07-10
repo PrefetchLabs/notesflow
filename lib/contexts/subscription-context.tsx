@@ -27,6 +27,7 @@ interface SubscriptionContextType {
   usage: SubscriptionUsage;
   isLoading: boolean;
   isPro: boolean;
+  isBeta: boolean;
   isFreeTier: boolean;
   isInGracePeriod: boolean;
   canCreateNote: boolean;
@@ -59,6 +60,14 @@ const defaultLimits: SubscriptionLimits = {
   maxAiCalls: 0,
   maxCollaborators: 0,
   maxStorage: 100,
+};
+
+const betaLimits: SubscriptionLimits = {
+  maxNotes: 50,
+  maxFolders: 10,
+  maxAiCalls: 100,
+  maxCollaborators: 2,
+  maxStorage: 500,
 };
 
 const defaultUsage: SubscriptionUsage = {
@@ -99,13 +108,14 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     fetchSubscription();
   }, [fetchSubscription]);
 
-  const limits = subscription?.limits || defaultLimits;
-  const usage = subscription?.usage || defaultUsage;
-  
   // Check if user is admin - admins get pro access
   const isAdmin = user?.role === 'admin';
-  const isPro = isAdmin || (subscription && subscription.plan !== 'free');
-  const isFreeTier = !isAdmin && (subscription?.plan === 'free' || !subscription);
+  const isBeta = subscription?.plan === 'beta';
+  const isPro = isAdmin || (subscription && (subscription.plan === 'pro_monthly' || subscription.plan === 'pro_yearly' || subscription.plan === 'early_bird'));
+  const isFreeTier = !isAdmin && !isPro && !isBeta;
+  
+  const limits = subscription?.limits || (isBeta ? betaLimits : defaultLimits);
+  const usage = subscription?.usage || defaultUsage;
   
   // Check if user is in any grace period (admins don't have grace periods)
   const now = new Date();
@@ -191,6 +201,22 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     // Pro users have access to all features
     if (isPro) return true;
     
+    // Beta users have access to most features except unlimited and themes
+    if (isBeta) {
+      switch (feature) {
+        case 'ai':
+        case 'collaboration':
+        case 'sharing':
+        case 'export':
+          return true;
+        case 'unlimited':
+        case 'themes':
+          return false; // Pro-only features
+        default:
+          return false;
+      }
+    }
+    
     // Free tier restrictions
     switch (feature) {
       case 'ai':
@@ -205,7 +231,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       default:
         return false;
     }
-  }, [isPro, isInNewUserGracePeriod, checkLimit, isAdmin]);
+  }, [isPro, isBeta, isInNewUserGracePeriod, checkLimit, isAdmin]);
 
   const checkAndShowLimit = useCallback((feature: keyof SubscriptionLimits, featureName: string, unit?: string) => {
     const result = checkLimit(feature);
@@ -285,12 +311,13 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     usage,
     isLoading,
     isPro,
+    isBeta,
     isFreeTier,
     isInGracePeriod,
     canCreateNote: checkLimit('maxNotes').allowed,
     canCreateFolder: checkLimit('maxFolders').allowed,
-    canUseAI: isPro || checkLimit('maxAiCalls').allowed,
-    canShare: isPro || checkLimit('maxCollaborators').allowed,
+    canUseAI: isPro || isBeta || checkLimit('maxAiCalls').allowed,
+    canShare: isPro || isBeta || checkLimit('maxCollaborators').allowed,
     refreshSubscription: fetchSubscription,
     refetchSubscription: fetchSubscription,
     checkLimit,

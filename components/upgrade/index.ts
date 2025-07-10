@@ -6,4 +6,5 @@ export { UpgradeButton } from './upgrade-button';
 export { showUsageLimitToast, showFeatureLockedToast } from './usage-limit-toast';
 export { GracePeriodBanner } from './grace-period-banner';
 export { ProBadge } from './pro-badge';
+export { PlanBadge } from './plan-badge';
 export { FeatureGate, ProFeatureWrapper } from './feature-gate';

@@ -17,6 +17,7 @@ export const subscriptionStatusEnum = pgEnum('subscription_status', [
 // Subscription plan enum
 export const subscriptionPlanEnum = pgEnum('subscription_plan', [
   'free',
+  'beta',
   'pro_monthly',
   'pro_yearly',
   'early_bird'

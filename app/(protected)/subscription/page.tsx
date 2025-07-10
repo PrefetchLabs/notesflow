@@ -6,7 +6,7 @@ import { useSubscription } from '@/lib/contexts/subscription-context';
 import { useAuth } from '@/lib/auth/auth-hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, CreditCard, Calendar, AlertCircle, ExternalLink, Shield } from 'lucide-react';
+import { Sparkles, CreditCard, Calendar, AlertCircle, ExternalLink, Shield, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ProBadge } from '@/components/upgrade/pro-badge';
 import { UsageIndicator } from '@/components/upgrade/usage-indicator';
@@ -19,6 +19,7 @@ export default function SubscriptionPage() {
   const {
     subscription,
     isPro,
+    isBeta,
     isFreeTier,
     usage,
     limits,
@@ -65,6 +66,7 @@ export default function SubscriptionPage() {
           <CardTitle className="flex items-center gap-2">
             Current Plan
             {isPro && <ProBadge />}
+            {isBeta && <Badge className="bg-gradient-to-r from-green-600 to-teal-600 text-white border-0"><Zap className="h-3 w-3 mr-1" />Beta</Badge>}
             {isAdmin && <Badge variant="secondary" className="ml-2"><Shield className="h-3 w-3 mr-1" />Admin</Badge>}
           </CardTitle>
           <CardDescription>
@@ -72,6 +74,8 @@ export default function SubscriptionPage() {
               ? 'As an administrator, you have unlimited access to all features'
               : isPro 
               ? 'You have full access to all features' 
+              : isBeta
+              ? 'As a beta tester, you have enhanced access to help us test new features'
               : 'You are on the free plan with limited features'}
           </CardDescription>
         </CardHeader>
@@ -79,11 +83,16 @@ export default function SubscriptionPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-2xl font-bold">
-                {isAdmin ? 'Administrator' : isPro ? 'Pro' : 'Free'}
+                {isAdmin ? 'Administrator' : isPro ? 'Pro' : isBeta ? 'Beta Tester' : 'Free'}
               </p>
-              {!isAdmin && subscription?.metadata?.interval && (
+              {!isAdmin && !isBeta && subscription?.metadata?.interval && (
                 <p className="text-sm text-muted-foreground">
                   Billed {subscription.metadata.interval}ly
+                </p>
+              )}
+              {isBeta && (
+                <p className="text-sm text-muted-foreground">
+                  Limited time access
                 </p>
               )}
             </div>
