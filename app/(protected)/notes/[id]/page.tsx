@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { BlockNoteAIEditor } from '@/components/editor/BlockNoteAIEditor';
-import { CollaborativeEditor } from '@/components/editor/collaborative-editor';
+import { CollaborativeEditorFinal } from '@/components/editor/collaborative-editor-final';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight } from 'lucide-react';
 import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
@@ -470,15 +470,15 @@ export default function NotePage() {
               content && (
                 hasEditPermission ? (
                   isCollaborationEnabled ? (
-                    <CollaborativeEditor
-                      key={`collab-${noteId}`} // Force re-mount when note changes
+                    <CollaborativeEditorFinal
+                      key={`collab-${noteId}-${isCollaborationEnabled}`} // Include collaboration state in key
                       noteId={noteId}
                       initialContent={content}
                       onContentChange={handleContentChange}
                     />
                   ) : (
                     <BlockNoteAIEditor
-                      key={noteId} // Force re-mount when note changes
+                      key={`note-${noteId}`} // Stable key for non-collaborative mode
                       initialContent={content}
                       onContentChange={handleContentChange}
                       showAIUsage={true}

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
-import { notes } from '@/lib/db/schema';
-import { eq, and, isNull } from 'drizzle-orm';
+import { notes, collaborators } from '@/lib/db/schema';
+import { eq, and, isNull, or } from 'drizzle-orm';
 
 export async function GET(
   request: NextRequest,
@@ -19,19 +19,39 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // First try to get the note
     const [note] = await db
       .select()
       .from(notes)
       .where(
         and(
           eq(notes.id, id),
-          eq(notes.userId, session.user.id),
           isNull(notes.deletedAt)
         )
       );
 
     if (!note) {
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });
+    }
+
+    // Check if user has access (owner or collaborator)
+    const isOwner = note.userId === session.user.id;
+    
+    if (!isOwner) {
+      // Check if user is a collaborator
+      const [collaboration] = await db
+        .select()
+        .from(collaborators)
+        .where(
+          and(
+            eq(collaborators.noteId, id),
+            eq(collaborators.userId, session.user.id)
+          )
+        );
+      
+      if (!collaboration) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
     }
     
     // Update lastAccessedAt timestamp

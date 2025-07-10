@@ -1,22 +1,31 @@
 'use client';
 
+import { useEffect, useState, useRef } from "react";
 import { BlockNoteView } from "@blocknote/mantine";
+import { useCreateBlockNote } from "@blocknote/react";
 import { AIMenuController } from "@blocknote/xl-ai";
+import { defaultBlockSpecs } from "@blocknote/core";
+import { en } from "@blocknote/core/locales";
+import { en as aiEn } from "@blocknote/xl-ai/locales";
+import { llmFormats } from "@blocknote/xl-ai";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 import "@blocknote/xl-ai/style.css";
 import "@/styles/collaboration.css";
 import { useTheme } from "next-themes";
-import { useCollaborativeBlockNote } from "@/hooks/useCollaborativeBlockNote";
 import { FormattingToolbarWithAI } from "./ai/FormattingToolbarWithAI";
 import { SuggestionMenuWithAI } from "./ai/SuggestionMenuWithAI";
+import { createAIExtension } from "@/lib/editor/ai-extension";
+import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Users, WifiOff, Wifi, UserPlus, UserMinus } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
+import * as Y from "yjs";
+import { SupabaseProvider } from "@/lib/collaboration/supabase-yjs-provider";
+import { useAuth } from "@/lib/auth/auth-hooks";
 
-interface CollaborativeEditorProps {
+interface CollaborativeEditorV2Props {
   noteId: string;
   initialContent?: any[];
   onContentChange?: (content: any[]) => void;
@@ -24,26 +33,59 @@ interface CollaborativeEditorProps {
   className?: string;
 }
 
-export function CollaborativeEditor({
+export function CollaborativeEditorV2({
   noteId,
   initialContent,
   onContentChange,
   editable = true,
   className,
-}: CollaborativeEditorProps) {
+}: CollaborativeEditorV2Props) {
   const { resolvedTheme } = useTheme();
-  const { editor, isConnected, awareness } = useCollaborativeBlockNote({
-    noteId,
-    initialContent,
-  });
+  const { user } = useAuth();
   
+  const [isConnected, setIsConnected] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [activeUsers, setActiveUsers] = useState<Array<{ id: number; user: any }>>([]);
+  
+  const docRef = useRef<Y.Doc | null>(null);
+  const providerRef = useRef<SupabaseProvider | null>(null);
   const previousUsersRef = useRef<Array<{ id: number; user: any }>>([]);
-
-  // Track active users and show join/leave notifications
+  
+  // Initialize collaboration
   useEffect(() => {
-    if (!awareness) return;
-
+    if (!user || !noteId) {
+      console.log('[CollaborativeEditorV2] Missing user or noteId');
+      return;
+    }
+    
+    console.log('[CollaborativeEditorV2] Initializing collaboration for note:', noteId);
+    
+    // Create Y.Doc
+    const doc = new Y.Doc();
+    docRef.current = doc;
+    
+    // Don't initialize content here - let BlockNote handle it
+    // The Y.Doc will sync with other users if they already have content
+    
+    // Create provider
+    const provider = new SupabaseProvider(doc, {
+      noteId,
+      user: {
+        id: user.id,
+        name: user.name || user.email?.split('@')[0] || 'Anonymous',
+        color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+      },
+    });
+    providerRef.current = provider;
+    
+    // Listen to connection changes
+    const unsubscribeConnection = provider.onConnectionChange((connected) => {
+      console.log('[CollaborativeEditorV2] Connection changed:', connected);
+      setIsConnected(connected);
+    });
+    
+    // Listen to awareness changes
+    const awareness = provider.getAwareness();
     const updateUsers = () => {
       const states = awareness.getStates();
       const users: Array<{ id: number; user: any }> = [];
@@ -60,7 +102,6 @@ export function CollaborativeEditor({
       
       users.forEach(user => {
         if (!previousIds.includes(user.id)) {
-          // User joined
           toast.success(
             <div className="flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
@@ -74,7 +115,6 @@ export function CollaborativeEditor({
       // Check for users who left
       previousUsersRef.current.forEach(user => {
         if (!currentIds.includes(user.id)) {
-          // User left
           toast.info(
             <div className="flex items-center gap-2">
               <UserMinus className="h-4 w-4" />
@@ -88,30 +128,75 @@ export function CollaborativeEditor({
       previousUsersRef.current = users;
       setActiveUsers(users);
     };
-
+    
     awareness.on('change', updateUsers);
-    updateUsers(); // Initial update
-
+    updateUsers();
+    
+    // Mark as ready after a short delay to ensure everything is initialized
+    setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+    
+    // Cleanup
     return () => {
+      console.log('[CollaborativeEditorV2] Cleaning up');
       awareness.off('change', updateUsers);
+      unsubscribeConnection();
+      provider.disconnect();
+      providerRef.current = null;
+      docRef.current = null;
+      setIsReady(false);
     };
-  }, [awareness]);
-
+  }, [user, noteId]); // Don't include initialContent to avoid re-creating
+  
+  // Create AI model
+  const model = createCustomAIModel();
+  
+  // Create editor
+  const editor = useCreateBlockNote({
+    // Provide initialContent always - BlockNote will handle it correctly
+    // In collaborative mode, it will use Y.Doc if it has content
+    initialContent,
+    dictionary: {
+      ...en,
+      ai: aiEn
+    },
+    extensions: [
+      createAIExtension({
+        model,
+        stream: true,
+        dataFormat: llmFormats.html,
+        agentCursor: {
+          name: "AI",
+          color: "#8bc6ff"
+        }
+      })
+    ],
+    blockSpecs: {
+      ...defaultBlockSpecs,
+    },
+    collaboration: isReady && docRef.current && providerRef.current ? {
+      provider: providerRef.current as any,
+      fragment: docRef.current.getXmlFragment("document-store"),
+      user: {
+        name: user?.name || user?.email?.split('@')[0] || 'Anonymous',
+        color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+      },
+      showCursorLabels: "activity",
+    } : undefined,
+  }, [noteId, isReady]); // Only recreate when these change
+  
   // Handle content changes
   const handleChange = () => {
-    if (!editor) return;
-    
+    if (!editor || !onContentChange) return;
     const document = editor.document;
-    
-    if (onContentChange) {
-      onContentChange(document);
-    }
+    onContentChange(document);
   };
-
+  
   if (!editor) {
     return <div className="h-full w-full animate-pulse bg-muted" />;
   }
-
+  
   return (
     <div className={cn("relative h-full", className)}>
       {/* Connection Status & Active Users */}
@@ -129,7 +214,7 @@ export function CollaborativeEditor({
           ) : (
             <>
               <WifiOff className="h-3 w-3" />
-              Offline
+              Connecting...
             </>
           )}
         </Badge>

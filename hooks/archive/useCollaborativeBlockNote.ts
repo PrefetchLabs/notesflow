@@ -9,8 +9,7 @@ import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import * as Y from "yjs";
 import { SupabaseProvider } from "@/lib/collaboration/supabase-yjs-provider";
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "@/lib/auth/auth-context";
-import { useAnonymousAuth } from "@/lib/auth/anonymous-auth-context";
+import { useAuth } from "@/lib/auth/auth-hooks";
 
 export interface CollaborativeBlockNoteOptions {
   initialContent?: any[];
@@ -42,36 +41,33 @@ export function useCollaborativeBlockNote({
   userColor,
   showCursorLabels = "activity"
 }: CollaborativeBlockNoteOptions) {
-  // Try to get user from regular auth first, then anonymous auth
-  let user: any;
-  try {
-    const authContext = useAuth();
-    user = authContext.user;
-  } catch {
-    // If regular auth fails, try anonymous auth
-    try {
-      const anonContext = useAnonymousAuth();
-      user = anonContext.user;
-    } catch {
-      user = null;
-    }
-  }
+  // Get user from auth context
+  const { user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const docRef = useRef<Y.Doc | null>(null);
   const providerRef = useRef<SupabaseProvider | null>(null);
+  
+  console.log('[useCollaborativeBlockNote] Hook called - user:', user);
 
   // Initialize Y.Doc and provider
   useEffect(() => {
-    if (!user || !noteId) return;
+    console.log('[useCollaborativeBlockNote] Effect running, user:', user?.id, 'noteId:', noteId);
+    if (!user || !noteId) {
+      console.log('[useCollaborativeBlockNote] Missing user or noteId, skipping');
+      return;
+    }
 
     // Create Y.Doc if not exists
     if (!docRef.current) {
+      console.log('[useCollaborativeBlockNote] Creating new Y.Doc');
       docRef.current = new Y.Doc();
     }
 
     // Create provider if not exists
     if (!providerRef.current) {
       const color = userColor || generateUserColor();
+      console.log('[useCollaborativeBlockNote] Creating SupabaseProvider with color:', color);
       
       providerRef.current = new SupabaseProvider(docRef.current, {
         noteId,
@@ -84,23 +80,38 @@ export function useCollaborativeBlockNote({
 
       // Listen to connection changes
       const unsubscribe = providerRef.current.onConnectionChange((connected) => {
+        console.log('[useCollaborativeBlockNote] Connection status changed:', connected);
         setIsConnected(connected);
       });
 
+      // Mark as initialized once provider is created
+      setIsInitialized(true);
+
       return () => {
+        console.log('[useCollaborativeBlockNote] Cleaning up provider');
         unsubscribe();
         providerRef.current?.disconnect();
         providerRef.current = null;
+        docRef.current = null;
+        setIsInitialized(false);
       };
+    } else if (providerRef.current && user) {
+      // Provider already exists, just update initialized state
+      setIsInitialized(true);
     }
   }, [user, noteId, userColor]);
 
   // Create model instance outside of effect
   const model = createCustomAIModel();
 
+  // Only pass initialContent if we're NOT in collaborative mode
+  // In collaborative mode, content comes from the Y.Doc
+  const shouldUseCollaboration = isInitialized && docRef.current && providerRef.current && user;
+  
   // Create editor with collaboration
   const editor = useCreateBlockNote({
-    initialContent,
+    // Only use initialContent if NOT collaborating
+    ...(shouldUseCollaboration ? {} : { initialContent }),
     dictionary: {
       ...en,
       ai: aiEn
@@ -119,8 +130,8 @@ export function useCollaborativeBlockNote({
     blockSpecs: {
       ...defaultBlockSpecs,
     },
-    collaboration: docRef.current && providerRef.current && user ? {
-      provider: providerRef.current as any, // Cast to any for now since our custom provider doesn't match the exact WebSocket provider interface
+    collaboration: shouldUseCollaboration ? {
+      provider: providerRef.current as any,
       fragment: docRef.current.getXmlFragment("document-store"),
       user: {
         name: user.name || user.email?.split('@')[0] || 'Anonymous',
@@ -128,7 +139,7 @@ export function useCollaborativeBlockNote({
       },
       showCursorLabels,
     } : undefined,
-  }, [noteId, user?.id]); // Re-create editor when noteId or user changes
+  }, [noteId, user?.id, isInitialized]); // Re-create editor when these change
 
   return {
     editor,
