@@ -11,8 +11,10 @@ interface PlanBadgeProps {
 }
 
 export function PlanBadge({ className, size = 'sm', showIcon = true }: PlanBadgeProps) {
-  const { isPro, isBeta, isFreeTier } = useSubscription();
   const { user } = useAuth();
+  const { isPro, isBeta, isFreeTier, subscription } = useSubscription();
+  
+  // Check admin status first, before subscription status
   const isAdmin = user?.role === 'admin';
 
   const sizeClasses = {
@@ -39,7 +41,7 @@ export function PlanBadge({ className, size = 'sm', showIcon = true }: PlanBadge
     );
   }
 
-  if (isPro) {
+  if (isPro && !isAdmin) {
     return (
       <Badge
         className={cn(
