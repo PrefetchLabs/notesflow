@@ -13,10 +13,10 @@ interface RouteConfig {
 }
 
 const adminRouteConfig: RouteConfig[] = [
-  { path: '/admin/users', permissions: [ADMIN_PERMISSIONS.USER_VIEW] },
-  { path: '/admin/content', permissions: [ADMIN_PERMISSIONS.CONTENT_VIEW_ALL] },
-  { path: '/admin/analytics', permissions: [ADMIN_PERMISSIONS.ANALYTICS_VIEW] },
-  { path: '/admin/system', permissions: [ADMIN_PERMISSIONS.SYSTEM_CONFIG_VIEW] },
+  { path: '/dashboard/admin/users', permissions: [ADMIN_PERMISSIONS.USER_VIEW] },
+  { path: '/dashboard/admin/content', permissions: [ADMIN_PERMISSIONS.CONTENT_VIEW_ALL] },
+  { path: '/dashboard/admin/analytics', permissions: [ADMIN_PERMISSIONS.ANALYTICS_VIEW] },
+  { path: '/dashboard/admin/system', permissions: [ADMIN_PERMISSIONS.SYSTEM_CONFIG_VIEW] },
 ];
 
 interface AdminRouteGuardProps {

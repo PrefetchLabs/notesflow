@@ -9,7 +9,7 @@ const authRoutes = ['/login', '/register'];
 
 // Admin routes - only check session in middleware
 // Actual permission checks are done in the route handlers
-const adminRoutes = ['/admin'];
+const adminRoutes = ['/dashboard/admin'];
 
 export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);

@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/lib/auth/auth-hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Settings } from 'lucide-react';
+import { Settings, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { authClient } from '@/lib/auth/auth-client';
 import { useRouter } from 'next/navigation';
+import { useAdminPermissions } from '@/hooks/useAdminPermissions';
 
 interface UserProfileProps {
   collapsed: boolean;
@@ -24,6 +25,7 @@ interface UserProfileProps {
 export function UserProfile({ collapsed }: UserProfileProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { isAdmin } = useAdminPermissions();
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -81,7 +83,16 @@ export function UserProfile({ collapsed }: UserProfileProps) {
       <DropdownMenuContent align={collapsed ? 'center' : 'end'} className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuItem onClick={() => router.push('/dashboard/admin')}>
+              <Shield className="mr-2 h-4 w-4" />
+              Admin Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        <DropdownMenuItem onClick={() => router.push('/settings')}>
           <Settings className="mr-2 h-4 w-4" />
           Settings
         </DropdownMenuItem>

@@ -37,7 +37,7 @@ export default async function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <a href="/admin/users" className="block">
+          <a href="/dashboard/admin/users" className="block">
             <div className="bg-card p-6 rounded-lg border hover:border-primary transition-colors">
               <h3 className="font-semibold mb-2">User Management</h3>
               <p className="text-sm text-muted-foreground">
@@ -46,7 +46,7 @@ export default async function AdminDashboard() {
             </div>
           </a>
 
-          <a href="/admin/content" className="block">
+          <a href="/dashboard/admin/content" className="block">
             <div className="bg-card p-6 rounded-lg border hover:border-primary transition-colors">
               <h3 className="font-semibold mb-2">Content Moderation</h3>
               <p className="text-sm text-muted-foreground">
@@ -55,7 +55,7 @@ export default async function AdminDashboard() {
             </div>
           </a>
 
-          <a href="/admin/analytics" className="block">
+          <a href="/dashboard/admin/analytics" className="block">
             <div className="bg-card p-6 rounded-lg border hover:border-primary transition-colors">
               <h3 className="font-semibold mb-2">Analytics</h3>
               <p className="text-sm text-muted-foreground">
@@ -64,7 +64,7 @@ export default async function AdminDashboard() {
             </div>
           </a>
 
-          <a href="/admin/system" className="block">
+          <a href="/dashboard/admin/system" className="block">
             <div className="bg-card p-6 rounded-lg border hover:border-primary transition-colors">
               <h3 className="font-semibold mb-2">System Settings</h3>
               <p className="text-sm text-muted-foreground">
