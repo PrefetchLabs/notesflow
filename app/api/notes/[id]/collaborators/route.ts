@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
-import { notes, collaborators, user } from '@/lib/db/schema';
+import { notes, collaborators, user, subscriptions } from '@/lib/db/schema';
 import { eq, and, ne } from 'drizzle-orm';
 import { headers } from 'next/headers';
 
@@ -104,6 +104,23 @@ export async function POST(
 
     if (!session?.user) {
       return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // Check subscription
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, session.user.id));
+
+    if (!subscription || subscription.plan === 'free') {
+      return NextResponse.json(
+        { 
+          error: 'Sharing is only available for Pro users',
+          requiresUpgrade: true,
+          feature: 'collaboration'
+        },
+        { status: 403 }
+      );
     }
 
     const { id: noteId } = await params;

@@ -26,6 +26,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { useSubscription } from "@/lib/contexts/subscription-context";
+import { useRouter } from "next/navigation";
 
 interface ShareDialogProps {
   noteId: string;
@@ -48,8 +50,27 @@ interface Collaborator {
 
 export function ShareDialogV2({ noteId, noteTitle, open, onOpenChange, onSharingEnabled }: ShareDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const { isPro } = useSubscription();
+  const router = useRouter();
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
+  
+  // Check subscription before opening
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen && !isPro) {
+      toast.error(
+        'Sharing is only available for Pro users',
+        {
+          action: {
+            label: 'Upgrade to Pro',
+            onClick: () => router.push('/upgrade'),
+          },
+        }
+      );
+      return;
+    }
+    setIsOpen(newOpen);
+  };
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState('');
   const [permission, setPermission] = useState<'view' | 'edit'>('view');
@@ -177,7 +198,7 @@ export function ShareDialogV2({ noteId, noteTitle, open, onOpenChange, onSharing
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Share "{noteTitle || 'Note'}"</DialogTitle>

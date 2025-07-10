@@ -1,0 +1,2 @@
+ALTER TABLE "subscriptions" ALTER COLUMN "limits" SET DEFAULT '{"maxNotes":10,"maxFolders":3,"maxAiCalls":0,"maxCollaborators":0,"maxStorage":100}'::jsonb;--> statement-breakpoint
+ALTER TABLE "subscriptions" ALTER COLUMN "usage" SET DEFAULT '{"notesCount":0,"foldersCount":0,"aiCallsCount":0,"collaboratorsCount":0,"storageUsed":0}'::jsonb;

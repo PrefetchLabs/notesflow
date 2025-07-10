@@ -53,14 +53,12 @@ export const subscriptions = pgTable('subscriptions', {
   limits: jsonb('limits').$type<{
     maxNotes: number;
     maxFolders: number;
-    maxDevices: number;
     maxAiCalls: number;
     maxCollaborators: number;
     maxStorage: number; // in MB
   }>().default({
     maxNotes: 10,
     maxFolders: 3,
-    maxDevices: 1,
     maxAiCalls: 0,
     maxCollaborators: 0,
     maxStorage: 100
@@ -70,14 +68,12 @@ export const subscriptions = pgTable('subscriptions', {
   usage: jsonb('usage').$type<{
     notesCount: number;
     foldersCount: number;
-    devicesCount: number;
     aiCallsCount: number;
     collaboratorsCount: number;
     storageUsed: number; // in MB
   }>().default({
     notesCount: 0,
     foldersCount: 0,
-    devicesCount: 0,
     aiCallsCount: 0,
     collaboratorsCount: 0,
     storageUsed: 0

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight } from 'lucide-react';
 import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useSubscription } from '@/lib/contexts/subscription-context';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ export default function NotePage() {
   const { folders } = useFolders();
   const { setHasUnsavedChanges: setGlobalUnsavedChanges, promptToSave } = useUnsavedChanges();
   const { addToRecent } = useRecentNotes();
+  const { isPro } = useSubscription();
   
   const [note, setNote] = useState<any>(null);
   const [content, setContent] = useState<any>(null);
@@ -268,6 +270,18 @@ export default function NotePage() {
   }, [noteId, router]);
 
   const handleShare = () => {
+    if (!isPro) {
+      toast.error(
+        'Sharing is only available for Pro users',
+        {
+          action: {
+            label: 'Upgrade to Pro',
+            onClick: () => router.push('/upgrade'),
+          },
+        }
+      );
+      return;
+    }
     setIsShareDialogOpen(true);
   };
 

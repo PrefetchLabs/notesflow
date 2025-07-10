@@ -7,7 +7,6 @@ import type { Subscription } from '@/lib/db/schema/subscriptions';
 interface SubscriptionLimits {
   maxNotes: number;
   maxFolders: number;
-  maxDevices: number;
   maxAiCalls: number;
   maxCollaborators: number;
   maxStorage: number;
@@ -16,7 +15,6 @@ interface SubscriptionLimits {
 interface SubscriptionUsage {
   notesCount: number;
   foldersCount: number;
-  devicesCount: number;
   aiCallsCount: number;
   collaboratorsCount: number;
   storageUsed: number;
@@ -34,7 +32,6 @@ interface SubscriptionContextType {
   canCreateFolder: boolean;
   canUseAI: boolean;
   canShare: boolean;
-  canAddDevice: boolean;
   refreshSubscription: () => Promise<void>;
   checkLimit: (feature: keyof SubscriptionLimits) => {
     allowed: boolean;
@@ -47,7 +44,6 @@ interface SubscriptionContextType {
 const defaultLimits: SubscriptionLimits = {
   maxNotes: 10,
   maxFolders: 3,
-  maxDevices: 1,
   maxAiCalls: 0,
   maxCollaborators: 0,
   maxStorage: 100,
@@ -56,7 +52,6 @@ const defaultLimits: SubscriptionLimits = {
 const defaultUsage: SubscriptionUsage = {
   notesCount: 0,
   foldersCount: 0,
-  devicesCount: 0,
   aiCallsCount: 0,
   collaboratorsCount: 0,
   storageUsed: 0,
@@ -102,7 +97,6 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     const featureMap: Record<keyof SubscriptionLimits, keyof SubscriptionUsage> = {
       maxNotes: 'notesCount',
       maxFolders: 'foldersCount',
-      maxDevices: 'devicesCount',
       maxAiCalls: 'aiCallsCount',
       maxCollaborators: 'collaboratorsCount',
       maxStorage: 'storageUsed',
@@ -132,7 +126,6 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     canCreateFolder: checkLimit('maxFolders').allowed,
     canUseAI: isPro || checkLimit('maxAiCalls').allowed,
     canShare: isPro || checkLimit('maxCollaborators').allowed,
-    canAddDevice: checkLimit('maxDevices').allowed,
     refreshSubscription: fetchSubscription,
     checkLimit,
   };

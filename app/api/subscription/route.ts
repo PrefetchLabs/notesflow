@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
-import { subscriptions, folders, notes, devices, collaborators } from '@/lib/db/schema';
+import { subscriptions, folders, notes, collaborators } from '@/lib/db/schema';
 import { eq, and, isNull, count } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -49,16 +49,6 @@ export async function GET(request: NextRequest) {
       .from(folders)
       .where(eq(folders.userId, session.user.id));
 
-    const [devicesCountResult] = await db
-      .select({ count: count() })
-      .from(devices)
-      .where(
-        and(
-          eq(devices.userId, session.user.id),
-          eq(devices.isActive, true)
-        )
-      );
-
     const [collaboratorsCountResult] = await db
       .select({ count: count() })
       .from(collaborators)
@@ -68,7 +58,6 @@ export async function GET(request: NextRequest) {
     const updatedUsage = {
       notesCount: notesCountResult?.count || 0,
       foldersCount: foldersCountResult?.count || 0,
-      devicesCount: devicesCountResult?.count || 0,
       aiCallsCount: subscription.usage?.aiCallsCount || 0, // Keep existing AI calls count
       collaboratorsCount: collaboratorsCountResult?.count || 0,
       storageUsed: subscription.usage?.storageUsed || 0, // Keep existing storage count
