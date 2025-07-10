@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/lib/auth/auth-hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Settings, Shield } from 'lucide-react';
+import { Settings, Shield, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -92,6 +92,10 @@ export function UserProfile({ collapsed }: UserProfileProps) {
             <DropdownMenuSeparator />
           </>
         )}
+        <DropdownMenuItem onClick={() => router.push('/subscription')}>
+          <CreditCard className="mr-2 h-4 w-4" />
+          Subscription
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push('/settings')}>
           <Settings className="mr-2 h-4 w-4" />
           Settings

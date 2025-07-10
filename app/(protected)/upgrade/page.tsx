@@ -24,9 +24,26 @@ export default function UpgradePage() {
   const router = useRouter();
   const { isInNewUserGracePeriod, gracePeriodDaysRemaining, usage, limits } = useSubscription();
 
-  const handleUpgrade = (plan: 'monthly' | 'yearly') => {
-    // TODO: Integrate with Stripe
-    console.log('Upgrade to', plan);
+  const handleUpgrade = async (plan: 'monthly' | 'yearly') => {
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceType: plan }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const { url } = await response.json();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      // You could show a toast here
+    }
   };
 
   return (

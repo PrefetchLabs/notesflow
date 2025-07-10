@@ -34,6 +34,7 @@ interface SubscriptionContextType {
   canUseAI: boolean;
   canShare: boolean;
   refreshSubscription: () => Promise<void>;
+  refetchSubscription: () => Promise<void>;
   checkLimit: (feature: keyof SubscriptionLimits) => {
     allowed: boolean;
     current: number;
@@ -47,6 +48,9 @@ interface SubscriptionContextType {
   checkAndShowLimit: (feature: keyof SubscriptionLimits, featureName: string, unit?: string) => boolean;
   isInNewUserGracePeriod: boolean;
   gracePeriodDaysRemaining: number;
+  gracePeriodHoursRemaining?: number;
+  hasFeatureAccess: (feature: 'ai' | 'collaboration' | 'sharing' | 'unlimited' | 'themes' | 'export') => boolean;
+  showFeatureLockedToast: (feature: string) => void;
 }
 
 const defaultLimits: SubscriptionLimits = {
@@ -163,6 +167,29 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     showFeatureLockedToast(feature, description);
   }, []);
 
+  const hasFeatureAccess = useCallback((feature: 'ai' | 'collaboration' | 'sharing' | 'unlimited' | 'themes' | 'export') => {
+    // During grace period, all features are available
+    if (isInNewUserGracePeriod) return true;
+    
+    // Pro users have access to all features
+    if (isPro) return true;
+    
+    // Free tier restrictions
+    switch (feature) {
+      case 'ai':
+        return checkLimit('maxAiCalls').allowed;
+      case 'collaboration':
+      case 'sharing':
+        return checkLimit('maxCollaborators').allowed;
+      case 'unlimited':
+      case 'themes':
+      case 'export':
+        return false; // Pro-only features
+      default:
+        return false;
+    }
+  }, [isPro, isInNewUserGracePeriod, checkLimit]);
+
   const checkAndShowLimit = useCallback((feature: keyof SubscriptionLimits, featureName: string, unit?: string) => {
     const result = checkLimit(feature);
     
@@ -216,6 +243,25 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     return Math.max(0, diffDays);
   }, [subscription]);
 
+  // Calculate hours remaining in grace period
+  const gracePeriodHoursRemaining = useMemo(() => {
+    if (!subscription) return 0;
+    
+    const endDate = subscription.isNewUser && subscription.newUserGracePeriodEnd
+      ? new Date(subscription.newUserGracePeriodEnd)
+      : subscription.gracePeriodEnd
+      ? new Date(subscription.gracePeriodEnd)
+      : null;
+      
+    if (!endDate) return 0;
+    
+    const now = new Date();
+    const diffTime = endDate.getTime() - now.getTime();
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    
+    return Math.max(0, diffHours);
+  }, [subscription]);
+
   const value: SubscriptionContextType = {
     subscription,
     limits,
@@ -229,11 +275,15 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     canUseAI: isPro || checkLimit('maxAiCalls').allowed,
     canShare: isPro || checkLimit('maxCollaborators').allowed,
     refreshSubscription: fetchSubscription,
+    refetchSubscription: fetchSubscription,
     checkLimit,
     showUpgradePrompt,
     checkAndShowLimit,
     isInNewUserGracePeriod,
     gracePeriodDaysRemaining,
+    gracePeriodHoursRemaining,
+    hasFeatureAccess,
+    showFeatureLockedToast,
   };
 
   return (

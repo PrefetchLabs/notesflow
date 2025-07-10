@@ -44,6 +44,7 @@ export const subscriptions = pgTable('subscriptions', {
   currentPeriodEnd: timestamp('current_period_end'),
   cancelAt: timestamp('cancel_at'),
   canceledAt: timestamp('canceled_at'),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
   
   // Trial information
   trialStart: timestamp('trial_start'),
@@ -100,6 +101,9 @@ export const subscriptions = pgTable('subscriptions', {
   
   // Early bird special
   isEarlyBird: boolean('is_early_bird').default(false),
+  
+  // Additional metadata
+  metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
