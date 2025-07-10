@@ -15,25 +15,25 @@ export class AdminService {
   // Check if a user has system admin access
   static async isSystemAdmin(userId: string): Promise<boolean> {
     const result = await db
-      .select({ isSystemAdmin: user.isSystemAdmin, role: user.role })
+      .select({ role: user.role })
       .from(user)
       .where(eq(user.id, userId))
       .limit(1);
     
     const userData = result[0];
-    return userData?.isSystemAdmin === true || userData?.role === 'system_admin';
+    return userData?.role === 'system_admin';
   }
 
   // Check if a user has any admin access
   static async isAdmin(userId: string): Promise<boolean> {
     const result = await db
-      .select({ role: user.role, isSystemAdmin: user.isSystemAdmin })
+      .select({ role: user.role })
       .from(user)
       .where(eq(user.id, userId))
       .limit(1);
     
     const userData = result[0];
-    return userData?.role === 'admin' || userData?.role === 'system_admin' || userData?.isSystemAdmin === true;
+    return userData?.role === 'admin' || userData?.role === 'system_admin';
   }
 
   // Get user's admin permissions
@@ -41,8 +41,7 @@ export class AdminService {
     const result = await db
       .select({
         role: user.role,
-        adminPermissions: user.adminPermissions,
-        isSystemAdmin: user.isSystemAdmin
+        adminPermissions: user.adminPermissions
       })
       .from(user)
       .where(eq(user.id, userId))
@@ -52,7 +51,7 @@ export class AdminService {
     if (!userData) return [];
 
     // System admins have all permissions
-    if (userData.isSystemAdmin || userData.role === 'system_admin') {
+    if (userData.role === 'system_admin') {
       return Object.values(ADMIN_PERMISSIONS);
     }
 
@@ -102,7 +101,6 @@ export class AdminService {
   ): Promise<void> {
     const updateData: any = {
       role,
-      isSystemAdmin: role === 'system_admin',
       adminPermissions: permissions || DEFAULT_ADMIN_PERMISSIONS[role]
     };
 
@@ -118,7 +116,6 @@ export class AdminService {
       .update(user)
       .set({
         role: 'user',
-        isSystemAdmin: false,
         adminPermissions: [],
         lastAdminActivityAt: null
       })
@@ -154,7 +151,6 @@ export class AdminService {
     email: string;
     name: string | null;
     role: UserRole;
-    isSystemAdmin: boolean;
     adminPermissions: string[];
     lastAdminActivityAt: Date | null;
   }>> {
@@ -164,12 +160,11 @@ export class AdminService {
         email: user.email,
         name: user.name,
         role: user.role,
-        isSystemAdmin: user.isSystemAdmin,
         adminPermissions: user.adminPermissions,
         lastAdminActivityAt: user.lastAdminActivityAt
       })
       .from(user)
-      .where(eq(user.isSystemAdmin, true));
+      .where(eq(user.role, 'admin'));
     
     return admins;
   }

@@ -13,7 +13,6 @@ export const user = pgTable('user', {
   image: text('image'),
   // Admin-specific fields
   role: userRoleEnum('role').default('user').notNull(),
-  isSystemAdmin: boolean('is_system_admin').default(false).notNull(),
   adminPermissions: jsonb('admin_permissions').$type<string[]>().default([]),
   lastAdminActivityAt: timestamp('last_admin_activity_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
