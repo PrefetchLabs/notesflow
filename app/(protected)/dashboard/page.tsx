@@ -8,12 +8,16 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MobileNav } from '@/components/layouts/mobile-nav';
 import { useResponsive } from '@/hooks/useResponsive';
+import { useSubscription } from '@/lib/contexts/subscription-context';
+import { UsageIndicator } from '@/components/upgrade/usage-indicator';
+import { UpgradeBanner } from '@/components/upgrade/upgrade-banner';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
   const { isMobile } = useResponsive();
+  const { isFreeTier, limits, usage, checkLimit } = useSubscription();
 
   const handleGetStarted = async () => {
     setHasStarted(true);
@@ -89,7 +93,7 @@ export default function DashboardPage() {
                 transition={{ duration: 0.2 }}
               >
                 <p className="text-xs text-muted-foreground sm:text-sm">Total Notes</p>
-                <p className="text-xl font-bold sm:text-2xl">0</p>
+                <p className="text-xl font-bold sm:text-2xl">{usage.notesCount}</p>
               </motion.div>
               <motion.div 
                 className="rounded-lg bg-background p-3 sm:p-4"
@@ -97,7 +101,7 @@ export default function DashboardPage() {
                 transition={{ duration: 0.2 }}
               >
                 <p className="text-xs text-muted-foreground sm:text-sm">Folders</p>
-                <p className="text-xl font-bold sm:text-2xl">0</p>
+                <p className="text-xl font-bold sm:text-2xl">{usage.foldersCount}</p>
               </motion.div>
               <motion.div 
                 className="rounded-lg bg-background p-3 sm:p-4"
@@ -115,6 +119,37 @@ export default function DashboardPage() {
               Show Welcome Screen
             </Button>
           </div>
+
+          {/* Usage Indicators for Free Tier */}
+          {isFreeTier && (
+            <div className="mt-6 space-y-4">
+              <h2 className="text-base font-semibold sm:text-lg">Usage Limits</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <UsageIndicator
+                  label="Notes"
+                  used={usage.notesCount}
+                  limit={limits.maxNotes}
+                  unit="notes"
+                />
+                <UsageIndicator
+                  label="Folders"
+                  used={usage.foldersCount}
+                  limit={limits.maxFolders}
+                  unit="folders"
+                />
+              </div>
+
+              {/* Show upgrade banner if approaching limits */}
+              {(checkLimit('maxNotes').remaining <= 2 || checkLimit('maxFolders').remaining === 0) && (
+                <UpgradeBanner
+                  title="You're running out of space!"
+                  description="Upgrade to Pro for unlimited notes, folders, and AI-powered features."
+                  variant="default"
+                  className="mt-6"
+                />
+              )}
+            </div>
+          )}
         </motion.div>
       </main>
       

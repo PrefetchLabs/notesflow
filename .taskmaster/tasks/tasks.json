@@ -1790,7 +1790,7 @@
             "id": 7,
             "title": "Implement usage tracking hooks",
             "description": "Create React hooks to track and display current usage against limits",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1,
               2,
@@ -1803,7 +1803,7 @@
             "id": 8,
             "title": "Add visual indicators for pro features",
             "description": "Implement UI elements that clearly indicate which features require pro subscription",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               4,
               5,
@@ -2591,7 +2591,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-10T20:31:20.852Z",
+      "updated": "2025-07-10T21:47:16.988Z",
       "description": "Tasks for master context"
     }
   }

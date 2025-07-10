@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useSession } from '@/lib/hooks/useSession';
 import type { Subscription } from '@/lib/db/schema/subscriptions';
+import { showUsageLimitToast, showFeatureLockedToast } from '@/components/upgrade/usage-limit-toast';
 
 interface SubscriptionLimits {
   maxNotes: number;
@@ -39,6 +40,8 @@ interface SubscriptionContextType {
     limit: number;
     remaining: number;
   };
+  showUpgradePrompt: (feature: string, description?: string) => void;
+  checkAndShowLimit: (feature: keyof SubscriptionLimits, featureName: string, unit?: string) => boolean;
 }
 
 const defaultLimits: SubscriptionLimits = {
@@ -114,6 +117,34 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     };
   }, [limits, usage, isPro]);
 
+  const showUpgradePrompt = useCallback((feature: string, description?: string) => {
+    showFeatureLockedToast(feature, description);
+  }, []);
+
+  const checkAndShowLimit = useCallback((feature: keyof SubscriptionLimits, featureName: string, unit?: string) => {
+    const { allowed, current, limit } = checkLimit(feature);
+    
+    if (!allowed) {
+      const featureUnits: Record<keyof SubscriptionLimits, string> = {
+        maxNotes: 'notes',
+        maxFolders: 'folders',
+        maxAiCalls: 'AI calls',
+        maxCollaborators: 'collaborators',
+        maxStorage: 'MB',
+      };
+      
+      showUsageLimitToast({
+        feature: featureName,
+        limit,
+        current,
+        unit: unit || featureUnits[feature],
+      });
+      return true; // Limit reached
+    }
+    
+    return false; // No limit reached
+  }, [checkLimit]);
+
   const value: SubscriptionContextType = {
     subscription,
     limits,
@@ -128,6 +159,8 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     canShare: isPro || checkLimit('maxCollaborators').allowed,
     refreshSubscription: fetchSubscription,
     checkLimit,
+    showUpgradePrompt,
+    checkAndShowLimit,
   };
 
   return (

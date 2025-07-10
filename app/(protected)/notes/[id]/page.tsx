@@ -9,6 +9,7 @@ import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight } f
 import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSubscription } from '@/lib/contexts/subscription-context';
+import { ProBadge } from '@/components/ui/pro-badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -446,7 +447,10 @@ export default function NotePage() {
               {isOwnNote && (
                 <DropdownMenuItem onClick={handleShare}>
                   <Share2 className="mr-2 h-4 w-4" />
-                  Share
+                  <span className="flex items-center gap-2">
+                    Share
+                    {!isPro && <ProBadge size="sm" showIcon={false} />}
+                  </span>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />

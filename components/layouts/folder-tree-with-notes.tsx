@@ -59,6 +59,8 @@ import { FolderWithNotes, Note } from '@/hooks/useFoldersWithNotes';
 import { useRouter } from 'next/navigation';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
+import { useSubscription } from '@/lib/contexts/subscription-context';
+import { ProBadge } from '@/components/ui/pro-badge';
 
 interface FolderTreeWithNotesProps {
   folders: FolderWithNotes[];
@@ -318,6 +320,7 @@ export function FolderTreeWithNotes({
   const [editingFolder, setEditingFolder] = useState<FolderWithNotes | null>(null);
   const [folderName, setFolderName] = useState('');
   const [parentFolderId, setParentFolderId] = useState<string | undefined>();
+  const { checkAndShowLimit, isPro } = useSubscription();
 
   // Build flat list of all navigable items for keyboard navigation
   const navigableItems = useMemo(() => {
@@ -501,6 +504,13 @@ export function FolderTreeWithNotes({
 
   const handleCreateFolder = () => {
     if (!folderName.trim()) return;
+    
+    // Check folder limit
+    if (checkAndShowLimit('maxFolders', 'Folder creation')) {
+      setDialogOpen(false);
+      return;
+    }
+    
     onCreateFolder(folderName, parentFolderId);
     setDialogOpen(false);
     setFolderName('');
@@ -613,19 +623,30 @@ export function FolderTreeWithNotes({
           <h3 className={cn('text-xs font-semibold uppercase text-muted-foreground', collapsed && 'sr-only')}>
             Folders
           </h3>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => {
-              setParentFolderId(undefined);
-              setFolderName('');
-              setEditingFolder(null);
-              setDialogOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("h-6 w-6", !isPro && "opacity-60")}
+              onClick={() => {
+                if (checkAndShowLimit('maxFolders', 'Folder creation')) {
+                  return;
+                }
+                setParentFolderId(undefined);
+                setFolderName('');
+                setEditingFolder(null);
+                setDialogOpen(true);
+              }}
+              title={isPro ? "Create new folder" : "Create new folder (Pro feature)"}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            {!isPro && (
+              <div className="absolute -top-1 -right-1 pointer-events-none">
+                <ProBadge size="sm" showIcon={false} />
+              </div>
+            )}
+          </div>
         </div>
 
         <DndContext
