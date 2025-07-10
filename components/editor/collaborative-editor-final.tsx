@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 import { AIMenuController } from "@blocknote/xl-ai";
@@ -19,13 +19,11 @@ import { createAIExtension } from "@/lib/editor/ai-extension";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Users, WifiOff, Wifi, UserPlus, UserMinus } from "lucide-react";
-import { toast } from "sonner";
+import { Users, WifiOff, Wifi } from "lucide-react";
 import * as Y from "yjs";
-import { WebrtcProvider } from "y-webrtc";
+import { WebsocketProvider } from "y-websocket";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { useAuth } from "@/lib/auth/auth-hooks";
-import { createClient } from "@/lib/supabase/client";
 
 interface CollaborativeEditorFinalProps {
   noteId: string;
@@ -35,10 +33,9 @@ interface CollaborativeEditorFinalProps {
   className?: string;
 }
 
-// Use a simpler approach with WebRTC for peer-to-peer collaboration
 export function CollaborativeEditorFinal({
   noteId,
-  initialContent,
+  initialContent = [{ type: "paragraph", content: "" }],
   onContentChange,
   editable = true,
   className,
@@ -48,111 +45,97 @@ export function CollaborativeEditorFinal({
   const [isConnected, setIsConnected] = useState(false);
   const [activeUsers, setActiveUsers] = useState<Array<{ id: number; user: any }>>([]);
   
-  // Create Y.Doc with persistence
+  // Create Y.Doc
   const ydoc = useMemo(() => new Y.Doc(), []);
   
-  // Create WebRTC provider for real-time sync
+  // Generate consistent user color
+  const userColor = useMemo(() => {
+    if (!user?.id) return '#' + Math.floor(Math.random()*16777215).toString(16);
+    let hash = 0;
+    for (let i = 0; i < user.id.length; i++) {
+      hash = user.id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return '#' + ((hash & 0x00FFFFFF).toString(16).padStart(6, '0'));
+  }, [user?.id]);
+  
+  // Create WebSocket provider
   const provider = useMemo(() => {
     if (!user) return null;
     
-    // Use a combination of WebRTC and Supabase for signaling
-    const provider = new WebrtcProvider(`notesflow-${noteId}`, ydoc, {
-      signaling: [
-        'wss://signaling.yjs.dev', // Public signaling server
-        'wss://y-webrtc-signaling-eu.herokuapp.com',
-        'wss://y-webrtc-signaling-us.herokuapp.com'
-      ],
-      password: noteId, // Use noteId as room password
-      awareness: {
-        user: {
-          name: user.name || user.email?.split('@')[0] || 'Anonymous',
-          color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
-          id: user.id,
-        }
-      },
-      maxConns: 20,
+    const wsUrl = process.env['NEXT_PUBLIC_YJS_SERVER_URL'] || 'ws://localhost:1234';
+    console.log('[CollaborativeEditor] Creating WebSocket provider:', wsUrl);
+    
+    const wsProvider = new WebsocketProvider(
+      wsUrl,
+      `notesflow-${noteId}`,
+      ydoc,
+      {
+        WebSocketPolyfill: WebSocket,
+        resyncInterval: 5000,
+      }
+    );
+    
+    // Set user info
+    wsProvider.awareness.setLocalStateField('user', {
+      name: user.name || user.email?.split('@')[0] || 'Anonymous',
+      color: userColor,
+      id: user.id,
     });
     
-    provider.on('synced', (synced: boolean) => {
-      console.log('[CollaborativeEditor] WebRTC synced:', synced);
-      setIsConnected(synced);
+    // Monitor connection status
+    wsProvider.on('status', (event: any) => {
+      console.log('[CollaborativeEditor] WebSocket status:', event.status);
+      setIsConnected(event.status === 'connected');
     });
     
-    return provider;
-  }, [user, noteId, ydoc]);
+    wsProvider.on('sync', (isSynced: boolean) => {
+      console.log('[CollaborativeEditor] Sync status:', isSynced);
+    });
+    
+    return wsProvider;
+  }, [user, noteId, ydoc, userColor]);
   
-  // Create IndexedDB persistence for offline support
+  // Create IndexedDB persistence
   const persistence = useMemo(() => {
-    return new IndexeddbPersistence(`notesflow-${noteId}`, ydoc);
+    const indexeddbProvider = new IndexeddbPersistence(`notesflow-${noteId}`, ydoc);
+    indexeddbProvider.on('synced', () => {
+      console.log('[CollaborativeEditor] IndexedDB synced');
+    });
+    return indexeddbProvider;
   }, [noteId, ydoc]);
   
   // Track active users
   useEffect(() => {
     if (!provider) return;
     
-    const awareness = provider.awareness;
-    
     const updateUsers = () => {
-      const states = awareness.getStates();
+      const states = provider.awareness.getStates();
       const users: Array<{ id: number; user: any }> = [];
       
       states.forEach((state, clientId) => {
-        if (clientId !== awareness.clientID && state.user) {
+        if (clientId !== provider.awareness.clientID && state.user) {
           users.push({ id: clientId, user: state.user });
         }
       });
       
       setActiveUsers(users);
+      console.log('[CollaborativeEditor] Active users:', users);
     };
     
-    awareness.on('change', updateUsers);
+    provider.awareness.on('change', updateUsers);
     updateUsers();
     
     return () => {
-      awareness.off('change', updateUsers);
+      provider.awareness.off('change', updateUsers);
     };
   }, [provider]);
   
-  // Save to database periodically
-  useEffect(() => {
-    if (!ydoc || !noteId) return;
-    
-    const supabase = createClient();
-    let saveTimeout: NodeJS.Timeout;
-    
-    const saveToDatabase = async () => {
-      try {
-        // Get the current document content
-        const fragment = ydoc.getXmlFragment("document-store");
-        // We'll save the Y.Doc state for recovery, but the actual content
-        // is managed by BlockNote through the Y.Doc
-        
-        console.log('[CollaborativeEditor] Auto-saving to database');
-      } catch (error) {
-        console.error('[CollaborativeEditor] Failed to save:', error);
-      }
-    };
-    
-    const handleUpdate = () => {
-      // Debounce saves
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(saveToDatabase, 5000); // Save after 5 seconds of inactivity
-    };
-    
-    ydoc.on('update', handleUpdate);
-    
-    return () => {
-      ydoc.off('update', handleUpdate);
-      clearTimeout(saveTimeout);
-    };
-  }, [ydoc, noteId]);
-  
   // Create AI model
-  const model = createCustomAIModel();
+  const model = useMemo(() => createCustomAIModel(), []);
   
-  // Create editor with Y.Doc collaboration
+  // Create editor
   const editor = useCreateBlockNote({
-    initialContent: initialContent,
+    initialContent,
     dictionary: {
       ...en,
       ai: aiEn
@@ -172,26 +155,34 @@ export function CollaborativeEditorFinal({
       ...defaultBlockSpecs,
     },
     collaboration: provider ? {
-      provider: provider as any, // WebRTC provider works with BlockNote
+      provider,
       fragment: ydoc.getXmlFragment("document-store"),
       user: {
         name: user?.name || user?.email?.split('@')[0] || 'Anonymous',
-        color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+        color: userColor,
       },
-      showCursorLabels: "activity",
     } : undefined,
-  }, []);
+  }, [provider, ydoc, user, userColor]);
   
   // Handle content changes
-  const handleChange = () => {
-    if (!editor || !onContentChange) return;
-    const document = editor.document;
-    onContentChange(document);
-  };
+  useEffect(() => {
+    if (!editor) return;
+    
+    console.log('[CollaborativeEditor] Editor initialized');
+    
+    const unsubscribe = editor.onChange(() => {
+      if (onContentChange) {
+        onContentChange(editor.document);
+      }
+    });
+    
+    return unsubscribe;
+  }, [editor, onContentChange]);
   
   // Cleanup
   useEffect(() => {
     return () => {
+      console.log('[CollaborativeEditor] Cleaning up...');
       provider?.disconnect();
       provider?.destroy();
       persistence?.destroy();
@@ -262,12 +253,9 @@ export function CollaborativeEditorFinal({
         editable={editable}
         theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
         className="h-full"
-        onChange={handleChange}
-        formattingToolbar={false}
-        slashMenu={false}
       >
         <AIMenuController />
-        <FormattingToolbarWithAI />
+        <FormattingToolbarWithAI editor={editor} />
         <SuggestionMenuWithAI editor={editor} />
       </BlockNoteView>
     </div>

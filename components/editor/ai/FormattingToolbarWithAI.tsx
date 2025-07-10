@@ -38,7 +38,14 @@ export function FormattingToolbarWithAI({ editor: fullEditor }: FormattingToolba
           
           try {
             // Use the full editor instance
-            const aiExtension = getAIExtension(fullEditor);
+            let aiExtension;
+            try {
+              aiExtension = getAIExtension(fullEditor);
+            } catch (error) {
+              console.error('Error getting AI extension:', error);
+              toast.error('AI extension not available');
+              return;
+            }
             
             if (!aiExtension) {
               toast.error('AI extension not available');

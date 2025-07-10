@@ -1,5 +1,57 @@
 /* Enhanced cursor animations for BlockNote collaboration */
 
+/* BlockNote specific collaboration styles */
+.collaboration-cursor {
+  position: absolute;
+  width: 2px;
+  height: 1.2em;
+  top: 0;
+  transition: top 150ms ease-out, left 150ms ease-out;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.collaboration-cursor-label {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 3px 3px 3px 0;
+  color: white;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Also support BlockNote's default collaboration classes */
+.bn-collaboration-cursor {
+  position: absolute;
+  width: 2px;
+  background-color: var(--cursor-color);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.bn-collaboration-cursor-label {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  padding: 2px 6px;
+  background-color: var(--cursor-color);
+  color: white;
+  font-size: 11px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.bn-collaboration-selection {
+  background-color: var(--cursor-color);
+  opacity: 0.2;
+}
+
 /* Cursor appearance animation */
 @keyframes cursor-fade-in {
   0% {
