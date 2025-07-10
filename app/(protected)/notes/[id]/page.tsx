@@ -469,21 +469,13 @@ export default function NotePage() {
             ) : (
               content && (
                 hasEditPermission ? (
-                  isCollaborationEnabled ? (
-                    <CollaborativeEditorFinal
-                      key={`collab-${noteId}-${isCollaborationEnabled}`} // Include collaboration state in key
-                      noteId={noteId}
-                      initialContent={content}
-                      onContentChange={handleContentChange}
-                    />
-                  ) : (
-                    <BlockNoteAIEditor
-                      key={`note-${noteId}`} // Stable key for non-collaborative mode
-                      initialContent={content}
-                      onContentChange={handleContentChange}
-                      showAIUsage={true}
-                    />
-                  )
+                  <CollaborativeEditorFinal
+                    key={`editor-${noteId}`} // Single stable key
+                    noteId={noteId}
+                    initialContent={content}
+                    onContentChange={handleContentChange}
+                    forceCollaboration={isCollaborationEnabled}
+                  />
                 ) : (
                   // View-only mode for collaborators without edit permission
                   <div className="rounded-lg border bg-muted/10 p-8">

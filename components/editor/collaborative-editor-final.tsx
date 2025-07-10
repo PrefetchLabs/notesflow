@@ -31,6 +31,7 @@ interface CollaborativeEditorFinalProps {
   onContentChange?: (content: any[]) => void;
   editable?: boolean;
   className?: string;
+  forceCollaboration?: boolean;
 }
 
 export function CollaborativeEditorFinal({
@@ -39,6 +40,7 @@ export function CollaborativeEditorFinal({
   onContentChange,
   editable = true,
   className,
+  forceCollaboration = false,
 }: CollaborativeEditorFinalProps) {
   // Ensure we have valid initial content
   const safeInitialContent = useMemo(() => {
@@ -51,6 +53,7 @@ export function CollaborativeEditorFinal({
   const { user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [activeUsers, setActiveUsers] = useState<Array<{ id: number; user: any }>>([]);
+  const [shouldUseCollaboration, setShouldUseCollaboration] = useState(forceCollaboration);
   
   // Create Y.Doc
   const ydoc = useMemo(() => new Y.Doc(), []);
@@ -82,12 +85,7 @@ export function CollaborativeEditorFinal({
       }
     );
     
-    // Set user info
-    wsProvider.awareness.setLocalStateField('user', {
-      name: user.name || user.email?.split('@')[0] || 'Anonymous',
-      color: userColor,
-      id: user.id,
-    });
+    // Don't set user info here - do it after connection
     
     // Monitor connection status
     wsProvider.on('status', (event: any) => {
@@ -100,7 +98,7 @@ export function CollaborativeEditorFinal({
     });
     
     return wsProvider;
-  }, [user, noteId, ydoc, userColor]);
+  }, [user, noteId, ydoc]);
   
   // Create IndexedDB persistence
   const persistence = useMemo(() => {
@@ -112,7 +110,50 @@ export function CollaborativeEditorFinal({
   }, [noteId, ydoc]);
   
   
-  // Track active users
+  // Set awareness state when provider is connected
+  useEffect(() => {
+    if (!provider || !user) return;
+    
+    const setUserInfo = () => {
+      const userInfo = {
+        name: user.name || user.email?.split('@')[0] || 'Anonymous',
+        color: userColor,
+        id: user.id,
+      };
+      
+      // Set the full awareness state, not just a field
+      provider.awareness.setLocalState({
+        user: userInfo,
+        cursor: null // Initialize cursor position
+      });
+      
+      console.log('[CollaborativeEditor] Set awareness state:', {
+        clientID: provider.awareness.clientID,
+        userInfo
+      });
+    };
+    
+    // Set immediately if already connected
+    if (isConnected) {
+      setUserInfo();
+    }
+    
+    // Also set when connection status changes
+    const handleStatus = (event: any) => {
+      if (event.status === 'connected') {
+        // Delay to ensure WebSocket is fully ready
+        setTimeout(setUserInfo, 200);
+      }
+    };
+    
+    provider.on('status', handleStatus);
+    
+    return () => {
+      provider.off('status', handleStatus);
+    };
+  }, [provider, user, userColor, isConnected]);
+
+  // Track active users and determine if collaboration should be active
   useEffect(() => {
     if (!provider) return;
     
@@ -120,28 +161,49 @@ export function CollaborativeEditorFinal({
       const states = provider.awareness.getStates();
       const users: Array<{ id: number; user: any }> = [];
       
+      console.log('[CollaborativeEditor] Awareness update:', {
+        totalStates: states.size,
+        myClientID: provider.awareness.clientID,
+        wsReadyState: (provider as any).ws?.readyState,
+        synced: provider.synced
+      });
+      
       states.forEach((state, clientId) => {
-        if (clientId !== provider.awareness.clientID && state.user) {
+        console.log(`[CollaborativeEditor] Client ${clientId}:`, state);
+        if (clientId !== provider.awareness.clientID && state?.user) {
           users.push({ id: clientId, user: state.user });
         }
       });
       
       setActiveUsers(users);
       console.log('[CollaborativeEditor] Active users:', users);
+      
+      // Enable collaboration if there are other users or if forced
+      const hasOtherUsers = users.length > 0;
+      setShouldUseCollaboration(forceCollaboration || hasOtherUsers);
     };
     
+    // Update users on any awareness change
     provider.awareness.on('change', updateUsers);
+    provider.awareness.on('update', updateUsers);
+    
+    // Force update every 2 seconds to debug
+    const debugInterval = setInterval(updateUsers, 2000);
+    
+    // Initial update
     updateUsers();
     
     return () => {
       provider.awareness.off('change', updateUsers);
+      provider.awareness.off('update', updateUsers);
+      clearInterval(debugInterval);
     };
-  }, [provider]);
+  }, [provider, forceCollaboration]);
   
   // Create AI model
   const model = useMemo(() => createCustomAIModel(), []);
   
-  // Create editor
+  // Create editor - always with provider for seamless collaboration switching
   const editor = useCreateBlockNote({
     // Only provide initialContent when NOT using collaboration
     // When using collaboration, content comes from Y.Doc
@@ -171,6 +233,8 @@ export function CollaborativeEditorFinal({
         name: user?.name || user?.email?.split('@')[0] || 'Anonymous',
         color: userColor,
       },
+      // Show cursor labels when active
+      showCursorLabels: "activity"
     } : undefined,
   }, [provider, ydoc, user, userColor]);
   
@@ -244,8 +308,14 @@ export function CollaborativeEditorFinal({
   useEffect(() => {
     return () => {
       console.log('[CollaborativeEditor] Cleaning up...');
-      provider?.disconnect();
-      provider?.destroy();
+      
+      // Clear awareness state before disconnecting
+      if (provider) {
+        provider.awareness.setLocalState(null);
+        provider.disconnect();
+        provider.destroy();
+      }
+      
       persistence?.destroy();
       ydoc.destroy();
     };
@@ -257,57 +327,59 @@ export function CollaborativeEditorFinal({
   
   return (
     <div className={cn("relative h-full", className)}>
-      {/* Connection Status & Active Users */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        {/* Connection Status */}
-        <Badge 
-          variant={isConnected ? "default" : "secondary"}
-          className="flex items-center gap-1"
-        >
-          {isConnected ? (
-            <>
-              <Wifi className="h-3 w-3" />
-              Connected
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-3 w-3" />
-              Connecting...
-            </>
-          )}
-        </Badge>
+      {/* Show collaboration UI only when active */}
+      {shouldUseCollaboration && (
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          {/* Connection Status */}
+          <Badge 
+            variant={isConnected ? "default" : "secondary"}
+            className="flex items-center gap-1"
+          >
+            {isConnected ? (
+              <>
+                <Wifi className="h-3 w-3" />
+                Connected
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-3 w-3" />
+                Connecting...
+              </>
+            )}
+          </Badge>
 
-        {/* Active Users */}
-        {activeUsers.length > 0 && (
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {activeUsers.length + 1}
-            </Badge>
-            
-            {/* User Avatars */}
-            <div className="flex -space-x-2">
-              {activeUsers.slice(0, 5).map((activeUser) => (
-                <div
-                  key={activeUser.id}
-                  className="relative h-8 w-8 rounded-full ring-2 ring-background"
-                  style={{ backgroundColor: activeUser.user.color }}
-                  title={activeUser.user.name}
-                >
-                  <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
-                    {activeUser.user.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              ))}
-              {activeUsers.length > 5 && (
-                <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-muted ring-2 ring-background">
-                  <span className="text-xs">+{activeUsers.length - 5}</span>
-                </div>
-              )}
+          {/* Active Users */}
+          {activeUsers.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                {activeUsers.length + 1}
+              </Badge>
+              
+              {/* User Avatars */}
+              <div className="flex -space-x-2">
+                {activeUsers.slice(0, 5).map((activeUser) => (
+                  <div
+                    key={activeUser.id}
+                    className="relative h-8 w-8 rounded-full ring-2 ring-background"
+                    style={{ backgroundColor: activeUser.user.color }}
+                    title={activeUser.user.name}
+                  >
+                    <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+                      {activeUser.user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                ))}
+                {activeUsers.length > 5 && (
+                  <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-muted ring-2 ring-background">
+                    <span className="text-xs">+{activeUsers.length - 5}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <BlockNoteView
         editor={editor}
