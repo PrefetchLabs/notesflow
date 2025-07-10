@@ -57,6 +57,13 @@
       "when": 1752178914483,
       "tag": "0007_vengeful_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1752182136957,
+      "tag": "0008_motionless_zzzax",
+      "breakpoints": true
     }
   ]
 }
