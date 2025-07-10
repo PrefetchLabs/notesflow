@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const activeUsersResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(user)
-      .where(gt(user.lastSignInAt, thirtyDaysAgo));
+      .where(gt(user.updatedAt, thirtyDaysAgo));
     const activeUsers = Number(activeUsersResult[0]?.count || 0);
 
     // Get notes stats

@@ -66,7 +66,8 @@ export function DashboardStats() {
         if (!response.ok) throw new Error('Failed to fetch stats');
         
         const data = await response.json();
-        const { stats: apiStats, trends } = data;
+        const apiStats = data.stats;
+        const trends = data.stats.trends;
 
         setStats([
           {
