@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
 import { subscriptions, folders, notes, collaborators } from '@/lib/db/schema';
 import { eq, and, isNull, count } from 'drizzle-orm';
+import { addDays } from 'date-fns';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,8 +24,7 @@ export async function GET(request: NextRequest) {
     if (!subscription) {
       // Create default free subscription with 7-day grace period for new users
       const now = new Date();
-      const gracePeriodEnd = new Date(now);
-      gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7);
+      const gracePeriodEnd = addDays(now, 7);
 
       [subscription] = await db
         .insert(subscriptions)
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
           status: 'active',
           isNewUser: true,
           newUserGracePeriodEnd: gracePeriodEnd,
-          isInGracePeriod: true,
-          gracePeriodEnd: gracePeriodEnd,
+          createdAt: now,
+          updatedAt: now,
         })
         .returning();
     }
