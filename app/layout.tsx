@@ -4,6 +4,7 @@ import { WebVitals } from '@/components/web-vitals';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AdminProvider } from '@/components/providers/admin-provider';
+import { DragDropProvider } from '@/contexts/drag-drop-context';
 
 export const metadata: Metadata = {
   title: 'NotesFlow - Your thoughts and time, beautifully unified',
@@ -34,7 +35,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <AdminProvider>
-              {children}
+              <DragDropProvider>
+                {children}
+              </DragDropProvider>
             </AdminProvider>
           </ThemeProvider>
         </QueryProvider>

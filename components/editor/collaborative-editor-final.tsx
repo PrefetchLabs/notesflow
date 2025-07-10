@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 import { AIMenuController } from "@blocknote/xl-ai";
@@ -25,6 +25,8 @@ import { WebsocketProvider } from "y-websocket";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { useAuth } from "@/lib/auth/auth-hooks";
 import { useAIAccess } from "@/hooks/useAIAccess";
+import { useBlockNoteSelection } from "@/hooks/useBlockNoteSelection";
+import { SelectionDragHandler } from "./selection-drag-handler";
 
 interface CollaborativeEditorFinalProps {
   noteId: string;
@@ -33,6 +35,8 @@ interface CollaborativeEditorFinalProps {
   editable?: boolean;
   className?: string;
   forceCollaboration?: boolean;
+  enableDragToCalendar?: boolean;
+  onTextDragStart?: (text: string) => void;
 }
 
 export function CollaborativeEditorFinal({
@@ -42,6 +46,8 @@ export function CollaborativeEditorFinal({
   editable = true,
   className,
   forceCollaboration = false,
+  enableDragToCalendar = false,
+  onTextDragStart,
 }: CollaborativeEditorFinalProps) {
   // Ensure we have valid initial content
   const safeInitialContent = useMemo(() => {
@@ -239,6 +245,17 @@ export function CollaborativeEditorFinal({
       showCursorLabels: "activity"
     } : undefined,
   }, [provider, ydoc, user, userColor]);
+
+  // Handle text selection for drag to calendar
+  const { selection } = useBlockNoteSelection({
+    editor,
+    enabled: enableDragToCalendar && editable,
+  });
+
+  const handleDragStart = useCallback((event: React.DragEvent, text: string) => {
+    console.log('[CollaborativeEditor] Drag started with text:', text);
+    onTextDragStart?.(text);
+  }, [onTextDragStart]);
   
   // Initialize Y.Doc content when provider and editor are ready
   useEffect(() => {
@@ -395,6 +412,14 @@ export function CollaborativeEditorFinal({
         <FormattingToolbarWithAI showAI={hasAIAccess} />
         <SuggestionMenuWithAI editor={editor} />
       </BlockNoteView>
+      
+      {/* Drag handler for calendar integration */}
+      {enableDragToCalendar && (
+        <SelectionDragHandler
+          selection={selection}
+          onDragStart={handleDragStart}
+        />
+      )}
     </div>
   );
 }

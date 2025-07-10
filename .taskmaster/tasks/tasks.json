@@ -1230,7 +1230,7 @@
         "id": 10,
         "title": "Implement Drag Text to Calendar Feature",
         "description": "Create the killer feature: dragging selected text from notes to create time blocks",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
           9
         ],
@@ -1242,32 +1242,32 @@
             "id": 1,
             "title": "Implement BlockNote selection API integration",
             "description": "Create a custom selection detection system that integrates with BlockNote's internal selection API to capture text selections in real-time",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "details": "Research BlockNote's selection API, implement event listeners for selection changes, create a selection state manager that tracks selected text, position, and block references. Handle edge cases like multi-block selections and nested content.",
+            "details": "Research BlockNote's selection API, implement event listeners for selection changes, create a selection state manager that tracks selected text, position, and block references. Handle edge cases like multi-block selections and nested content.\n<info added on 2025-07-10T23:49:02.184Z>\nImplementation completed successfully. Created comprehensive useBlockNoteSelection hook that leverages BlockNote's TipTap editor foundation to track text selections with real-time updates. The hook captures selection data including selected text content, cursor position coordinates, associated block references, and DOM element boundaries. Implemented debounced selection change handling to optimize performance during rapid text selection changes. Added utility methods for position validation and selection state checking. Successfully integrated with the collaborative editor component while maintaining clean separation of concerns and reusable hook architecture.\n</info added on 2025-07-10T23:49:02.184Z>",
             "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Build drag handler UI component",
             "description": "Create a visual drag handler that appears near selected text in the BlockNote editor",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
-            "details": "Design and implement a floating drag handle component that appears on text selection, position it correctly relative to selected text, ensure it doesn't interfere with editor functionality, add hover states and visual indicators.",
+            "details": "Design and implement a floating drag handle component that appears on text selection, position it correctly relative to selected text, ensure it doesn't interfere with editor functionality, add hover states and visual indicators.\n<info added on 2025-07-10T23:49:41.491Z>\nComponent implementation completed successfully. Built a comprehensive SelectionDragHandler that provides intuitive drag-and-drop functionality for selected text. The implementation includes animated appearance using Framer Motion, intelligent positioning that tracks selection bounds, visual drag handle with calendar icon, custom drag preview displaying selected text content, informative tooltip for user guidance, proper drag data transfer using custom MIME type for calendar integration, and portal rendering for correct z-index layering. The component integrates seamlessly with the collaborative editor without interfering with existing functionality and provides clear visual feedback throughout the entire drag operation.\n</info added on 2025-07-10T23:49:41.491Z>",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Implement custom drag event system",
             "description": "Create a custom drag-and-drop system that works with BlockNote's content model",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1,
               2
             ],
-            "details": "Override native drag behavior to work with BlockNote's virtual DOM, create custom drag data transfer format, handle drag start/move/end events, ensure compatibility with editor's undo/redo system.",
+            "details": "Override native drag behavior to work with BlockNote's virtual DOM, create custom drag data transfer format, handle drag start/move/end events, ensure compatibility with editor's undo/redo system.\n<info added on 2025-07-10T23:53:04.289Z>\nImplementation completed with global DragDropContext using React Context API. System coordinates drag operations between editor (source) and calendar (drop target) components. Custom data transfer format includes NotesFlow-specific metadata. Native browser drag events integrated with context state management. Cross-component drag and drop functionality now operational with proper state coordination throughout the application.\n</info added on 2025-07-10T23:53:04.289Z>",
             "testStrategy": ""
           },
           {
@@ -1837,7 +1837,7 @@
         "dependencies": [
           13
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1845,7 +1845,7 @@
             "description": "Set up Stripe account, create subscription products with pricing tiers, and configure tax settings",
             "dependencies": [],
             "details": "Sign up for Stripe account, navigate to Products section, create subscription products for different tiers (Basic, Pro, Enterprise), set up monthly and annual pricing for each tier, configure tax collection settings if needed, and obtain API keys for both test and production environments",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1856,7 +1856,7 @@
               1
             ],
             "details": "Run 'bun add stripe @stripe/stripe-js', create lib/stripe/client.ts for browser client initialization, create lib/stripe/server.ts for server-side Stripe instance, add STRIPE_PUBLISHABLE_KEY and STRIPE_SECRET_KEY to .env files, configure Stripe webhook endpoint secret",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1865,7 +1865,7 @@
             "description": "Create Drizzle ORM schema for subscriptions, plans, and billing history",
             "dependencies": [],
             "details": "Define tables: subscriptions (id, userId, stripeCustomerId, stripeSubscriptionId, status, currentPeriodEnd), plans (id, name, stripePriceId, features, limits), billing_history (id, userId, amount, status, invoiceUrl), add foreign key relationships and indexes, create migration files",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1877,7 +1877,7 @@
               3
             ],
             "details": "Create app/api/stripe/checkout/route.ts, implement POST handler that creates checkout session with selected price ID, include success_url and cancel_url, add metadata for user identification, implement proper error handling and validation, ensure authentication before session creation",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1888,7 +1888,7 @@
               2
             ],
             "details": "Create components/pricing/PricingCard.tsx with plan features display, implement PlanSelector.tsx for monthly/annual toggle, create CheckoutButton.tsx that calls checkout API, use shadcn/ui components for consistent styling, implement loading states and error handling",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1900,7 +1900,7 @@
               3
             ],
             "details": "Create app/api/stripe/webhook/route.ts, implement signature verification using stripe.webhooks.constructEvent, add raw body parsing for webhook verification, implement event routing based on event type, add logging for all incoming events, ensure idempotent event processing",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1911,7 +1911,7 @@
               6
             ],
             "details": "Implement handlers for: checkout.session.completed (create subscription record), customer.subscription.updated (update status/plan), customer.subscription.deleted (cancel subscription), payment_intent.succeeded (log successful payments), invoice.payment_failed (handle failed payments), update database accordingly for each event",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1922,7 +1922,7 @@
               5
             ],
             "details": "Create app/(dashboard)/checkout/success/page.tsx with order confirmation, implement session retrieval to show purchase details, create cancel page for abandoned checkouts, add email notification trigger on success, implement proper loading and error states",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1934,7 +1934,7 @@
               7
             ],
             "details": "Configure customer portal in Stripe dashboard, create API endpoint to generate portal sessions, add 'Manage Subscription' button in user settings, implement redirect flow to Stripe portal, handle return URL after portal actions, ensure portal configuration matches business rules",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1946,7 +1946,7 @@
               7
             ],
             "details": "Create middleware.ts to check subscription status on protected routes, implement feature gating based on plan limits, add subscription status to user context, handle expired subscriptions gracefully, cache subscription status for performance, implement grace period handling",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1959,7 +1959,7 @@
               7
             ],
             "details": "Add try-catch blocks with specific error messages, implement exponential backoff for failed webhook processing, create error logging with context (user, amount, error type), add Sentry or similar error tracking, implement user-friendly error messages, create admin alerts for critical payment failures",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -1978,7 +1978,7 @@
               11
             ],
             "details": "Test successful subscription creation flow, test failed payment scenarios using Stripe test cards, verify webhook processing for all event types, test subscription upgrades/downgrades, validate cancellation and reactivation flows, test edge cases like duplicate webhooks, verify proper database state after each operation",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -2487,7 +2487,7 @@
         "id": 19,
         "title": "Implement System-Wide Admin User Type with Full Platform Management",
         "description": "Create a comprehensive admin user type with elevated privileges for platform management, including user management, content moderation, subscription overrides, system configuration, and analytics access",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           2,
           3,
@@ -2583,7 +2583,7 @@
               7
             ],
             "details": "Create unit tests for permission system, implement integration tests for admin workflows, add security penetration testing, validate RLS policies, create admin user acceptance tests, performance testing for admin operations",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -2591,7 +2591,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-10T21:52:59.056Z",
+      "updated": "2025-07-10T23:53:10.972Z",
       "description": "Tasks for master context"
     }
   }

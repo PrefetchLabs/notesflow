@@ -499,6 +499,8 @@ export default function NotePage() {
                     initialContent={content}
                     onContentChange={handleContentChange}
                     forceCollaboration={isCollaborationEnabled}
+                    enableDragToCalendar={true}
+                    onTextDragStart={(text) => console.log('Drag started:', text)}
                   />
                 ) : (
                   // View-only mode for collaborators without edit permission
