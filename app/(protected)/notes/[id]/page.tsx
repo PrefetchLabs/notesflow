@@ -211,6 +211,8 @@ export default function NotePage() {
       setHasUnsavedChanges(false);
       setGlobalUnsavedChanges(false);
       toast.success('Note saved');
+      // Trigger refresh event to update the sidebar with new title
+      window.dispatchEvent(new Event('refresh-notes'));
     } catch {
       toast.error('Failed to save note');
     } finally {
