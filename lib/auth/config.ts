@@ -23,6 +23,19 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days
     updateAge: 60 * 60 * 24, // 24 hours
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5, // 5 minutes
+    },
+  },
+  callbacks: {
+    session: async ({ session, user }) => {
+      if (session?.user && user) {
+        session.user.role = user.role || 'user';
+        session.user.isActive = user.isActive ?? true;
+      }
+      return session;
+    },
   },
   user: {
     additionalFields: {

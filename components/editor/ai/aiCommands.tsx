@@ -19,15 +19,25 @@ export const continueWriting = (
   aliases: ["continue", "keep writing", "more"],
   icon: <Edit3 size={18} />,
   onItemClick: async () => {
-    await getAIExtension(editor).callLLM({
-      userPrompt: "Continue writing from where I left off. Keep the same tone and style.",
-      useSelection: false,
-      defaultStreamTools: {
-        add: true,
-        update: false,
-        delete: false,
-      },
-    });
+    try {
+      const aiExtension = getAIExtension(editor);
+      console.log('[AI Command] Continue Writing - AI Extension:', aiExtension);
+      if (!aiExtension) {
+        console.error('[AI Command] AI extension not found on editor');
+        return;
+      }
+      await aiExtension.callLLM({
+        userPrompt: "Continue writing from where I left off. Keep the same tone and style.",
+        useSelection: false,
+        defaultStreamTools: {
+          add: true,
+          update: false,
+          delete: false,
+        },
+      });
+    } catch (error) {
+      console.error('[AI Command] Continue Writing error:', error);
+    }
   },
   size: "small",
 });
@@ -41,15 +51,25 @@ export const improveClarity = (
   aliases: ["clarify", "clear", "simplify"],
   icon: <FileCheck size={18} />,
   onItemClick: async () => {
-    await getAIExtension(editor).callLLM({
-      userPrompt: "Improve the clarity of this text. Make it easier to understand while keeping the same meaning.",
-      useSelection: true,
-      defaultStreamTools: {
-        add: false,
-        update: true,
-        delete: false,
-      },
-    });
+    try {
+      const aiExtension = getAIExtension(editor);
+      console.log('[AI Command] Improve Clarity - AI Extension:', aiExtension);
+      if (!aiExtension) {
+        console.error('[AI Command] AI extension not found on editor');
+        return;
+      }
+      await aiExtension.callLLM({
+        userPrompt: "Improve the clarity of this text. Make it easier to understand while keeping the same meaning.",
+        useSelection: true,
+        defaultStreamTools: {
+          add: false,
+          update: true,
+          delete: false,
+        },
+      });
+    } catch (error) {
+      console.error('[AI Command] Improve Clarity error:', error);
+    }
   },
   size: "small",
 });

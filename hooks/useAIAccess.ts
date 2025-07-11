@@ -1,13 +1,21 @@
 import { useSubscription } from '@/lib/contexts/subscription-context';
+import { useAuth } from '@/lib/auth/auth-context';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
 export function useAIAccess() {
   const { isPro, isLoading } = useSubscription();
+  const { user } = useAuth();
   const router = useRouter();
 
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin' || user?.role === 'system_admin';
+  
+  // Admins and Pro users have AI access
+  const hasAIAccess = isAdmin || isPro;
+
   const checkAIAccess = () => {
-    if (!isPro) {
+    if (!hasAIAccess) {
       toast.error(
         'AI features are only available for Pro users',
         {
@@ -23,7 +31,7 @@ export function useAIAccess() {
   };
 
   return {
-    hasAIAccess: isPro,
+    hasAIAccess,
     isLoading,
     checkAIAccess,
   };

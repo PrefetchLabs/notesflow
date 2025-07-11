@@ -12,17 +12,25 @@ export function SuggestionMenuWithAI({ editor }: { editor: BlockNoteEditor }) {
     subtext: "Use AI to help write",
     onItemClick: () => {
       try {
+        console.log('[AI Menu] Attempting to open AI menu...');
         const textCursorPosition = editor.getTextCursorPosition();
+        console.log('[AI Menu] Text cursor position:', textCursorPosition);
+        
         if (textCursorPosition?.block) {
           const aiExtension = getAIExtension(editor);
+          console.log('[AI Menu] AI extension:', aiExtension);
+          
           if (aiExtension) {
+            console.log('[AI Menu] Opening AI menu at block:', textCursorPosition.block.id);
             aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
           } else {
-            console.error('AI extension not available');
+            console.error('[AI Menu] AI extension not available - make sure you have Pro access');
           }
+        } else {
+          console.error('[AI Menu] No text cursor position found');
         }
       } catch (error) {
-        console.error('Error opening AI menu:', error);
+        console.error('[AI Menu] Error opening AI menu:', error);
       }
     },
     aliases: ["ai", "assistant", "help"],

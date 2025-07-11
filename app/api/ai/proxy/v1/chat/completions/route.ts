@@ -19,21 +19,27 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check subscription for AI access
-    const [subscription] = await db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, session.user.id));
+    // Check if user is admin
+    const isAdmin = session.user.role === 'admin' || session.user.role === 'system_admin';
+    
+    // Check subscription for AI access (admins bypass subscription check)
+    if (!isAdmin) {
+      const [subscription] = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, session.user.id));
 
-    if (!subscription || subscription.plan === 'free') {
-      return NextResponse.json(
-        { 
-          error: 'AI features are only available for Pro users',
-          requiresUpgrade: true,
-          feature: 'ai_assistant'
-        },
-        { status: 403 }
-      );
+      const allowedPlans = ['beta', 'pro_monthly', 'pro_yearly', 'early_bird'];
+      if (!subscription || !allowedPlans.includes(subscription.plan || '')) {
+        return NextResponse.json(
+          { 
+            error: 'AI features are only available for Beta and Pro users',
+            requiresUpgrade: true,
+            feature: 'ai_assistant'
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Get the request body

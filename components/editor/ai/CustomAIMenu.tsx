@@ -13,9 +13,10 @@ import {
   quickFix,
 } from './aiCommands';
 
-export function CustomAIMenu() {
+export function CustomAIMenu(props: any) {
   return (
     <AIMenu
+      {...props}
       items={(
         editor: BlockNoteEditor<any, any, any>,
         aiResponseStatus:
@@ -26,6 +27,8 @@ export function CustomAIMenu() {
           | "user-reviewing"
           | "closed",
       ) => {
+        console.log('[CustomAIMenu] Status:', aiResponseStatus, 'Editor:', editor);
+        
         if (aiResponseStatus === "user-input") {
           const defaultItems = getDefaultAIMenuItems(editor, aiResponseStatus);
           

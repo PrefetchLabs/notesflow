@@ -15,6 +15,7 @@ import "@/styles/collaboration.css";
 import { useTheme } from "next-themes";
 import { FormattingToolbarWithAI } from "./ai/FormattingToolbarWithAI";
 import { SuggestionMenuWithAI } from "./ai/SuggestionMenuWithAI";
+import { CustomAIMenu } from "./ai/CustomAIMenu";
 import { createAIExtension } from "@/lib/editor/ai-extension";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import { cn } from "@/lib/utils";
@@ -211,6 +212,13 @@ export function CollaborativeEditorFinal({
   // Create AI model
   const model = useMemo(() => createCustomAIModel(), []);
   
+  console.log('[CollaborativeEditor] AI Access:', { 
+    hasAIAccess, 
+    user: user?.email, 
+    role: user?.role,
+    isPro: hasAIAccess
+  });
+  
   // Create editor - always with provider for seamless collaboration switching
   const editor = useCreateBlockNote({
     // Only provide initialContent when NOT using collaboration
@@ -244,7 +252,7 @@ export function CollaborativeEditorFinal({
       // Show cursor labels when active
       showCursorLabels: "activity"
     } : undefined,
-  }, [provider, ydoc, user, userColor]);
+  }, [provider, ydoc, user, userColor, hasAIAccess, model]);
 
   // Handle text selection for drag to calendar
   const { selection } = useBlockNoteSelection({
@@ -309,6 +317,8 @@ export function CollaborativeEditorFinal({
     if (!editor) return;
     
     console.log('[CollaborativeEditor] Editor initialized');
+    console.log('[CollaborativeEditor] Editor extensions:', editor.extensions);
+    console.log('[CollaborativeEditor] Editor _tiptapEditor extensions:', editor._tiptapEditor?.extensions);
     
     const unsubscribe = editor.onChange(() => {
       try {
@@ -408,7 +418,7 @@ export function CollaborativeEditorFinal({
         formattingToolbar={false}
         slashMenu={false}
       >
-        {hasAIAccess && <AIMenuController />}
+        {hasAIAccess && <AIMenuController aiMenu={CustomAIMenu} />}
         <FormattingToolbarWithAI showAI={hasAIAccess} />
         <SuggestionMenuWithAI editor={editor} />
       </BlockNoteView>

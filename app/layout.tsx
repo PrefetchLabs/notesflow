@@ -7,15 +7,56 @@ import { AdminProvider } from '@/components/providers/admin-provider';
 import { DragDropProvider } from '@/contexts/drag-drop-context';
 
 export const metadata: Metadata = {
-  title: 'NotesFlow - Your thoughts and time, beautifully unified',
+  title: 'NotesFlow - AI-Powered Note Taking & Calendar Integration',
   description:
-    'A minimalist productivity workspace that uniquely combines note-taking with time-blocking in a breathtakingly simple, clean interface.',
-  keywords: ['notes', 'productivity', 'time-blocking', 'writing', 'focus'],
+    'Transform your productivity with AI-powered note-taking, smart calendar integration, and real-time collaboration. Start your free trial today.',
+  keywords: [
+    'note-taking app',
+    'AI notes',
+    'calendar integration',
+    'productivity app',
+    'time-blocking',
+    'collaboration tools',
+    'digital notes',
+    'task management',
+    'AI writing assistant',
+    'real-time collaboration'
+  ],
   authors: [{ name: 'NotesFlow Team' }],
   openGraph: {
-    title: 'NotesFlow',
-    description: 'Your thoughts and time, beautifully unified.',
+    title: 'NotesFlow - AI-Powered Note Taking & Calendar Integration',
+    description: 'Transform your productivity with AI-powered note-taking, smart calendar integration, and real-time collaboration.',
     type: 'website',
+    url: 'https://notesflow.app',
+    siteName: 'NotesFlow',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'NotesFlow - Your thoughts and time, beautifully unified',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NotesFlow - AI-Powered Note Taking',
+    description: 'Transform your productivity with AI-powered note-taking and smart calendar integration.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification-code',
   },
 };
 
