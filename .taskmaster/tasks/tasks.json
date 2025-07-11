@@ -1993,7 +1993,7 @@
         "dependencies": [
           14
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2001,7 +2001,7 @@
             "description": "Set up the onboarding route with proper navigation guards and layout components to ensure users who haven't completed onboarding are redirected appropriately",
             "dependencies": [],
             "details": "Create app/(onboarding) folder structure with layout.tsx, implement route protection to redirect completed users, set up basic page structure for the 3-screen flow, and configure Next.js routing",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2012,7 +2012,7 @@
               1
             ],
             "details": "Create welcome page component with NotesFlow branding, implement responsive design with proper spacing, add 'Get Started' button with proper styling, ensure smooth transition to next screen",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2023,7 +2023,7 @@
               1
             ],
             "details": "Build animated note component using Framer Motion, create mini calendar visualization, implement drag gesture animations, add auto-play functionality with pause on hover, ensure smooth performance across devices",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2034,7 +2034,7 @@
               1
             ],
             "details": "Design pricing cards for each tier (Free, Pro, Team), highlight features and limitations, implement selection state management, add 'Continue' button that respects selection, integrate with existing plan management system",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2045,7 +2045,7 @@
               1
             ],
             "details": "Design dot or progress bar indicators, show current step highlight, implement click-to-navigate functionality, add smooth transitions between steps, ensure accessibility with proper ARIA labels",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2059,7 +2059,7 @@
               5
             ],
             "details": "Implement arrow key navigation between screens, add Enter/Space key support for buttons, ensure proper focus management, add skip links, test with screen readers, implement escape key to exit onboarding",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2070,7 +2070,7 @@
               4
             ],
             "details": "Create API endpoint to generate sample note with example content, update user profile to mark onboarding complete, implement success animation, redirect to main dashboard, ensure proper error handling",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -2591,7 +2591,7 @@
     ],
     "metadata": {
       "created": "2025-07-09T03:57:04.193Z",
-      "updated": "2025-07-10T23:53:10.972Z",
+      "updated": "2025-07-11T00:07:38.377Z",
       "description": "Tasks for master context"
     }
   }

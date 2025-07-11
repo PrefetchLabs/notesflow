@@ -6,3 +6,4 @@ export * from './collaborators';
 export * from './aiUsage';
 export * from './system';
 export * from './subscriptions';
+export * from './userPreferences';
