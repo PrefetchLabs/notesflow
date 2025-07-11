@@ -5,7 +5,7 @@ import { ADMIN_PERMISSIONS } from '@/lib/auth/admin-permissions';
 import { db } from '@/lib/db';
 import { user } from '@/lib/db/schema/auth';
 import { subscriptions } from '@/lib/db/schema/subscriptions';
-import { desc, ilike, or, and, eq, sql } from 'drizzle-orm';
+import { desc, ilike, or, and, eq, sql, inArray } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   // Check authentication
@@ -66,32 +66,10 @@ export async function GET(request: NextRequest) {
     
     const totalUsers = Number(countResult[0]?.count || 0);
 
-    // Get paginated users with subscription data
-    const users = await db
-      .select({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        image: user.image,
-        role: user.role,
-        isSystemAdmin: user.isSystemAdmin,
-        emailVerified: user.emailVerified,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        lastAdminActivityAt: user.lastAdminActivityAt,
-        subscription: {
-          id: subscriptions.id,
-          plan: subscriptions.plan,
-          status: subscriptions.status,
-          currentPeriodEnd: subscriptions.currentPeriodEnd,
-          cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
-          usage: subscriptions.usage,
-          limits: subscriptions.limits,
-          metadata: subscriptions.metadata,
-        },
-      })
+    // Get paginated users
+    const usersData = await db
+      .select()
       .from(user)
-      .leftJoin(subscriptions, eq(user.id, subscriptions.userId))
       .where(whereClause)
       .orderBy(
         sortOrder === 'desc' 
@@ -100,6 +78,26 @@ export async function GET(request: NextRequest) {
       )
       .limit(limit)
       .offset((page - 1) * limit);
+
+    // Get subscriptions for these users
+    const userIds = usersData.map(u => u.id);
+    const subscriptionsData = userIds.length > 0 
+      ? await db
+          .select()
+          .from(subscriptions)
+          .where(inArray(subscriptions.userId, userIds))
+      : [];
+
+    // Map subscriptions to users
+    const subscriptionMap = new Map(
+      subscriptionsData.map(sub => [sub.userId, sub])
+    );
+
+    // Combine user data with subscriptions
+    const users = usersData.map(userData => ({
+      ...userData,
+      subscription: subscriptionMap.get(userData.id) || null,
+    }));
 
     return NextResponse.json({
       users,
