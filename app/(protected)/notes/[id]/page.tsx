@@ -350,7 +350,7 @@ export default function NotePage() {
   }, [hasUnsavedChanges, handleSave, handleDelete]);
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-full flex-col">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="px-6 py-4">
@@ -480,7 +480,7 @@ export default function NotePage() {
       </header>
 
       {/* Editor */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-auto">
         <div className="h-full px-4 py-6 md:px-8 lg:px-12">
           <div className="mx-auto h-full max-w-4xl">
             {isLoading ? (

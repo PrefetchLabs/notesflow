@@ -187,34 +187,12 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   const remainingMinutes = Math.round(totalFocusedMinutes % 60);
 
   return (
-    <aside className="calendar-sidebar relative flex h-full flex-col bg-background overflow-hidden">
+    <aside className="calendar-sidebar relative flex h-full flex-col bg-background overflow-hidden border-l">
       {/* Header */}
       <div className="border-b p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Time Blocks</h2>
           
-          {/* Hide Calendar Button */}
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onToggle}
-                  className={cn(
-                    'absolute -left-4 top-6 z-10 h-8 w-8 rounded-full border bg-background shadow-sm',
-                    'hover:bg-accent hover:shadow-md',
-                    'transition-shadow duration-200'
-                  )}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                Hide calendar
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
 
         {/* Day navigation */}
@@ -275,7 +253,13 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
           
           {!error && (
             <div className="relative h-[1440px]"> {/* 24 hours * 60px per hour */}
-              <SingleDayCalendarGrid />
+              <SingleDayCalendarGrid 
+                currentDate={currentDate}
+                onSlotClick={handleTimeSlotClick}
+                onSlotDoubleClick={handleTimeSlotDoubleClick}
+                onSlotMouseEnter={handleMouseMove}
+                onSlotMouseLeave={handleMouseLeave}
+              />
               
               {/* Time blocks */}
               {blocks.map((block) => (
@@ -304,17 +288,9 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
                 />
               )}
 
-              {/* Click area for creating new blocks */}
-              <div
-                className="absolute inset-0 cursor-pointer"
-                onClick={handleTimeSlotClick}
-                onDoubleClick={handleTimeSlotDoubleClick}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-              />
 
               {/* Current time indicator */}
-              {isCurrentDay && <CurrentTimeIndicator />}
+              {isCurrentDay && <CurrentTimeIndicator currentDate={currentDate} />}
             </div>
           )}
         </div>

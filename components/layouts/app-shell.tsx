@@ -6,10 +6,11 @@ import { cn } from '@/lib/utils';
 import { AppShellSkeleton } from '@/components/skeletons';
 import { useResponsive } from '@/hooks/useResponsive';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { Menu, Calendar } from 'lucide-react';
+import { Menu, Calendar, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TimeBlockingCalendar } from '@/components/calendar/time-blocking-calendar';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarHidden, setSidebarHidden] = useState(false);
@@ -100,47 +101,78 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Desktop layout
   return (
     <div className="app-shell min-h-screen bg-background">
-      {/* Desktop header with hamburger when sidebar is hidden or calendar controls */}
-      {(sidebarHidden || calendarOpen) && (
+      {/* Desktop header with hamburger when sidebar is hidden */}
+      {sidebarHidden && (
         <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center justify-between px-4">
             <div className="flex items-center">
-              {sidebarHidden && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleSidebar}
-                    className="mr-2"
-                  >
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-bold tracking-tight">NotesFlow</span>
-                    <span className="text-xs text-muted-foreground">v0.1</span>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setCalendarOpen(!calendarOpen)}
-                title={calendarOpen ? "Hide calendar" : "Show calendar"}
+                onClick={toggleSidebar}
+                className="mr-2"
               >
-                <Calendar className="h-5 w-5" />
+                <Menu className="h-5 w-5" />
               </Button>
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg font-bold tracking-tight">NotesFlow</span>
+                <span className="text-xs text-muted-foreground">v0.1</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
             </div>
           </div>
         </header>
       )}
       
+      {/* Calendar toggle button - only visible when calendar is closed */}
+      {!calendarOpen && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setCalendarOpen(true)}
+          title="Show calendar"
+          className={cn(
+            "fixed top-4 right-4 z-40 h-8 w-8 rounded-full border bg-background shadow-sm",
+            "hover:bg-accent hover:shadow-md",
+            "transition-all duration-200"
+          )}
+        >
+          <Calendar className="h-4 w-4" />
+        </Button>
+      )}
+      
+      {/* Calendar hide button - visible when calendar is open */}
+      {calendarOpen && (
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCalendarOpen(false)}
+                className={cn(
+                  'fixed right-[284px] z-50 h-8 w-8 rounded-full border bg-background shadow-sm',
+                  'hover:bg-accent hover:shadow-md',
+                  'transition-shadow duration-200',
+                  sidebarHidden ? 'top-[88px]' : 'top-6'
+                )}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              Hide calendar
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      
       <div
         className={cn(
           'grid',
-          (sidebarHidden || calendarOpen) ? 'h-[calc(100vh-3.5rem)]' : 'h-screen',
+          sidebarHidden ? 'h-[calc(100vh-3.5rem)]' : 'h-screen',
           // Grid columns
           {
             'grid-cols-1': sidebarHidden && !calendarOpen,
@@ -162,9 +194,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         
         {/* Right Calendar Sidebar */}
         {calendarOpen && (
-          <div className="h-full w-[280px] border-l bg-background">
-            <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
-          </div>
+          <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
         )}
       </div>
     </div>

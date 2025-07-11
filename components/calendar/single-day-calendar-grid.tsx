@@ -14,18 +14,24 @@ import {
 interface SingleDayCalendarGridProps {
   currentDate: Date;
   onSlotClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onSlotDoubleClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onSlotMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onSlotMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onSlotMouseUp?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onSlotMouseEnter?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onSlotMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
   children?: React.ReactNode;
 }
 
 export function SingleDayCalendarGrid({
   currentDate,
   onSlotClick,
+  onSlotDoubleClick,
   onSlotMouseDown,
   onSlotMouseMove,
   onSlotMouseUp,
+  onSlotMouseEnter,
+  onSlotMouseLeave,
   children,
 }: SingleDayCalendarGridProps) {
   const [timeSlots, setTimeSlots] = useState<Date[]>([]);
@@ -37,7 +43,10 @@ export function SingleDayCalendarGrid({
     
     for (let i = 0; i < totalSlots; i++) {
       const slot = new Date(currentDate);
-      slot.setHours(CALENDAR_START_HOUR, i * SLOT_DURATION_MINUTES, 0, 0);
+      const totalMinutes = CALENDAR_START_HOUR * 60 + i * SLOT_DURATION_MINUTES;
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      slot.setHours(hours, minutes, 0, 0);
       slots.push(slot);
     }
     
@@ -84,8 +93,11 @@ export function SingleDayCalendarGrid({
                     isHourStart ? "border-border/40" : "border-border/20"
                   )}
                   data-slot-index={slotIndex}
-                  data-slot-time={timeSlots[slotIndex].toISOString()}
+                  data-slot-time={timeSlots[slotIndex]?.toISOString()}
                   onClick={onSlotClick}
+                  onDoubleClick={onSlotDoubleClick}
+                  onMouseEnter={onSlotMouseEnter}
+                  onMouseLeave={onSlotMouseLeave}
                 />
               );
             })}
