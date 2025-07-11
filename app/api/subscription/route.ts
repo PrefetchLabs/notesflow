@@ -22,9 +22,8 @@ export async function GET(request: NextRequest) {
       .where(eq(subscriptions.userId, session.user.id));
 
     if (!subscription) {
-      // Create default free subscription with 7-day grace period for new users
+      // Create default free subscription (no grace period for free users)
       const now = new Date();
-      const gracePeriodEnd = addDays(now, 7);
 
       [subscription] = await db
         .insert(subscriptions)
@@ -33,8 +32,8 @@ export async function GET(request: NextRequest) {
           userId: session.user.id,
           plan: 'free',
           status: 'active',
-          isNewUser: true,
-          newUserGracePeriodEnd: gracePeriodEnd,
+          isNewUser: false, // No grace period for free users
+          newUserGracePeriodEnd: null,
           createdAt: now,
           updatedAt: now,
         })

@@ -47,9 +47,9 @@ interface SubscriptionContextType {
   };
   showUpgradePrompt: (feature: string, description?: string) => void;
   checkAndShowLimit: (feature: keyof SubscriptionLimits, featureName: string, unit?: string) => boolean;
-  isInNewUserGracePeriod: boolean;
-  gracePeriodDaysRemaining: number;
-  gracePeriodHoursRemaining?: number;
+  isInBetaPeriod: boolean;
+  betaDaysRemaining: number;
+  betaHoursRemaining?: number;
   hasFeatureAccess: (feature: 'ai' | 'collaboration' | 'sharing' | 'unlimited' | 'themes' | 'export') => boolean;
   showFeatureLockedToast: (feature: string) => void;
 }
@@ -119,11 +119,12 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   
   // Check if user is in any grace period (admins don't have grace periods)
   const now = new Date();
-  const isInNewUserGracePeriod = !isAdmin && subscription?.isNewUser && subscription?.newUserGracePeriodEnd && 
-    new Date(subscription.newUserGracePeriodEnd) > now;
+  // Only beta users have time-limited access, not regular free users
+  const isInBetaPeriod = !isAdmin && isBeta && subscription?.metadata?.betaEndDate && 
+    new Date(subscription.metadata.betaEndDate as string) > now;
   const isInOverageGracePeriod = !isAdmin && subscription?.isInGracePeriod && subscription?.gracePeriodEnd && 
     new Date(subscription.gracePeriodEnd) > now;
-  const isInGracePeriod = !isAdmin && (isInNewUserGracePeriod || isInOverageGracePeriod);
+  const isInGracePeriod = !isAdmin && (isInOverageGracePeriod);
 
   const checkLimit = useCallback((feature: keyof SubscriptionLimits) => {
     // Admins have unlimited access
@@ -152,16 +153,14 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     // Calculate soft limit (10% over the base limit)
     const softLimit = Math.floor(limit * 1.1);
     
-    // During grace periods, allow full access or soft limits
-    if (isInNewUserGracePeriod) {
-      // New users get unlimited access for 7 days
+    // Beta users get their enhanced limits
+    if (isBeta && isInBetaPeriod) {
       return {
-        allowed: true,
+        allowed: currentUsage < limit,
         current: currentUsage,
         limit: limit,
-        remaining: Infinity,
-        isInGracePeriod: true,
-        gracePeriodType: 'new_user',
+        remaining: Math.max(0, limit - currentUsage),
+        isInGracePeriod: false,
       };
     }
     
@@ -185,7 +184,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       remaining: Math.max(0, limit - currentUsage),
       isInGracePeriod: false,
     };
-  }, [limits, usage, isPro, isInNewUserGracePeriod, isInOverageGracePeriod, isAdmin]);
+  }, [limits, usage, isPro, isBeta, isInBetaPeriod, isInOverageGracePeriod, isAdmin]);
 
   const showUpgradePrompt = useCallback((feature: string, description?: string) => {
     showFeatureLockedToast(feature, description);
@@ -195,8 +194,10 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     // Admins have access to all features
     if (isAdmin) return true;
     
-    // During grace period, all features are available
-    if (isInNewUserGracePeriod) return true;
+    // Beta users have access to enhanced features during their trial
+    if (isBeta && isInBetaPeriod) {
+      return feature !== 'unlimited'; // Beta users don't get unlimited access
+    }
     
     // Pro users have access to all features
     if (isPro) return true;
@@ -231,7 +232,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       default:
         return false;
     }
-  }, [isPro, isBeta, isInNewUserGracePeriod, checkLimit, isAdmin]);
+  }, [isPro, isBeta, isInBetaPeriod, checkLimit, isAdmin]);
 
   const checkAndShowLimit = useCallback((feature: keyof SubscriptionLimits, featureName: string, unit?: string) => {
     const result = checkLimit(feature);
@@ -268,13 +269,11 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   }, [checkLimit]);
 
   // Calculate days remaining in grace period
-  const gracePeriodDaysRemaining = useMemo(() => {
-    if (!subscription) return 0;
+  const betaDaysRemaining = useMemo(() => {
+    if (!subscription || !isBeta) return 0;
     
-    const endDate = subscription.isNewUser && subscription.newUserGracePeriodEnd
-      ? new Date(subscription.newUserGracePeriodEnd)
-      : subscription.gracePeriodEnd
-      ? new Date(subscription.gracePeriodEnd)
+    const endDate = subscription.metadata?.betaEndDate
+      ? new Date(subscription.metadata.betaEndDate as string)
       : null;
       
     if (!endDate) return 0;
@@ -284,16 +283,14 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     return Math.max(0, diffDays);
-  }, [subscription]);
+  }, [subscription, isBeta]);
 
-  // Calculate hours remaining in grace period
-  const gracePeriodHoursRemaining = useMemo(() => {
-    if (!subscription) return 0;
+  // Calculate hours remaining for beta period
+  const betaHoursRemaining = useMemo(() => {
+    if (!subscription || !isBeta) return 0;
     
-    const endDate = subscription.isNewUser && subscription.newUserGracePeriodEnd
-      ? new Date(subscription.newUserGracePeriodEnd)
-      : subscription.gracePeriodEnd
-      ? new Date(subscription.gracePeriodEnd)
+    const endDate = subscription.metadata?.betaEndDate
+      ? new Date(subscription.metadata.betaEndDate as string)
       : null;
       
     if (!endDate) return 0;
@@ -303,7 +300,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
     
     return Math.max(0, diffHours);
-  }, [subscription]);
+  }, [subscription, isBeta]);
 
   const value: SubscriptionContextType = {
     subscription,
@@ -323,9 +320,9 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     checkLimit,
     showUpgradePrompt,
     checkAndShowLimit,
-    isInNewUserGracePeriod,
-    gracePeriodDaysRemaining,
-    gracePeriodHoursRemaining,
+    isInBetaPeriod,
+    betaDaysRemaining,
+    betaHoursRemaining,
     hasFeatureAccess,
     showFeatureLockedToast,
   };
