@@ -21,9 +21,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Shield, ShieldOff, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Shield, ShieldOff, Trash2, CreditCard, Zap, Crown } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { UserRole } from '@/types';
+
+interface Subscription {
+  id: string | null;
+  plan: string | null;
+  status: string | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean | null;
+  usage?: any;
+  limits?: any;
+  metadata?: any;
+}
 
 interface User {
   id: string;
@@ -36,11 +47,13 @@ interface User {
   createdAt: Date;
   updatedAt: Date;
   lastAdminActivityAt: Date | null;
+  subscription: Subscription | null;
 }
 
 interface UsersTableProps {
   users: User[];
   onUpdateUser: (userId: string, updates: Partial<User>) => void;
+  onUpdateSubscription: (userId: string, plan: string, action?: string) => void;
   onDeleteUser: (userId: string) => void;
   currentUserId: string;
 }
@@ -60,6 +73,7 @@ const roleLabels: Record<UserRole, string> = {
 export function UsersTable({ 
   users, 
   onUpdateUser, 
+  onUpdateSubscription,
   onDeleteUser,
   currentUserId 
 }: UsersTableProps) {
@@ -93,6 +107,34 @@ export function UsersTable({
     return user.email[0].toUpperCase();
   };
 
+  const getSubscriptionBadge = (subscription: Subscription | null) => {
+    if (!subscription || !subscription.plan) {
+      return <Badge variant="secondary">Free</Badge>;
+    }
+
+    const plan = subscription.plan;
+    
+    if (plan === 'beta') {
+      return (
+        <Badge className="bg-gradient-to-r from-green-600 to-teal-600 text-white border-0">
+          <Zap className="h-3 w-3 mr-1" />
+          Beta
+        </Badge>
+      );
+    }
+    
+    if (plan === 'pro_monthly' || plan === 'pro_yearly') {
+      return (
+        <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
+          <Crown className="h-3 w-3 mr-1" />
+          Pro
+        </Badge>
+      );
+    }
+    
+    return <Badge variant="secondary">Free</Badge>;
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -106,6 +148,7 @@ export function UsersTable({
             </TableHead>
             <TableHead>User</TableHead>
             <TableHead>Role</TableHead>
+            <TableHead>Subscription</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Joined</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -148,6 +191,9 @@ export function UsersTable({
                 </Badge>
               </TableCell>
               <TableCell>
+                {getSubscriptionBadge(user.subscription)}
+              </TableCell>
+              <TableCell>
                 <Badge variant={user.emailVerified ? 'default' : 'secondary'}>
                   {user.emailVerified ? 'Verified' : 'Unverified'}
                 </Badge>
@@ -186,6 +232,62 @@ export function UsersTable({
                         Remove Admin
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuSeparator />
+                    
+                    {/* Subscription Management */}
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">
+                      Subscription
+                    </DropdownMenuLabel>
+                    {(!user.subscription || user.subscription.plan === 'free') && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateSubscription(user.id, 'beta')}
+                        >
+                          <Zap className="mr-2 h-4 w-4" />
+                          Convert to Beta Tester
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onUpdateSubscription(user.id, 'pro_monthly')}
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          Upgrade to Pro
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {user.subscription?.plan === 'beta' && (
+                      <DropdownMenuItem
+                        onClick={() => onUpdateSubscription(user.id, 'free')}
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Revert to Free
+                      </DropdownMenuItem>
+                    )}
+                    {(user.subscription?.plan === 'pro_monthly' || user.subscription?.plan === 'pro_yearly') && (
+                      <>
+                        {user.subscription.cancelAtPeriodEnd ? (
+                          <DropdownMenuItem
+                            onClick={() => onUpdateSubscription(user.id, user.subscription!.plan!, 'reactivate')}
+                          >
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Reactivate Subscription
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => onUpdateSubscription(user.id, user.subscription!.plan!, 'cancel')}
+                          >
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Cancel Subscription
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          onClick={() => onUpdateSubscription(user.id, 'free')}
+                        >
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Downgrade to Free
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => onDeleteUser(user.id)}

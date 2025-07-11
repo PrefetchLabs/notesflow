@@ -4,6 +4,7 @@ import { AdminService } from '@/lib/auth/admin-service';
 import { ADMIN_PERMISSIONS } from '@/lib/auth/admin-permissions';
 import { db } from '@/lib/db';
 import { user } from '@/lib/db/schema/auth';
+import { subscriptions } from '@/lib/db/schema/subscriptions';
 import { desc, ilike, or, and, eq, sql } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
     
     const totalUsers = Number(countResult[0]?.count || 0);
 
-    // Get paginated users
+    // Get paginated users with subscription data
     const users = await db
       .select({
         id: user.id,
@@ -78,8 +79,19 @@ export async function GET(request: NextRequest) {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         lastAdminActivityAt: user.lastAdminActivityAt,
+        subscription: {
+          id: subscriptions.id,
+          plan: subscriptions.plan,
+          status: subscriptions.status,
+          currentPeriodEnd: subscriptions.currentPeriodEnd,
+          cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+          usage: subscriptions.usage,
+          limits: subscriptions.limits,
+          metadata: subscriptions.metadata,
+        },
       })
       .from(user)
+      .leftJoin(subscriptions, eq(user.id, subscriptions.userId))
       .where(whereClause)
       .orderBy(
         sortOrder === 'desc' 

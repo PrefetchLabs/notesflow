@@ -11,6 +11,17 @@ import { toast } from 'sonner';
 import { UserPlus, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface Subscription {
+  id: string | null;
+  plan: string | null;
+  status: string | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean | null;
+  usage?: any;
+  limits?: any;
+  metadata?: any;
+}
+
 interface User {
   id: string;
   email: string;
@@ -22,6 +33,7 @@ interface User {
   createdAt: Date;
   updatedAt: Date;
   lastAdminActivityAt: Date | null;
+  subscription: Subscription | null;
 }
 
 export default function UsersPage() {
@@ -81,6 +93,25 @@ export default function UsersPage() {
     } catch (error) {
       console.error('Error updating user:', error);
       toast.error('Failed to update user');
+    }
+  };
+
+  // Update user subscription
+  const handleUpdateSubscription = async (userId: string, plan: string, action: string = 'changePlan') => {
+    try {
+      const response = await fetch('/api/admin/users/subscription', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, plan, action }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update subscription');
+
+      toast.success('Subscription updated successfully');
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast.error('Failed to update subscription');
     }
   };
 
@@ -154,6 +185,7 @@ export default function UsersPage() {
               <UsersTable
                 users={users}
                 onUpdateUser={handleUpdateUser}
+                onUpdateSubscription={handleUpdateSubscription}
                 onDeleteUser={handleDeleteUser}
                 currentUserId={currentUser?.id || ''}
               />
