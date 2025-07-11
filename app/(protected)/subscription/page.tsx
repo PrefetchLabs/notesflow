@@ -24,7 +24,8 @@ export default function SubscriptionPage() {
     usage,
     limits,
     isInGracePeriod,
-    gracePeriodDaysRemaining,
+    isInBetaPeriod,
+    betaDaysRemaining,
   } = useSubscription();
   
   const isAdmin = user?.role === 'admin';
@@ -131,8 +132,23 @@ export default function SubscriptionPage() {
                     Payment Issue
                   </p>
                   <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                    There was an issue with your payment. You have {gracePeriodDaysRemaining} days 
-                    to update your payment method before your subscription is downgraded.
+                    There was an issue with your payment. Please update your payment method.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!isAdmin && isBeta && isInBetaPeriod && (
+            <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Zap className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
+                <div>
+                  <p className="font-medium text-green-900 dark:text-green-100">
+                    Beta Access Active
+                  </p>
+                  <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                    You have {betaDaysRemaining} days remaining in your beta trial. After that, you'll be moved to the free plan.
                   </p>
                 </div>
               </div>
