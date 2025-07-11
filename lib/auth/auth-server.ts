@@ -3,6 +3,21 @@ import { headers } from 'next/headers';
 
 export { auth };
 
+// Get current user from session
+export async function getUser() {
+  try {
+    const headersList = await headers();
+    const session = await auth.api.getSession({
+      headers: headersList,
+    });
+
+    return session?.user || null;
+  } catch (error) {
+    console.error('Failed to get user:', error);
+    return null;
+  }
+}
+
 // Authentication middleware for API routes
 export async function authMiddleware(request: Request) {
   try {
