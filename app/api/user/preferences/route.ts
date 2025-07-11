@@ -48,6 +48,12 @@ export async function PATCH(request: Request) {
 
     const updates = await request.json();
 
+    // Convert date strings to Date objects if needed
+    const processedUpdates = { ...updates };
+    if (processedUpdates.onboardingCompletedAt && typeof processedUpdates.onboardingCompletedAt === 'string') {
+      processedUpdates.onboardingCompletedAt = new Date(processedUpdates.onboardingCompletedAt);
+    }
+
     // Check if preferences exist
     const existing = await db
       .select()
@@ -62,7 +68,7 @@ export async function PATCH(request: Request) {
         .insert(userPreferences)
         .values({
           userId: user.id,
-          ...updates,
+          ...processedUpdates,
           updatedAt: new Date(),
         })
         .returning();
@@ -71,7 +77,7 @@ export async function PATCH(request: Request) {
       preferences = await db
         .update(userPreferences)
         .set({
-          ...updates,
+          ...processedUpdates,
           updatedAt: new Date(),
         })
         .where(eq(userPreferences.userId, user.id))

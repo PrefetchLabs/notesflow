@@ -123,7 +123,9 @@ export default function OnboardingPage() {
       });
 
       if (!noteResponse.ok) {
-        throw new Error('Failed to create sample note');
+        const errorData = await noteResponse.json();
+        console.error('Failed to create note:', errorData);
+        throw new Error(errorData.error || 'Failed to create sample note');
       }
 
       // Mark onboarding as complete
@@ -132,7 +134,7 @@ export default function OnboardingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           onboardingCompleted: true,
-          onboardingCompletedAt: new Date().toISOString(),
+          onboardingCompletedAt: new Date(),
         }),
       });
 
