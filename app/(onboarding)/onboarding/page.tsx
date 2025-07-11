@@ -29,7 +29,29 @@ export default function OnboardingPage() {
   };
 
   const handleSkip = async () => {
-    await completeOnboarding();
+    setIsCompleting(true);
+    try {
+      // Just mark onboarding as complete without creating sample note
+      const prefResponse = await fetch('/api/user/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          onboardingCompleted: true,
+          onboardingCompletedAt: new Date(),
+        }),
+      });
+
+      if (!prefResponse.ok) {
+        throw new Error('Failed to update preferences');
+      }
+
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Failed to skip onboarding:', error);
+      toast.error('Failed to skip setup. Please try again.');
+    } finally {
+      setIsCompleting(false);
+    }
   };
 
   const completeOnboarding = async () => {
@@ -124,8 +146,9 @@ export default function OnboardingPage() {
 
       if (!noteResponse.ok) {
         const errorData = await noteResponse.json();
-        console.error('Failed to create note:', errorData);
-        throw new Error(errorData.error || 'Failed to create sample note');
+        console.error('Failed to create sample note:', errorData);
+        // Don't throw error - sample note is optional
+        toast.warning('Sample note could not be created, but you can start creating your own notes!');
       }
 
       // Mark onboarding as complete
@@ -157,6 +180,8 @@ export default function OnboardingPage() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isCompleting) return; // Don't process keys while completing
+    
     if (e.key === 'Enter' && currentStep < ONBOARDING_STEPS) {
       handleNext();
     } else if (e.key === 'Escape') {
