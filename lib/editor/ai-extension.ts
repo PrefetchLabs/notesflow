@@ -1,19 +1,47 @@
-import { createAIExtension as createBlockNoteAIExtension, AIExtension } from "@blocknote/xl-ai";
+import { createAIExtension as createBlockNoteAIExtension, AIExtension, getAIExtension as getBlockNoteAIExtension } from "@blocknote/xl-ai";
 import { BlockNoteEditor } from "@blocknote/core";
 import { checkAIUsageLimit, trackAIUsage } from "@/app/actions/ai";
 import { toast } from "sonner";
 
 type AIExtensionOptions = ConstructorParameters<typeof AIExtension>[1];
 
+// Store AI extension instances for custom retrieval
+const aiExtensionMap = new WeakMap<BlockNoteEditor, AIExtension>();
+
+// Custom getAIExtension that works with our wrapped extension
+export function getAIExtension(editor: BlockNoteEditor): AIExtension | null {
+  // First try to get from our map
+  const customExtension = aiExtensionMap.get(editor);
+  if (customExtension) {
+    return customExtension;
+  }
+  
+  // Fallback to BlockNote's default
+  try {
+    return getBlockNoteAIExtension(editor);
+  } catch (error) {
+    console.error('[AI Extension] Failed to get AI extension:', error);
+    return null;
+  }
+}
+
+// Create a custom AI extension that wraps the BlockNote AI extension
 export function createAIExtension(options: AIExtensionOptions) {
+  // Return the extension directly for BlockNote to use
+  const originalExtensionCreator = createBlockNoteAIExtension(options);
+  
   return (editor: BlockNoteEditor) => {
     console.log('[AI Extension] Creating AI extension with options:', options);
-    const baseExtension = createBlockNoteAIExtension(options)(editor);
+    const baseExtension = originalExtensionCreator(editor);
     console.log('[AI Extension] Base extension created:', baseExtension);
     
-    // Override the callLLM method to add usage tracking
+    // Store the extension in our map
+    aiExtensionMap.set(editor, baseExtension);
+    
+    // Store the original callLLM method
     const originalCallLLM = baseExtension.callLLM.bind(baseExtension);
     
+    // Override the callLLM method to add usage tracking
     baseExtension.callLLM = async (opts) => {
       console.log('[AI Extension] callLLM called with:', opts);
       try {
