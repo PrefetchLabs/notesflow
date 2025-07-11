@@ -1,16 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Script from 'next/script';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Calendar, CheckCircle, Clock, FileText, Link2, Menu, MessageSquare, Sparkles, Users, X, Zap } from 'lucide-react';
+import { ArrowRight, Calendar, CheckCircle, Clock, FileText, Link2, Menu, MessageSquare, Sparkles, Users, X, Zap, Play, Pause } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const [email, setEmail] = useState('');
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
   // Structured data for SEO
   const structuredData = {
@@ -136,38 +144,235 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative py-16 md:py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-50" />
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5"
+          style={{ opacity }}
+        />
         <div className="container relative">
-          <div className="mx-auto max-w-4xl text-center">
-            <Badge className="mb-4 animate-fade-in" variant="secondary">
-              <Sparkles className="mr-1 h-3 w-3" />
-              AI-Powered Note Taking
-            </Badge>
-            <h1 className="mb-6 text-4xl sm:text-5xl font-bold tracking-tight lg:text-6xl animate-fade-in-up">
-              Your thoughts and time,{' '}
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                beautifully unified
-              </span>
-            </h1>
-            <p className="mb-8 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up animation-delay-200">
-              Take notes effortlessly while NotesFlow automatically organizes your thoughts, 
-              creates calendar events, and helps you stay productive with AI assistance.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-400">
-              <Button asChild size="lg" className="text-lg">
-                <Link href="/login">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="text-lg">
-                <Link href="#features">Learn More</Link>
-              </Button>
+          <motion.div 
+            className="mx-auto max-w-5xl"
+            style={{ scale }}
+          >
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Badge className="mb-4" variant="secondary">
+                  <Sparkles className="mr-1 h-3 w-3" />
+                  AI-Powered Note Taking
+                </Badge>
+              </motion.div>
+              
+              <motion.h1 
+                className="mb-6 text-4xl sm:text-5xl font-bold tracking-tight lg:text-6xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                Your thoughts and time,{' '}
+                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  beautifully unified
+                </span>
+              </motion.h1>
+              
+              <motion.p 
+                className="mb-8 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                Take notes effortlessly while NotesFlow automatically organizes your thoughts, 
+                creates calendar events, and helps you stay productive with AI assistance.
+              </motion.p>
+              
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Button asChild size="lg" className="text-lg">
+                  <Link href="/login">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="text-lg">
+                  <Link href="#demo">Watch Demo</Link>
+                </Button>
+              </motion.div>
+              
+              <motion.p 
+                className="mt-4 text-sm text-muted-foreground"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                No credit card required • 7-day free trial
+              </motion.p>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground animate-fade-in animation-delay-600">
-              No credit card required • 7-day free trial
+
+            {/* Demo Video Section */}
+            <motion.div 
+              className="relative mx-auto max-w-4xl mt-12"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <div className="relative rounded-xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary/10 to-primary/5 p-1">
+                <div className="relative bg-background rounded-lg overflow-hidden">
+                  <div className="aspect-video relative bg-muted">
+                    {/* Placeholder for demo video */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                          <Play className="h-8 w-8 text-primary ml-1" />
+                        </div>
+                        <p className="text-lg font-semibold">Demo Video</p>
+                        <p className="text-sm text-muted-foreground">Drag text to calendar • AI assistance • Real-time collaboration</p>
+                      </div>
+                    </div>
+                    
+                    {/* Play/Pause button overlay */}
+                    <button
+                      onClick={() => setIsVideoPlaying(!isVideoPlaying)}
+                      className="absolute bottom-4 right-4 p-3 rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background/90 transition-colors"
+                      aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
+                    >
+                      {isVideoPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4 ml-0.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating feature badges */}
+              <motion.div 
+                className="absolute -top-4 -left-4 hidden sm:block"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <Badge className="shadow-lg">Drag to Calendar</Badge>
+              </motion.div>
+              
+              <motion.div 
+                className="absolute -top-4 -right-4 hidden sm:block"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+              >
+                <Badge className="shadow-lg">AI Writing Assistant</Badge>
+              </motion.div>
+              
+              <motion.div 
+                className="absolute -bottom-4 left-1/2 -translate-x-1/2 hidden sm:block"
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, delay: 2 }}
+              >
+                <Badge className="shadow-lg">Real-time Sync</Badge>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section className="py-16 md:py-24 bg-muted/50">
+        <div className="container">
+          <motion.div 
+            className="mx-auto max-w-4xl"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="mb-4 text-3xl font-bold tracking-tight lg:text-4xl">
+                The struggle is real
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                We've all been there. Too many tools, disconnected workflows, lost productivity.
+              </p>
+            </div>
+            
+            <div className="grid gap-8 md:grid-cols-3">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-center"
+              >
+                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+                  <X className="h-8 w-8 text-destructive" />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold">Cluttered Tools</h3>
+                <p className="text-muted-foreground">
+                  Notes in one app, calendar in another, tasks scattered everywhere
+                </p>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-center"
+              >
+                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+                  <Clock className="h-8 w-8 text-destructive" />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold">Time Wasted</h3>
+                <p className="text-muted-foreground">
+                  Switching between apps, copying information, missing deadlines
+                </p>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-center"
+              >
+                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+                  <Users className="h-8 w-8 text-destructive" />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold">Poor Collaboration</h3>
+                <p className="text-muted-foreground">
+                  Email attachments, version conflicts, no real-time updates
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Solution Section */}
+      <section className="py-16 md:py-24">
+        <div className="container">
+          <motion.div 
+            className="mx-auto max-w-4xl text-center mb-12"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <Badge className="mb-4" variant="default">
+              <CheckCircle className="mr-1 h-3 w-3" />
+              The Solution
+            </Badge>
+            <h2 className="mb-4 text-3xl font-bold tracking-tight lg:text-4xl">
+              One workspace for everything
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              NotesFlow brings your notes, calendar, and collaboration together in one beautiful, unified experience
             </p>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -183,17 +388,24 @@ export default function Home() {
             </p>
           </div>
           <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>AI-Powered Writing</CardTitle>
-                <CardDescription>
-                  Get intelligent suggestions, auto-formatting, and content generation powered by advanced AI
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full">
+                <CardHeader>
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>AI-Powered Writing</CardTitle>
+                  <CardDescription>
+                    Get intelligent suggestions, auto-formatting, and content generation powered by advanced AI
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
             <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <CardHeader>
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
@@ -484,23 +696,83 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Email Capture Section */}
+      <section className="py-16 md:py-24 bg-primary/5">
+        <div className="container">
+          <motion.div 
+            className="mx-auto max-w-2xl text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="mb-4 text-3xl font-bold tracking-tight lg:text-4xl">
+              Stay in the loop
+            </h2>
+            <p className="mb-8 text-lg text-muted-foreground">
+              Get updates on new features, tips, and exclusive offers
+            </p>
+            
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (email) {
+                  // TODO: Implement email capture API
+                  toast.success('Thanks for subscribing! Check your email for confirmation.');
+                  setEmail('');
+                }
+              }}
+              className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+            >
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1"
+              />
+              <Button type="submit" size="lg">
+                Subscribe
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </form>
+            
+            <p className="mt-4 text-xs text-muted-foreground">
+              We respect your privacy. Unsubscribe at any time.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-16 md:py-24">
         <div className="container">
-          <div className="mx-auto max-w-2xl text-center">
+          <motion.div 
+            className="mx-auto max-w-2xl text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <h2 className="mb-4 text-3xl font-bold tracking-tight lg:text-4xl">
               Ready to transform your note-taking?
             </h2>
             <p className="mb-8 text-lg text-muted-foreground">
               Join thousands of users who are already using NotesFlow to stay organized and productive
             </p>
-            <Button asChild size="lg" className="text-lg">
-              <Link href="/login">
-                Start Your Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button asChild size="lg" className="text-lg">
+                <Link href="/login">
+                  Start Your Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 

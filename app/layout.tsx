@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
-import { WebVitals } from '@/components/web-vitals';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AdminProvider } from '@/components/providers/admin-provider';
