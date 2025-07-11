@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth/auth-server';
 import { headers } from 'next/headers';
 import { db } from '@/lib/db';
-import { aiUsage } from '@/lib/db/schema';
+import { aiUsage, subscriptions } from '@/lib/db/schema';
 import { and, eq, gte, sum, sql } from 'drizzle-orm';
 
 const FREE_TIER_LIMIT = 10;
@@ -17,7 +17,37 @@ export async function checkAIUsageLimit() {
     throw new Error('User not authenticated');
   }
 
-  // Get current month usage
+  // Check if user is admin - admins have unlimited access
+  const isAdmin = session.user.role === 'admin' || session.user.role === 'system_admin';
+  if (isAdmin) {
+    return {
+      currentUsage: 0,
+      limit: Infinity,
+      hasReachedLimit: false,
+      remainingCalls: Infinity,
+    };
+  }
+
+  // Check user's subscription
+  const [subscription] = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, session.user.id));
+
+  // Pro and Beta users have unlimited AI access
+  const allowedPlans = ['beta', 'pro_monthly', 'pro_yearly', 'early_bird'];
+  const hasUnlimitedAccess = subscription && allowedPlans.includes(subscription.plan || '');
+  
+  if (hasUnlimitedAccess) {
+    return {
+      currentUsage: 0,
+      limit: Infinity,
+      hasReachedLimit: false,
+      remainingCalls: Infinity,
+    };
+  }
+
+  // For free tier users, check usage
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
@@ -54,13 +84,13 @@ export async function trackAIUsage(commandType: string, tokensUsed: number = 0) 
     throw new Error('User not authenticated');
   }
 
-  // Check limit before tracking
+  // Check limit before tracking (will return unlimited for admins/pro users)
   const usageCheck = await checkAIUsageLimit();
   if (usageCheck.hasReachedLimit) {
     throw new Error('AI usage limit reached for this month');
   }
 
-  // Track the usage
+  // Track the usage (even for unlimited users for analytics)
   await db.insert(aiUsage).values({
     userId: session.user.id,
     tokensUsed,
@@ -70,6 +100,6 @@ export async function trackAIUsage(commandType: string, tokensUsed: number = 0) 
 
   return {
     success: true,
-    remainingCalls: usageCheck.remainingCalls - 1,
+    remainingCalls: usageCheck.remainingCalls === Infinity ? Infinity : usageCheck.remainingCalls - 1,
   };
 }
