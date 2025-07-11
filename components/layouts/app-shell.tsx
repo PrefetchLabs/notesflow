@@ -139,12 +139,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       
       <div
         className={cn(
-          'grid h-screen',
-          // Dynamic grid columns based on sidebar and calendar state
-          sidebarHidden && !calendarOpen && 'grid-cols-1 h-[calc(100vh-3.5rem)]',
-          !sidebarHidden && !calendarOpen && 'grid-cols-[280px_1fr]',
-          sidebarHidden && calendarOpen && 'grid-cols-[1fr_280px] h-[calc(100vh-3.5rem)]',
-          !sidebarHidden && calendarOpen && 'grid-cols-[280px_1fr_280px]'
+          'grid',
+          (sidebarHidden || calendarOpen) ? 'h-[calc(100vh-3.5rem)]' : 'h-screen',
+          // Grid columns
+          {
+            'grid-cols-1': sidebarHidden && !calendarOpen,
+            'grid-cols-[280px_1fr]': !sidebarHidden && !calendarOpen,
+            'grid-cols-[1fr_280px]': sidebarHidden && calendarOpen,
+            'grid-cols-[280px_1fr_280px]': !sidebarHidden && calendarOpen,
+          }
         )}
       >
         {/* Left Sidebar */}
@@ -159,7 +162,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         
         {/* Right Calendar Sidebar */}
         {calendarOpen && (
-          <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
+          <div className="h-full w-[280px] border-l bg-background">
+            <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
+          </div>
         )}
       </div>
     </div>

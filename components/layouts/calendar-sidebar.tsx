@@ -187,7 +187,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   const remainingMinutes = Math.round(totalFocusedMinutes % 60);
 
   return (
-    <aside className="calendar-sidebar relative flex h-full flex-col border-l bg-background w-[280px]">
+    <aside className="calendar-sidebar relative flex h-full flex-col bg-background overflow-hidden">
       {/* Header */}
       <div className="border-b p-4">
         <div className="flex items-center justify-between mb-4">
