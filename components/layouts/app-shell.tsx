@@ -100,21 +100,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Desktop layout
   return (
     <div className="app-shell min-h-screen bg-background">
-      {/* Desktop header with hamburger when sidebar is hidden */}
-      {sidebarHidden && (
+      {/* Desktop header with hamburger when sidebar is hidden or calendar controls */}
+      {(sidebarHidden || calendarOpen) && (
         <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-14 items-center px-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="mr-2"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-bold tracking-tight">NotesFlow</span>
-              <span className="text-xs text-muted-foreground">v0.1</span>
+          <div className="flex h-14 items-center justify-between px-4">
+            <div className="flex items-center">
+              {sidebarHidden && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleSidebar}
+                    className="mr-2"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-bold tracking-tight">NotesFlow</span>
+                    <span className="text-xs text-muted-foreground">v0.1</span>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCalendarOpen(!calendarOpen)}
+                title={calendarOpen ? "Hide calendar" : "Show calendar"}
+              >
+                <Calendar className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         </header>
@@ -122,35 +139,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       
       <div
         className={cn(
-          'grid',
-          sidebarHidden ? 'grid-cols-1 h-[calc(100vh-3.5rem)]' : 'grid-cols-[280px_1fr] h-screen'
+          'grid h-screen',
+          // Dynamic grid columns based on sidebar and calendar state
+          sidebarHidden && !calendarOpen && 'grid-cols-1 h-[calc(100vh-3.5rem)]',
+          !sidebarHidden && !calendarOpen && 'grid-cols-[280px_1fr]',
+          sidebarHidden && calendarOpen && 'grid-cols-[1fr_280px] h-[calc(100vh-3.5rem)]',
+          !sidebarHidden && calendarOpen && 'grid-cols-[280px_1fr_280px]'
         )}
       >
-        {/* Sidebar for desktop */}
+        {/* Left Sidebar */}
         {!sidebarHidden && (
           <Sidebar onToggle={toggleSidebar} />
         )}
         
-        <main className="main-content overflow-hidden relative">
+        {/* Main Content */}
+        <main className="main-content overflow-hidden">
           <div className="h-full w-full">{children}</div>
-          
-          {/* Bottom right controls */}
-          <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
-            <ThemeToggle />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCalendarOpen(!calendarOpen)}
-              className="shadow-lg"
-            >
-              <Calendar className="h-5 w-5" />
-            </Button>
-          </div>
         </main>
+        
+        {/* Right Calendar Sidebar */}
+        {calendarOpen && (
+          <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
+        )}
       </div>
-      
-      {/* Calendar sidebar */}
-      <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
     </div>
   );
 }
