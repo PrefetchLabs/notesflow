@@ -22,6 +22,7 @@ export async function GET() {
       const newPreferences = await db
         .insert(userPreferences)
         .values({
+          id: crypto.randomUUID(),
           userId: user.id,
         })
         .returning();
@@ -67,6 +68,7 @@ export async function PATCH(request: Request) {
       preferences = await db
         .insert(userPreferences)
         .values({
+          id: crypto.randomUUID(),
           userId: user.id,
           ...processedUpdates,
           updatedAt: new Date(),

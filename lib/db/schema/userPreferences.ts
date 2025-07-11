@@ -1,7 +1,7 @@
 import { pgTable, text, boolean, timestamp, jsonb } from 'drizzle-orm/pg-core';
 
 export const userPreferences = pgTable('user_preferences', {
-  id: text('id').primaryKey().default('gen_random_uuid()'),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id')
     .notNull()
     .unique(),
