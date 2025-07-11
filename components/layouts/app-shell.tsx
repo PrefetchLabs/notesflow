@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="app-shell min-h-screen bg-background">
         {/* Mobile header */}
-        <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-sm">
           <div className="flex h-14 items-center justify-between px-4">
             <div className="flex items-center">
               <Button
@@ -62,7 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Menu className="h-5 w-5" />
               </Button>
               <div className="ml-2 flex items-baseline gap-1">
-                <span className="text-lg font-bold tracking-tight">NotesFlow</span>
+                <span className="text-lg font-light tracking-tight">NotesFlow</span>
                 <span className="text-xs text-muted-foreground">v0.1</span>
               </div>
             </div>
@@ -103,7 +103,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="app-shell min-h-screen bg-background">
       {/* Desktop header with hamburger when sidebar is hidden */}
       {sidebarHidden && (
-        <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-sm">
           <div className="flex h-14 items-center justify-between px-4">
             <div className="flex items-center">
               <Button
@@ -115,7 +115,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Menu className="h-5 w-5" />
               </Button>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold tracking-tight">NotesFlow</span>
+                <span className="text-lg font-light tracking-tight">NotesFlow</span>
                 <span className="text-xs text-muted-foreground">v0.1</span>
               </div>
             </div>
@@ -126,22 +126,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
       )}
       
-      {/* Calendar toggle button - only visible when calendar is closed */}
-      {!calendarOpen && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCalendarOpen(true)}
-          title="Show calendar"
-          className={cn(
-            "fixed top-4 right-4 z-40 h-8 w-8 rounded-full border bg-background shadow-sm",
-            "hover:bg-accent hover:shadow-md",
-            "transition-all duration-200"
-          )}
-        >
-          <Calendar className="h-4 w-4" />
-        </Button>
-      )}
+      {/* Theme toggle and Calendar toggle buttons */}
+      <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
+        <ThemeToggle />
+        {!calendarOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCalendarOpen(true)}
+            title="Show calendar"
+            className={cn(
+              "h-8 w-8 rounded-full border bg-background shadow-sm",
+              "hover:bg-accent hover:shadow-md",
+              "transition-all duration-200"
+            )}
+          >
+            <Calendar className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
       
       {/* Calendar hide button - visible when calendar is open */}
       {calendarOpen && (
@@ -156,7 +159,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   'fixed right-[284px] z-50 h-8 w-8 rounded-full border bg-background shadow-sm',
                   'hover:bg-accent hover:shadow-md',
                   'transition-shadow duration-200',
-                  sidebarHidden ? 'top-[88px]' : 'top-6'
+                  sidebarHidden ? 'top-[88px]' : 'top-4'
                 )}
               >
                 <ChevronRight className="h-4 w-4" />

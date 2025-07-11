@@ -97,11 +97,11 @@ export function Sidebar({ onToggle }: SidebarProps) {
   };
 
   return (
-    <aside className="sidebar relative flex h-screen flex-col border-r bg-background w-[280px]">
+    <aside className="sidebar relative flex h-screen flex-col border-r bg-sidebar-background w-[280px]">
       {/* Logo and Version */}
       <div className="border-b p-4">
         <div className="flex items-baseline gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">NotesFlow</h1>
+          <h1 className="text-2xl font-light tracking-tight">NotesFlow</h1>
           <span className="text-xs text-muted-foreground">v0.1</span>
         </div>
       </div>

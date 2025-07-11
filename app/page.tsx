@@ -57,12 +57,12 @@ export default function Home() {
       />
       <div className="flex min-h-screen flex-col">
         {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
         <div className="container flex h-16 items-center">
           <div className="flex flex-1 items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
               <FileText className="h-6 w-6" />
-              <span className="text-xl font-semibold">NotesFlow</span>
+              <span className="text-xl font-light tracking-tight">NotesFlow</span>
             </Link>
             
             {/* Desktop Navigation - Centered */}

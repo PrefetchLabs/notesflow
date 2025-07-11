@@ -159,7 +159,7 @@ export function KeyboardShortcutsProvider({ children }: { children: React.ReactN
             {shortcuts.map((shortcut, index) => (
               <div key={index} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50">
                 <span className="text-sm">{shortcut.description}</span>
-                <kbd className="px-2 py-1 text-xs font-mono bg-muted rounded border border-border">
+                <kbd className="px-2 py-1 text-xs font-mono bg-muted rounded border border-input">
                   {shortcut.keys}
                 </kbd>
               </div>

@@ -1,10 +1,25 @@
 import type { Metadata } from 'next';
+import { Inter, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import { WebVitals } from '@/components/web-vitals';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AdminProvider } from '@/components/providers/admin-provider';
 import { DragDropProvider } from '@/contexts/drag-drop-context';
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+  weight: ['300', '400', '500', '600', '700'],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-mono',
+  weight: ['400', '500'],
+});
 
 export const metadata: Metadata = {
   title: 'NotesFlow - AI-Powered Note Taking & Calendar Integration',
@@ -66,8 +81,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${ibmPlexMono.variable}`}>
+      <body suppressHydrationWarning className="font-sans antialiased">
         <QueryProvider>
           <ThemeProvider
             attribute="class"

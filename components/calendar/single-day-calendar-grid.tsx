@@ -64,7 +64,7 @@ export function SingleDayCalendarGrid({
               <div
                 key={`time-${slotIndex}`}
                 className={cn(
-                  "h-5 flex items-center justify-end pr-2 text-xs text-muted-foreground border-b border-border/20",
+                  "h-5 flex items-center justify-end pr-2 text-xs text-muted-foreground border-b border-black/5 dark:border-white/5",
                   isHourStart && "font-medium"
                 )}
               >
@@ -90,7 +90,7 @@ export function SingleDayCalendarGrid({
                   key={`slot-${slotIndex}`}
                   className={cn(
                     "h-5 border-b cursor-pointer hover:bg-accent/5 transition-colors",
-                    isHourStart ? "border-border/40" : "border-border/20"
+                    isHourStart ? "border-black/10 dark:border-white/10" : "border-black/5 dark:border-white/5"
                   )}
                   data-slot-index={slotIndex}
                   data-slot-time={timeSlots[slotIndex]?.toISOString()}

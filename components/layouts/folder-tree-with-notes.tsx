@@ -23,8 +23,6 @@ import { useSortable } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 import { 
   ChevronRight, 
-  Folder, 
-  FolderOpen, 
   MoreVertical,
   Plus,
   Pencil,
@@ -34,6 +32,7 @@ import {
   Eye,
   Edit3,
 } from 'lucide-react';
+import { FolderIcon, getFolderColorIndex } from '@/components/ui/folder-icon';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -190,7 +189,7 @@ function SortableFolderItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const Icon = folder.isExpanded ? FolderOpen : Folder;
+  const colorIndex = getFolderColorIndex(folder.name);
 
   return (
     <div
@@ -239,7 +238,7 @@ function SortableFolderItem({
           {!(folder.children?.length > 0 || folder.notes?.length > 0) && (
             <div className="h-4 w-4" />
           )}
-          <Icon className="h-4 w-4 text-muted-foreground" />
+          <FolderIcon isOpen={folder.isExpanded} colorIndex={colorIndex} className="h-4 w-4" />
           {!collapsed && (
             <span className="truncate">{folder.name}</span>
           )}
@@ -691,7 +690,7 @@ export function FolderTreeWithNotes({
                     </>
                   ) : (
                     <>
-                      <Folder className="h-4 w-4" />
+                      <FolderIcon isOpen={false} className="h-4 w-4" />
                       <span className="text-sm">Moving folder...</span>
                     </>
                   )}
