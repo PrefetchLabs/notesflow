@@ -31,9 +31,7 @@ export function createAIExtension(options: AIExtensionOptions) {
   const originalExtensionCreator = createBlockNoteAIExtension(options);
   
   return (editor: BlockNoteEditor) => {
-    console.log('[AI Extension] Creating AI extension with options:', options);
     const baseExtension = originalExtensionCreator(editor);
-    console.log('[AI Extension] Base extension created:', baseExtension);
     
     // Store the extension in our map
     aiExtensionMap.set(editor, baseExtension);
@@ -43,7 +41,6 @@ export function createAIExtension(options: AIExtensionOptions) {
     
     // Override the callLLM method to add usage tracking
     baseExtension.callLLM = async (opts) => {
-      console.log('[AI Extension] callLLM called with:', opts);
       try {
         // Check usage limit first
         const usageCheck = await checkAIUsageLimit();
@@ -68,9 +65,7 @@ export function createAIExtension(options: AIExtensionOptions) {
         }
 
         // Make the actual LLM call
-        console.log('[AI Extension] Making LLM call...');
         const result = await originalCallLLM(opts);
-        console.log('[AI Extension] LLM call result:', result);
 
         // Track usage after successful call
         if (result) {

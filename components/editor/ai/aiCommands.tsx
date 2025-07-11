@@ -21,19 +21,12 @@ export const continueWriting = (
   icon: <Edit3 size={18} />,
   onItemClick: async () => {
     try {
-      console.log('[AI Command] Continue Writing - Editor:', editor);
-      console.log('[AI Command] Editor extensions:', editor._tiptapEditor?.extensions);
-      
       const aiExtension = getAIExtension(editor);
-      console.log('[AI Command] Continue Writing - AI Extension:', aiExtension);
-      
       if (!aiExtension) {
         console.error('[AI Command] AI extension not found on editor');
-        console.error('[AI Command] Available extensions:', editor._tiptapEditor?.extensions?.map(ext => ext.name));
         return;
       }
       
-      console.log('[AI Command] Calling LLM...');
       await aiExtension.callLLM({
         userPrompt: "Continue writing from where I left off. Keep the same tone and style.",
         useSelection: false,
@@ -85,40 +78,33 @@ export const improveClarity = (
 // Summarize command
 export const summarize = (
   editor: BlockNoteEditor,
-): AIMenuSuggestionItem => {
-  console.log('[AI Command] Creating summarize command for editor:', editor);
-  return {
-    key: "summarize",
-    title: "Summarize",
-    aliases: ["summary", "short", "brief"],
-    icon: <FileText size={18} />,
-    onItemClick: async () => {
-      console.log('[AI Command] Summarize clicked!');
-      try {
-        const aiExtension = getAIExtension(editor);
-        console.log('[AI Command] Got AI extension:', aiExtension);
-        if (!aiExtension) {
-          console.error('[AI Command] AI extension not found on editor');
-          return;
-        }
-        console.log('[AI Command] Calling LLM with summarize prompt...');
-        const result = await aiExtension.callLLM({
-          userPrompt: "Summarize this content in a concise way, keeping the key points.",
-          useSelection: true,
-          defaultStreamTools: {
-            add: true,
-            update: false,
-            delete: false,
-          },
-        });
-        console.log('[AI Command] Summarize LLM result:', result);
-      } catch (error) {
-        console.error('[AI Command] Summarize error:', error);
+): AIMenuSuggestionItem => ({
+  key: "summarize",
+  title: "Summarize",
+  aliases: ["summary", "short", "brief"],
+  icon: <FileText size={18} />,
+  onItemClick: async () => {
+    try {
+      const aiExtension = getAIExtension(editor);
+      if (!aiExtension) {
+        console.error('[AI Command] AI extension not found on editor');
+        return;
       }
-    },
-    size: "small",
-  };
-};
+      await aiExtension.callLLM({
+        userPrompt: "Summarize this content in a concise way, keeping the key points.",
+        useSelection: true,
+        defaultStreamTools: {
+          add: true,
+          update: false,
+          delete: false,
+        },
+      });
+    } catch (error) {
+      console.error('[AI Command] Summarize error:', error);
+    }
+  },
+  size: "small",
+});
 
 // Extract Tasks command
 export const extractTasks = (

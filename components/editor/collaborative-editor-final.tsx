@@ -212,13 +212,6 @@ export function CollaborativeEditorFinal({
   // Create AI model
   const model = useMemo(() => createCustomAIModel(), []);
   
-  console.log('[CollaborativeEditor] AI Access:', { 
-    hasAIAccess, 
-    user: user?.email, 
-    role: user?.role,
-    isPro: hasAIAccess
-  });
-  
   // Create editor - always with provider for seamless collaboration switching
   const editor = useCreateBlockNote({
     // Only provide initialContent when NOT using collaboration

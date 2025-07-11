@@ -81,12 +81,6 @@ export async function POST(req: Request) {
     }
 
     // Forward the request to OpenAI
-    console.log('Forwarding request to OpenAI:', {
-      model: body.model,
-      messagesCount: body.messages?.length,
-      stream: body.stream,
-    });
-
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
