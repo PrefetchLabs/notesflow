@@ -12,11 +12,11 @@ import {
   UnnestBlockButton,
   CreateLinkButton
 } from '@blocknote/react';
-import { getAIExtension } from '@blocknote/xl-ai';
 import { Sparkles } from 'lucide-react';
 import { AIDropdownMenu } from './AIDropdownMenu';
 import { toast } from 'sonner';
 import { useSubscription } from '@/lib/contexts/subscription-context';
+import { getAIExtension } from '@/lib/editor/ai-extension';
 import { ProBadge } from '@/components/ui/pro-badge';
 
 export function FormattingToolbarWithAI() {

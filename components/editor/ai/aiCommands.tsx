@@ -85,33 +85,40 @@ export const improveClarity = (
 // Summarize command
 export const summarize = (
   editor: BlockNoteEditor,
-): AIMenuSuggestionItem => ({
-  key: "summarize",
-  title: "Summarize",
-  aliases: ["summary", "short", "brief"],
-  icon: <FileText size={18} />,
-  onItemClick: async () => {
-    try {
-      const aiExtension = getAIExtension(editor);
-      if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
-        return;
+): AIMenuSuggestionItem => {
+  console.log('[AI Command] Creating summarize command for editor:', editor);
+  return {
+    key: "summarize",
+    title: "Summarize",
+    aliases: ["summary", "short", "brief"],
+    icon: <FileText size={18} />,
+    onItemClick: async () => {
+      console.log('[AI Command] Summarize clicked!');
+      try {
+        const aiExtension = getAIExtension(editor);
+        console.log('[AI Command] Got AI extension:', aiExtension);
+        if (!aiExtension) {
+          console.error('[AI Command] AI extension not found on editor');
+          return;
+        }
+        console.log('[AI Command] Calling LLM with summarize prompt...');
+        const result = await aiExtension.callLLM({
+          userPrompt: "Summarize this content in a concise way, keeping the key points.",
+          useSelection: true,
+          defaultStreamTools: {
+            add: true,
+            update: false,
+            delete: false,
+          },
+        });
+        console.log('[AI Command] Summarize LLM result:', result);
+      } catch (error) {
+        console.error('[AI Command] Summarize error:', error);
       }
-      await aiExtension.callLLM({
-        userPrompt: "Summarize this content in a concise way, keeping the key points.",
-        useSelection: true,
-        defaultStreamTools: {
-          add: true,
-          update: false,
-          delete: false,
-        },
-      });
-    } catch (error) {
-      console.error('[AI Command] Summarize error:', error);
-    }
-  },
-  size: "small",
-});
+    },
+    size: "small",
+  };
+};
 
 // Extract Tasks command
 export const extractTasks = (

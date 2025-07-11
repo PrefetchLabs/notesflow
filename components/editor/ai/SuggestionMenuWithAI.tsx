@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blocknote/react';
-import { getAIExtension } from '@blocknote/xl-ai';
 import { Sparkles } from 'lucide-react';
 import { BlockNoteEditor } from '@blocknote/core';
+import { getAIExtension } from '@/lib/editor/ai-extension';
 
 export function SuggestionMenuWithAI({ editor }: { editor: BlockNoteEditor }) {
   const aiMenuItem = {
