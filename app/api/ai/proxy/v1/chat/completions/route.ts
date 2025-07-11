@@ -45,22 +45,48 @@ export async function POST(req: Request) {
     // Get the request body
     const body = await req.json();
 
+    // Extract command type from the prompt if available
+    let commandType = 'chat_completion';
+    if (body.messages && body.messages.length > 0) {
+      const userMessage = body.messages.find((m: any) => m.role === 'user');
+      if (userMessage?.content) {
+        // Try to identify the command type from the prompt
+        const content = userMessage.content.toLowerCase();
+        if (content.includes('summarize')) commandType = 'summarize';
+        else if (content.includes('improve')) commandType = 'improve';
+        else if (content.includes('fix') && content.includes('grammar')) commandType = 'fix_grammar';
+        else if (content.includes('translate')) commandType = 'translate';
+        else if (content.includes('continue')) commandType = 'continue_writing';
+        else if (content.includes('extract') && content.includes('task')) commandType = 'extract_tasks';
+        else if (content.includes('formal')) commandType = 'change_tone';
+        else if (content.includes('informal') || content.includes('casual')) commandType = 'change_tone';
+      }
+    }
+
     // Track AI usage
     await db.insert(aiUsage).values({
       id: crypto.randomUUID(),
       userId: session.user.id,
-      model: body.model || 'gpt-4o-mini',
-      endpoint: 'chat.completions',
-      inputTokens: JSON.stringify(body).length / 4, // Rough estimate
-      outputTokens: 0, // Will be updated after response
-      cost: 0, // Calculate based on model pricing
-      metadata: {
-        noteId: body.metadata?.noteId,
-        feature: body.metadata?.feature || 'editor',
-      },
+      tokensUsed: 0, // Will be updated after response
+      commandType,
     });
 
+    // Check if OpenAI API key is configured
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY is not configured');
+      return NextResponse.json(
+        { error: 'AI service is not configured' },
+        { status: 500 }
+      );
+    }
+
     // Forward the request to OpenAI
+    console.log('Forwarding request to OpenAI:', {
+      model: body.model,
+      messagesCount: body.messages?.length,
+      stream: body.stream,
+    });
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -69,6 +95,16 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify(body),
     });
+
+    // Check if the response is ok
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('OpenAI API error:', response.status, errorData);
+      return NextResponse.json(
+        { error: `OpenAI API error: ${response.status}` },
+        { status: response.status }
+      );
+    }
 
     // Return the response
     if (body.stream) {
