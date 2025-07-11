@@ -30,6 +30,9 @@ interface User {
   role: 'user' | 'admin' | 'system_admin';
   isSystemAdmin: boolean;
   emailVerified: boolean;
+  isActive: boolean;
+  disabledAt: Date | null;
+  disabledReason: string | null;
   createdAt: Date;
   updatedAt: Date;
   lastAdminActivityAt: Date | null;
@@ -80,19 +83,41 @@ export default function UsersPage() {
   // Update user
   const handleUpdateUser = async (userId: string, updates: Partial<User>) => {
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, updates }),
-      });
+      // Handle account status updates through a separate endpoint
+      if ('isActive' in updates) {
+        const response = await fetch('/api/admin/users/status', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId, 
+            isActive: updates.isActive,
+            reason: updates.isActive ? null : 'Disabled by administrator'
+          }),
+        });
 
-      if (!response.ok) throw new Error('Failed to update user');
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to update account status');
+        }
 
-      toast.success('User updated successfully');
-      fetchUsers(); // Refresh the list
-    } catch (error) {
+        toast.success(updates.isActive ? 'Account enabled' : 'Account disabled');
+        fetchUsers(); // Refresh the list
+      } else {
+        // Handle other updates
+        const response = await fetch('/api/admin/users', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, updates }),
+        });
+
+        if (!response.ok) throw new Error('Failed to update user');
+
+        toast.success('User updated successfully');
+        fetchUsers(); // Refresh the list
+      }
+    } catch (error: any) {
       console.error('Error updating user:', error);
-      toast.error('Failed to update user');
+      toast.error(error.message || 'Failed to update user');
     }
   };
 

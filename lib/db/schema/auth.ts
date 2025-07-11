@@ -15,6 +15,10 @@ export const user = pgTable('user', {
   role: userRoleEnum('role').default('user').notNull(),
   adminPermissions: jsonb('admin_permissions').$type<string[]>().default([]),
   lastAdminActivityAt: timestamp('last_admin_activity_at'),
+  // Account status
+  isActive: boolean('is_active').default(true).notNull(),
+  disabledAt: timestamp('disabled_at'),
+  disabledReason: text('disabled_reason'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

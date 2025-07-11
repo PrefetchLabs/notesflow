@@ -11,6 +11,11 @@ export async function getUser() {
       headers: headersList,
     });
 
+    // Check if user account is active
+    if (session?.user && session.user.isActive === false) {
+      return null;
+    }
+
     return session?.user || null;
   } catch (error) {
     console.error('Failed to get user:', error);
@@ -34,6 +39,15 @@ export async function authMiddleware(request: Request) {
       };
     }
 
+    // Check if user account is active
+    if (session.user.isActive === false) {
+      return {
+        success: false,
+        error: 'Account disabled',
+        user: null,
+      };
+    }
+
     return {
       success: true,
       user: {
@@ -42,6 +56,7 @@ export async function authMiddleware(request: Request) {
         name: session.user.name,
         image: session.user.image,
         role: session.user.role,
+        isActive: session.user.isActive,
       },
       session,
     };

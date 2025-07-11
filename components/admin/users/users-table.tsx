@@ -21,9 +21,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Shield, ShieldOff, Trash2, CreditCard, Zap, Crown } from 'lucide-react';
+import { MoreHorizontal, Shield, ShieldOff, Trash2, CreditCard, Zap, Crown, UserX, UserCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { UserRole } from '@/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Subscription {
   id: string | null;
@@ -44,6 +54,9 @@ interface User {
   role: UserRole;
   isSystemAdmin: boolean;
   emailVerified: boolean;
+  isActive: boolean;
+  disabledAt: Date | null;
+  disabledReason: string | null;
   createdAt: Date;
   updatedAt: Date;
   lastAdminActivityAt: Date | null;
@@ -78,6 +91,17 @@ export function UsersTable({
   currentUserId 
 }: UsersTableProps) {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    action: () => void;
+    title: string;
+    description: string;
+  }>({
+    open: false,
+    action: () => {},
+    title: '',
+    description: '',
+  });
 
   const toggleSelectAll = () => {
     if (selectedUsers.length === users.length) {
@@ -105,6 +129,15 @@ export function UsersTable({
         .slice(0, 2);
     }
     return user.email[0].toUpperCase();
+  };
+
+  const showConfirmDialog = (title: string, description: string, action: () => void) => {
+    setConfirmDialog({
+      open: true,
+      title,
+      description,
+      action,
+    });
   };
 
   const getSubscriptionBadge = (subscription: Subscription | null) => {
@@ -136,7 +169,8 @@ export function UsersTable({
   };
 
   return (
-    <div className="rounded-md border">
+    <>
+      <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -156,7 +190,7 @@ export function UsersTable({
         </TableHeader>
         <TableBody>
           {users.map((user) => (
-            <TableRow key={user.id}>
+            <TableRow key={user.id} className={!user.isActive ? 'opacity-60' : ''}>
               <TableCell>
                 <Checkbox
                   checked={selectedUsers.includes(user.id)}
@@ -194,9 +228,28 @@ export function UsersTable({
                 {getSubscriptionBadge(user.subscription)}
               </TableCell>
               <TableCell>
-                <Badge variant={user.emailVerified ? 'default' : 'secondary'}>
-                  {user.emailVerified ? 'Verified' : 'Unverified'}
-                </Badge>
+                <div className="flex flex-col gap-1">
+                  {!user.isActive ? (
+                    <Badge variant="destructive" className="w-fit">
+                      <UserX className="h-3 w-3 mr-1" />
+                      Disabled
+                    </Badge>
+                  ) : (
+                    <Badge variant="default" className="w-fit">
+                      <UserCheck className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
+                  )}
+                  {user.emailVerified ? (
+                    <Badge variant="secondary" className="w-fit text-xs">
+                      Email verified
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="w-fit text-xs">
+                      Email unverified
+                    </Badge>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <span className="text-sm text-muted-foreground">
@@ -230,6 +283,33 @@ export function UsersTable({
                       >
                         <ShieldOff className="mr-2 h-4 w-4" />
                         Remove Admin
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {/* Account Status Management */}
+                    {user.isActive ? (
+                      <DropdownMenuItem
+                        onClick={() => showConfirmDialog(
+                          'Disable Account',
+                          `Are you sure you want to disable ${user.name || user.email}'s account? They will not be able to log in until the account is re-enabled.`,
+                          () => onUpdateUser(user.id, { isActive: false })
+                        )}
+                        disabled={user.id === currentUserId || user.role === 'system_admin'}
+                        className="text-destructive"
+                      >
+                        <UserX className="mr-2 h-4 w-4" />
+                        Disable Account
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem
+                        onClick={() => showConfirmDialog(
+                          'Enable Account',
+                          `Are you sure you want to enable ${user.name || user.email}'s account? They will be able to log in again.`,
+                          () => onUpdateUser(user.id, { isActive: true })
+                        )}
+                      >
+                        <UserCheck className="mr-2 h-4 w-4" />
+                        Enable Account
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
@@ -305,5 +385,31 @@ export function UsersTable({
         </TableBody>
       </Table>
     </div>
+    
+    <AlertDialog 
+      open={confirmDialog.open} 
+      onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {confirmDialog.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              confirmDialog.action();
+              setConfirmDialog(prev => ({ ...prev, open: false }));
+            }}
+          >
+            Continue
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

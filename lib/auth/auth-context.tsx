@@ -14,6 +14,7 @@ import type { auth } from './config';
 type Session = typeof auth.$Infer.Session;
 type User = Session['user'] & {
   role?: 'user' | 'admin' | 'system_admin';
+  isActive?: boolean;
 };
 
 interface AuthContextType {
@@ -32,11 +33,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (session?.user) {
-      setUser(session.user);
+      // Check if user is active
+      if (session.user.isActive === false) {
+        setUser(null);
+        // Sign out disabled users
+        authClient.signOut().then(() => {
+          router.push('/login?error=account_disabled');
+        });
+      } else {
+        setUser(session.user);
+      }
     } else {
       setUser(null);
     }
-  }, [session]);
+  }, [session, router]);
 
   const handleSignOut = async () => {
     try {

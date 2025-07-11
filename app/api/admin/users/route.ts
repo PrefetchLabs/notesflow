@@ -95,7 +95,19 @@ export async function GET(request: NextRequest) {
 
     // Combine user data with subscriptions
     const users = usersData.map(userData => ({
-      ...userData,
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      image: userData.image,
+      role: userData.role,
+      isSystemAdmin: userData.isSystemAdmin || false,
+      emailVerified: userData.emailVerified,
+      isActive: userData.isActive,
+      disabledAt: userData.disabledAt,
+      disabledReason: userData.disabledReason,
+      createdAt: userData.createdAt,
+      updatedAt: userData.updatedAt,
+      lastAdminActivityAt: userData.lastAdminActivityAt,
       subscription: subscriptionMap.get(userData.id) || null,
     }));
 

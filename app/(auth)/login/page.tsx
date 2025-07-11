@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { createAuthClient } from 'better-auth/react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 const authClient = createAuthClient({
   baseURL: process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
@@ -14,7 +16,19 @@ const authClient = createAuthClient({
 
 export default function LoginPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const error = searchParams.get('error');
+
+  useEffect(() => {
+    if (error === 'account_disabled') {
+      toast({
+        title: 'Account Disabled',
+        description: 'Your account has been disabled. Please contact support for assistance.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -51,6 +65,16 @@ export default function LoginPage() {
             Sign in to your account to continue
           </CardDescription>
         </CardHeader>
+        {error === 'account_disabled' && (
+          <div className="px-6 pb-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Your account has been disabled. Please contact support for assistance.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
         <CardContent>
           <Button
             className="w-full"

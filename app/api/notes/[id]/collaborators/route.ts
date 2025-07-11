@@ -106,21 +106,28 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Check subscription
-    const [subscription] = await db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, session.user.id));
+    // Check if user is admin
+    const isAdmin = session.user.role === 'admin' || session.user.role === 'system_admin';
+    
+    // Check subscription - allow beta and pro users, or admins
+    if (!isAdmin) {
+      const [subscription] = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, session.user.id));
 
-    if (!subscription || subscription.plan === 'free') {
-      return NextResponse.json(
-        { 
-          error: 'Sharing is only available for Pro users',
-          requiresUpgrade: true,
-          feature: 'collaboration'
-        },
-        { status: 403 }
-      );
+      // Allow beta and pro users to share
+      const allowedPlans = ['beta', 'pro_monthly', 'pro_yearly'];
+      if (!subscription || !allowedPlans.includes(subscription.plan || '')) {
+        return NextResponse.json(
+          { 
+            error: 'Sharing is only available for Beta and Pro users',
+            requiresUpgrade: true,
+            feature: 'collaboration'
+          },
+          { status: 403 }
+        );
+      }
     }
 
     const { id: noteId } = await params;
