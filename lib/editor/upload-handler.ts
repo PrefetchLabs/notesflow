@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { auth } from '@/lib/auth/auth-client';
 
 export async function uploadFile(file: File): Promise<string> {
   try {
@@ -14,13 +15,13 @@ export async function uploadFile(file: File): Promise<string> {
       throw new Error('File size must be less than 10MB');
     }
 
-    const supabase = createClient();
-    
-    // Check if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    // Check if user is authenticated using Better Auth
+    const session = await auth.getSession();
+    if (!session) {
       throw new Error('You must be logged in to upload images');
     }
+
+    const supabase = createClient();
     
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
