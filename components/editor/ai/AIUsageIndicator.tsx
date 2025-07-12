@@ -2,19 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Infinity } from 'lucide-react';
 import { useSession } from '@/lib/auth/auth-client';
-import { toast } from 'sonner';
-
-const FREE_TIER_LIMIT = 10; // 10 AI calls per day for free tier
 
 interface AIUsageData {
-  total_requests: number;
-  current_month: string;
+  currentUsage: number;
+  limit: number;
+  hasReachedLimit: boolean;
+  remainingCalls: number;
 }
 
 export function AIUsageIndicator() {
-  const [usage, setUsage] = useState<number>(0);
+  const [usageData, setUsageData] = useState<AIUsageData | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
 
@@ -32,8 +31,8 @@ export function AIUsageIndicator() {
         return;
       }
 
-      const data = await response.json();
-      setUsage(data.currentUsage || 0);
+      const data: AIUsageData = await response.json();
+      setUsageData(data);
     } catch (error) {
       console.error('Error fetching AI usage:', error);
     } finally {
@@ -41,12 +40,13 @@ export function AIUsageIndicator() {
     }
   };
 
-  const remainingCalls = Math.max(0, FREE_TIER_LIMIT - usage);
-  const progressValue = (usage / FREE_TIER_LIMIT) * 100;
-  const isNearLimit = remainingCalls <= 3;
-  const isAtLimit = remainingCalls === 0;
+  if (loading || !usageData) return null;
 
-  if (loading) return null;
+  const isUnlimited = usageData.limit === Infinity;
+  const remainingCalls = usageData.remainingCalls;
+  const progressValue = isUnlimited ? 0 : (usageData.currentUsage / usageData.limit) * 100;
+  const isNearLimit = !isUnlimited && remainingCalls <= 3 && remainingCalls > 0;
+  const isAtLimit = !isUnlimited && usageData.hasReachedLimit;
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted/50">
@@ -54,7 +54,14 @@ export function AIUsageIndicator() {
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
-            AI Usage: {usage}/{FREE_TIER_LIMIT}
+            {isUnlimited ? (
+              <span className="flex items-center gap-1">
+                AI Usage: Unlimited
+                <Infinity className="h-3 w-3" />
+              </span>
+            ) : (
+              `AI Usage: ${usageData.currentUsage}/${usageData.limit}`
+            )}
           </span>
           {isAtLimit && (
             <span className="text-xs text-destructive font-medium">
@@ -62,11 +69,13 @@ export function AIUsageIndicator() {
             </span>
           )}
         </div>
-        <Progress 
-          value={progressValue} 
-          className="h-1 w-24"
-          indicatorClassName={isAtLimit ? 'bg-destructive' : isNearLimit ? 'bg-warning' : ''}
-        />
+        {!isUnlimited && (
+          <Progress 
+            value={progressValue} 
+            className="h-1 w-24"
+            indicatorClassName={isAtLimit ? 'bg-destructive' : isNearLimit ? 'bg-warning' : ''}
+          />
+        )}
       </div>
     </div>
   );

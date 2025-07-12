@@ -7,6 +7,7 @@ import { aiUsage, subscriptions } from '@/lib/db/schema';
 import { and, eq, gte, sum, sql } from 'drizzle-orm';
 
 const FREE_TIER_LIMIT = 10;
+const BETA_TIER_LIMIT = 100;
 
 export async function checkAIUsageLimit() {
   const session = await auth.api.getSession({
@@ -34,9 +35,9 @@ export async function checkAIUsageLimit() {
     .from(subscriptions)
     .where(eq(subscriptions.userId, session.user.id));
 
-  // Pro and Beta users have unlimited AI access
-  const allowedPlans = ['beta', 'pro_monthly', 'pro_yearly', 'early_bird'];
-  const hasUnlimitedAccess = subscription && allowedPlans.includes(subscription.plan || '');
+  // Pro users have unlimited AI access
+  const unlimitedPlans = ['pro_monthly', 'pro_yearly', 'early_bird'];
+  const hasUnlimitedAccess = subscription && unlimitedPlans.includes(subscription.plan || '');
   
   if (hasUnlimitedAccess) {
     return {
@@ -47,7 +48,11 @@ export async function checkAIUsageLimit() {
     };
   }
 
-  // For free tier users, check usage
+  // Beta users have 100 AI calls per month
+  const isBeta = subscription?.plan === 'beta';
+  const limit = isBeta ? BETA_TIER_LIMIT : FREE_TIER_LIMIT;
+
+  // For free and beta tier users, check usage
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
@@ -65,13 +70,13 @@ export async function checkAIUsageLimit() {
     );
 
   const currentUsage = usageData?.totalRequests || 0;
-  const hasReachedLimit = currentUsage >= FREE_TIER_LIMIT;
+  const hasReachedLimit = currentUsage >= limit;
 
   return {
     currentUsage,
-    limit: FREE_TIER_LIMIT,
+    limit,
     hasReachedLimit,
-    remainingCalls: Math.max(0, FREE_TIER_LIMIT - currentUsage),
+    remainingCalls: Math.max(0, limit - currentUsage),
   };
 }
 

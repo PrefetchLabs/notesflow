@@ -60,7 +60,7 @@ export function createAIExtension(options: AIExtensionOptions) {
         }
 
         // Show remaining calls if near limit
-        if (usageCheck.remainingCalls <= 3 && usageCheck.remainingCalls > 0) {
+        if (usageCheck.remainingCalls !== Infinity && usageCheck.remainingCalls <= 10 && usageCheck.remainingCalls > 0) {
           toast.warning(`${usageCheck.remainingCalls} AI calls remaining this month`);
         }
 
