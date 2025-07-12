@@ -127,27 +127,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
       
       {/* Theme toggle and Calendar toggle buttons */}
-      <div className={cn(
-        "fixed top-4 z-40 flex items-center gap-2 transition-all duration-200",
-        calendarOpen ? "right-[300px]" : "right-4"
-      )}>
-        <ThemeToggle />
-        {!calendarOpen && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCalendarOpen(true)}
-            title="Show calendar"
-            className={cn(
-              "h-8 w-8 rounded-full border bg-background shadow-sm",
-              "hover:bg-accent hover:shadow-md",
-              "transition-all duration-200"
-            )}
-          >
-            <Calendar className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      {!sidebarHidden && (
+        <div className={cn(
+          "fixed top-4 z-40 flex items-center gap-2 transition-all duration-200",
+          calendarOpen ? "right-[300px]" : "right-4"
+        )}>
+          <ThemeToggle />
+          {!calendarOpen && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCalendarOpen(true)}
+              title="Show calendar"
+              className={cn(
+                "h-8 w-8 rounded-full border bg-background shadow-sm",
+                "hover:bg-accent hover:shadow-md",
+                "transition-all duration-200"
+              )}
+            >
+              <Calendar className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      )}
+      
+      {/* Calendar button when sidebar is hidden and calendar is closed */}
+      {sidebarHidden && !calendarOpen && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setCalendarOpen(true)}
+          title="Show calendar"
+          className={cn(
+            "fixed top-[88px] right-4 z-40",
+            "h-8 w-8 rounded-full border bg-background shadow-sm",
+            "hover:bg-accent hover:shadow-md",
+            "transition-all duration-200"
+          )}
+        >
+          <Calendar className="h-4 w-4" />
+        </Button>
+      )}
       
       {/* Calendar hide button - visible when calendar is open */}
       {calendarOpen && (
