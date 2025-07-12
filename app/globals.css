@@ -692,6 +692,21 @@
   z-index: 1000;
 }
 
+/* Calendar block enhancements */
+.calendar-block {
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.calendar-block:active {
+  cursor: grabbing !important;
+}
+
+/* Ghost block styling */
+.calendar-ghost-block {
+  pointer-events: none !important;
+  z-index: 1000;
+}
+
 /* Current time indicator pulse */
 @keyframes time-pulse {
   0%, 100% {

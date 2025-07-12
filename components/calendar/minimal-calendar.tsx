@@ -56,6 +56,7 @@ export function MinimalCalendar({
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const [draggingBlock, setDraggingBlock] = useState<string | null>(null);
   const [dragStartY, setDragStartY] = useState(0);
+  const [mouseOffsetY, setMouseOffsetY] = useState(0);
   const [ghostBlock, setGhostBlock] = useState<GhostBlock | null>(null);
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -75,16 +76,23 @@ export function MinimalCalendar({
     });
   }, [blocks]);
 
-  // Convert Y position to time
+  // Convert Y position to time with grid snapping
   const yToTime = useCallback((y: number): { hour: number; minutes: number } => {
-    const totalMinutes = Math.max(0, Math.round((y / HOUR_HEIGHT) * 60));
+    const snapInterval = 15; // 15-minute intervals
+    const pixelsPerMinute = HOUR_HEIGHT / 60;
+    const totalMinutes = Math.round(y / pixelsPerMinute / snapInterval) * snapInterval;
     const hour = Math.floor(totalMinutes / 60);
-    const minutes = Math.round((totalMinutes % 60) / 15) * 15; // Round to 15-minute intervals
+    const minutes = totalMinutes % 60;
     
     return {
-      hour: Math.min(23, hour),
-      minutes: minutes >= 60 ? 45 : minutes
+      hour: Math.min(23, Math.max(0, hour)),
+      minutes: Math.min(45, Math.max(0, minutes))
     };
+  }, []);
+
+  // Convert time to Y position
+  const timeToY = useCallback((hour: number, minutes: number): number => {
+    return hour * HOUR_HEIGHT + (minutes / 60) * HOUR_HEIGHT;
   }, []);
 
   // Format time for display
@@ -105,16 +113,17 @@ export function MinimalCalendar({
     const y = e.clientY - rect.top + scrollTop;
     
     const time = yToTime(y);
+    const snappedY = timeToY(time.hour, time.minutes);
     const startTime = formatTime(time.hour, time.minutes);
     
     setIsDragging(true);
     setDragSelection({
-      startY: y,
-      endY: y,
+      startY: snappedY,
+      endY: snappedY,
       startTime,
       endTime: startTime
     });
-  }, [yToTime]);
+  }, [yToTime, timeToY]);
 
   // Handle mouse move during drag
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -126,27 +135,29 @@ export function MinimalCalendar({
     
     if (isDragging && dragSelection) {
       const time = yToTime(y);
+      const snappedY = timeToY(time.hour, time.minutes);
       const endTime = formatTime(time.hour, time.minutes);
       
       setDragSelection({
         ...dragSelection,
-        endY: y,
+        endY: snappedY,
         endTime
       });
     } else if (draggingBlock && ghostBlock) {
-      const deltaY = y - dragStartY;
       const block = blocks.find(b => b.id === draggingBlock);
       if (!block) return;
       
-      const newStartY = Math.max(0, ghostBlock.startY + deltaY);
-      const time = yToTime(newStartY);
+      // Calculate new position accounting for mouse offset and snap to grid
+      const newY = y - mouseOffsetY;
+      const time = yToTime(newY);
+      const snappedY = timeToY(time.hour, time.minutes);
       
       setGhostBlock({
         ...ghostBlock,
-        startY: newStartY
+        startY: Math.max(0, snappedY)
       });
     }
-  }, [isDragging, dragSelection, draggingBlock, ghostBlock, dragStartY, blocks, yToTime]);
+  }, [isDragging, dragSelection, draggingBlock, ghostBlock, mouseOffsetY, blocks, yToTime, timeToY]);
 
   // Handle mouse up to end drag
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
@@ -158,7 +169,7 @@ export function MinimalCalendar({
       const maxY = Math.max(dragSelection.startY, dragSelection.endY);
       const durationMinutes = ((maxY - minY) / HOUR_HEIGHT) * 60;
       
-      if (durationMinutes >= 30) { // At least 30 minutes
+      if (durationMinutes >= 15) { // At least 15 minutes
         // Parse times to check for overlap
         const [startHour, startMin] = dragSelection.startTime.split(':').map(Number);
         const [endHour, endMin] = dragSelection.endTime.split(':').map(Number);
@@ -188,12 +199,28 @@ export function MinimalCalendar({
         
         // Check for overlap
         if (!hasOverlap(startTime, endTime)) {
-          const rect = e.currentTarget.getBoundingClientRect();
+          // Store the selection data for menu handlers
+          setMenuSelectionData({ startTime, endTime });
+          
+          // Position menu to the side of the selection
+          const rect = gridRef.current!.getBoundingClientRect();
+          const scrollTop = scrollRef.current?.scrollTop || 0;
+          const selectionCenterY = rect.top + minY + (maxY - minY) / 2 - scrollTop;
+          
+          // Position to the right of the calendar, but ensure it's within viewport
+          const menuX = Math.min(rect.right + 10, window.innerWidth - 200);
+          const menuY = Math.min(Math.max(selectionCenterY - 50, 10), window.innerHeight - 120);
+          
+          console.log('Setting menu visible at:', { x: menuX, y: menuY });
+          
           setMenuPosition({ 
-            x: Math.min(e.clientX, window.innerWidth - 200),
-            y: Math.min(e.clientY, window.innerHeight - 100)
+            x: menuX,
+            y: menuY
           });
           setShowMenu(true);
+          
+          // Don't clear selection when showing menu
+          return;
         }
       }
       setDragSelection(null);
@@ -215,86 +242,40 @@ export function MinimalCalendar({
       
       setDraggingBlock(null);
       setGhostBlock(null);
+      setMouseOffsetY(0);
     }
   }, [isDragging, dragSelection, draggingBlock, ghostBlock, blocks, currentDate, hasOverlap, onUpdateBlock, yToTime]);
 
+  // Store the selection data for menu handlers
+  const [menuSelectionData, setMenuSelectionData] = useState<{ startTime: Date; endTime: Date } | null>(null);
+
   // Handle menu item clicks
   const handleCreateEvent = () => {
-    if (!dragSelection || !onCreateEvent) return;
+    if (!menuSelectionData || !onCreateEvent) return;
     
-    const [startHour, startMin] = dragSelection.startTime.split(':').map(Number);
-    const [endHour, endMin] = dragSelection.endTime.split(':').map(Number);
-    
-    // Ensure start is before end
-    let actualStartHour = startHour;
-    let actualStartMin = startMin;
-    let actualEndHour = endHour;
-    let actualEndMin = endMin;
-    
-    if (dragSelection.endY < dragSelection.startY) {
-      actualStartHour = endHour;
-      actualStartMin = endMin;
-      actualEndHour = startHour;
-      actualEndMin = startMin;
-    }
-    
-    const startTime = new Date(currentDate);
-    startTime.setHours(actualStartHour, actualStartMin, 0, 0);
-    
-    const endTime = new Date(currentDate);
-    endTime.setHours(actualEndHour, actualEndMin, 0, 0);
-    
-    if (endTime <= startTime) {
-      endTime.setDate(endTime.getDate() + 1);
-    }
-    
-    onCreateEvent(startTime, endTime);
+    onCreateEvent(menuSelectionData.startTime, menuSelectionData.endTime);
     setShowMenu(false);
+    setMenuSelectionData(null);
     setDragSelection(null);
   };
 
   const handleCreateTask = () => {
-    if (!dragSelection || !onCreateTask) return;
+    if (!menuSelectionData || !onCreateTask) return;
     
-    const [startHour, startMin] = dragSelection.startTime.split(':').map(Number);
-    const [endHour, endMin] = dragSelection.endTime.split(':').map(Number);
-    
-    // Ensure start is before end
-    let actualStartHour = startHour;
-    let actualStartMin = startMin;
-    let actualEndHour = endHour;
-    let actualEndMin = endMin;
-    
-    if (dragSelection.endY < dragSelection.startY) {
-      actualStartHour = endHour;
-      actualStartMin = endMin;
-      actualEndHour = startHour;
-      actualEndMin = startMin;
-    }
-    
-    const startTime = new Date(currentDate);
-    startTime.setHours(actualStartHour, actualStartMin, 0, 0);
-    
-    const endTime = new Date(currentDate);
-    endTime.setHours(actualEndHour, actualEndMin, 0, 0);
-    
-    if (endTime <= startTime) {
-      endTime.setDate(endTime.getDate() + 1);
-    }
-    
-    onCreateTask(startTime, endTime);
+    onCreateTask(menuSelectionData.startTime, menuSelectionData.endTime);
     setShowMenu(false);
+    setMenuSelectionData(null);
     setDragSelection(null);
   };
 
   // Handle block drag start
   const handleBlockMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
     e.stopPropagation();
+    e.preventDefault();
     if (!gridRef.current) return;
     
     const rect = gridRef.current.getBoundingClientRect();
     const scrollTop = scrollRef.current?.scrollTop || 0;
-    const y = e.clientY - rect.top + scrollTop;
     
     const block = blocks.find(b => b.id === blockId);
     if (!block) return;
@@ -302,8 +283,13 @@ export function MinimalCalendar({
     const startY = block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT;
     const height = ((block.endTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
     
+    // Calculate mouse offset from block's top edge
+    const mouseY = e.clientY - rect.top + scrollTop;
+    const offset = mouseY - startY;
+    
     setDraggingBlock(blockId);
-    setDragStartY(y);
+    setDragStartY(startY);
+    setMouseOffsetY(offset);
     setGhostBlock({ id: blockId, startY, height });
   }, [blocks]);
 
@@ -315,6 +301,7 @@ export function MinimalCalendar({
         if (!target.closest('.create-menu')) {
           setShowMenu(false);
           setDragSelection(null);
+          setMenuSelectionData(null);
         }
       };
       
@@ -381,18 +368,21 @@ export function MinimalCalendar({
       <ScrollArea className="flex-1" ref={scrollRef}>
         <div 
           ref={gridRef}
-          className="relative select-none"
+          className="relative select-none cursor-crosshair"
           style={{ height: `${HOURS.length * HOUR_HEIGHT}px` }}
           onMouseDown={handleGridMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
+          {/* Background click area */}
+          <div className="absolute inset-0 left-16" />
+          
           {/* Hour rows */}
           {HOURS.map((hour) => (
             <div
               key={hour}
-              className="absolute w-full flex"
+              className="absolute w-full flex pointer-events-none"
               style={{ top: `${hour * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
             >
               <div className="w-16 flex-shrink-0 text-right pr-3 pt-2">
@@ -440,10 +430,10 @@ export function MinimalCalendar({
             return (
               <div
                 className={cn(
-                  "absolute left-16 right-0 rounded-lg pointer-events-none",
+                  "absolute left-16 right-4 rounded-lg pointer-events-none transition-colors",
                   isOverlapping 
                     ? "bg-red-500/20 border-2 border-red-500" 
-                    : "bg-blue-500/20 border-2 border-blue-500"
+                    : "bg-blue-500/30 border-2 border-blue-500 border-dashed"
                 )}
                 style={{
                   top: `${minY}px`,
@@ -451,8 +441,8 @@ export function MinimalCalendar({
                 }}
               >
                 <div className={cn(
-                  "px-3 py-1 text-sm",
-                  isOverlapping ? "text-red-200" : "text-blue-200"
+                  "px-3 py-1 text-sm font-medium",
+                  isOverlapping ? "text-red-700 dark:text-red-300" : "text-blue-700 dark:text-blue-300"
                 )}>
                   {formatTime(actualStartHour, actualStartMin)} - {formatTime(actualEndHour, actualEndMin)}
                   {isOverlapping && " (Occupied)"}
@@ -477,20 +467,28 @@ export function MinimalCalendar({
             return (
               <div
                 className={cn(
-                  "absolute left-16 right-4 rounded-lg p-2 text-xs text-white pointer-events-none",
-                  isValidDrop ? "opacity-60" : "opacity-30"
+                  "absolute left-16 right-4 rounded-lg p-2 text-xs pointer-events-none transition-opacity",
+                  "shadow-lg"
                 )}
                 style={{
                   top: `${ghostBlock.startY}px`,
                   height: `${ghostBlock.height}px`,
                   backgroundColor: block.color || '#3B82F6',
-                  border: `2px dashed ${isValidDrop ? 'white' : '#ef4444'}`,
+                  opacity: isValidDrop ? 0.8 : 0.4,
+                  border: `2px solid ${isValidDrop ? 'rgba(255,255,255,0.8)' : '#ef4444'}`,
                 }}
               >
-                <div className="font-medium truncate">{block.title}</div>
-                <div className="text-xs opacity-80">
+                <div className="font-medium truncate text-white">{block.title}</div>
+                <div className="text-xs text-white/80">
                   {format(newStartTime, 'HH:mm')} - {format(newEndTime, 'HH:mm')}
                 </div>
+                {!isValidDrop && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-medium">
+                      Occupied
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -566,19 +564,15 @@ export function MinimalCalendar({
       </ScrollArea>
 
       {/* Create menu popup */}
-      <AnimatePresence>
-        {showMenu && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-            className="create-menu fixed z-50 bg-card rounded-lg shadow-2xl border py-1"
-            style={{
-              left: `${menuPosition.x}px`,
-              top: `${menuPosition.y}px`,
-            }}
-          >
+      {console.log('Rendering menu section, showMenu:', showMenu, 'position:', menuPosition)}
+      {showMenu && (
+        <div
+          className="create-menu fixed z-50 bg-card rounded-lg shadow-2xl border py-1"
+          style={{
+            left: `${menuPosition.x}px`,
+            top: `${menuPosition.y}px`,
+          }}
+        >
             <button
               className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
               onClick={handleCreateEvent}
@@ -593,9 +587,8 @@ export function MinimalCalendar({
               <CheckSquare className="h-4 w-4 text-muted-foreground" />
               Create task (fixed time)
             </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
