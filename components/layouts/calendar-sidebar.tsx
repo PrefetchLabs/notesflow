@@ -57,6 +57,16 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
     }
   };
 
+  // Handle updating block color
+  const handleUpdateColor = async (id: string, color: string) => {
+    try {
+      await updateBlock(id, { color });
+      toast.success('Color updated');
+    } catch (error) {
+      toast.error('Failed to update color');
+    }
+  };
+
   // Handle deleting blocks
   const handleDeleteBlock = async (id: string) => {
     try {
@@ -104,6 +114,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         onDeleteBlock={handleDeleteBlock}
         onToggleComplete={handleToggleComplete}
         onRenameBlock={handleRenameBlock}
+        onUpdateColor={handleUpdateColor}
         blocks={blocks}
         onInteractionStart={() => setIsInteracting(true)}
         onInteractionEnd={() => setIsInteracting(false)}

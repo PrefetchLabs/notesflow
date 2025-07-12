@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { ColorPalette } from './color-palette';
 
 const HOUR_HEIGHT = 60; // Height of each hour row
 const HOURS = Array.from({ length: 24 }, (_, i) => i); // 0-23 hours
@@ -20,6 +21,7 @@ interface MinimalCalendarProps {
   onDeleteBlock?: (id: string) => void;
   onToggleComplete?: (id: string) => void;
   onRenameBlock?: (id: string, newTitle: string) => void;
+  onUpdateColor?: (id: string, color: string) => void;
   onInteractionStart?: () => void;
   onInteractionEnd?: () => void;
   blocks?: Array<{
@@ -55,6 +57,7 @@ export function MinimalCalendar({
   onDeleteBlock,
   onToggleComplete,
   onRenameBlock,
+  onUpdateColor,
   onInteractionStart,
   onInteractionEnd,
   blocks = []
@@ -71,6 +74,9 @@ export function MinimalCalendar({
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [colorPalettePosition, setColorPalettePosition] = useState({ x: 0, y: 0 });
+  const [selectedBlockForColor, setSelectedBlockForColor] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastInteractionRef = useRef<number>(Date.now());
@@ -815,6 +821,14 @@ export function MinimalCalendar({
                   }
                   handleBlockMouseDown(e, block.id);
                 }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedBlockForColor(block.id);
+                  setColorPalettePosition({ x: e.clientX, y: e.clientY });
+                  setShowColorPalette(true);
+                  setShowMenu(false);
+                }}
                 onMouseEnter={() => setHoveredBlockId(block.id)}
                 onMouseLeave={() => setHoveredBlockId(null)}
               >
@@ -943,6 +957,22 @@ export function MinimalCalendar({
             </button>
         </div>
       )}
+      
+      {/* Color Palette */}
+      <ColorPalette
+        isOpen={showColorPalette}
+        position={colorPalettePosition}
+        currentColor={selectedBlockForColor ? blocks.find(b => b.id === selectedBlockForColor)?.color : undefined}
+        onSelectColor={(color) => {
+          if (selectedBlockForColor && onUpdateColor) {
+            onUpdateColor(selectedBlockForColor, color);
+          }
+        }}
+        onClose={() => {
+          setShowColorPalette(false);
+          setSelectedBlockForColor(null);
+        }}
+      />
     </div>
   );
 }
