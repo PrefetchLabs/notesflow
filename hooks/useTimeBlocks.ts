@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { startOfWeek, endOfWeek } from 'date-fns';
 import { toast } from 'sonner';
 import { useRealtimeTimeBlocks } from './useRealtimeTimeBlocks';
-import { useAuth } from '@/lib/auth/auth-provider';
+import { useSession } from '@/lib/auth/auth-client';
 
 export interface TimeBlock {
   id: string;
@@ -37,7 +37,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
   const [blocks, setBlocks] = useState<TimeBlock[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { data: session } = useSession();
 
   // Fetch time blocks for the current week
   const fetchBlocks = useCallback(async () => {
@@ -99,7 +99,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
 
   // Set up real-time subscription
   useRealtimeTimeBlocks({
-    userId: user?.id || '',
+    userId: session?.user?.id || '',
     onInsert: handleRealtimeInsert,
     onUpdate: handleRealtimeUpdate,
     onDelete: handleRealtimeDelete,
