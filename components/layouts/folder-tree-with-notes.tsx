@@ -31,6 +31,7 @@ import {
   Users,
   Eye,
   Edit3,
+  Circle,
 } from 'lucide-react';
 import { FolderIcon, getFolderColorIndex } from '@/components/ui/folder-icon';
 import { Button } from '@/components/ui/button';
@@ -75,7 +76,7 @@ interface FolderTreeWithNotesProps {
 }
 
 interface SortableNoteItemProps {
-  note: Note;
+  note: Note & { isShared?: boolean; hasActiveCollaborators?: boolean };
   collapsed: boolean;
   isSelected?: boolean;
   onClick?: () => void;

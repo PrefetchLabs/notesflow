@@ -27,6 +27,10 @@ import { useFolders } from '@/hooks/useFolders';
 import { suggestTitleFromContent } from '@/lib/utils/titleExtraction';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 import { useRecentNotes } from '@/hooks/useRecentNotes';
+import { useCollaborationStatus } from '@/hooks/useCollaborationStatus';
+import { CollaborationStatusBadge } from '@/components/editor/collaboration-status-badge';
+import { SyncWarningBanner } from '@/components/editor/sync-warning-banner';
+import { WebsocketProvider } from 'y-websocket';
 
 export default function NotePage() {
   const params = useParams();
@@ -49,10 +53,32 @@ export default function NotePage() {
   const [hasEditPermission, setHasEditPermission] = useState(true); // Default to true for owned notes
   const [isOwnNote, setIsOwnNote] = useState(true);
   const [permissionsChecked, setPermissionsChecked] = useState(false);
+  const [syncWarningDismissed, setSyncWarningDismissed] = useState(false);
+  
+  // Collaboration status tracking
+  const [collaborationInfo, setCollaborationInfo] = useState<{
+    provider: WebsocketProvider | null;
+    isConnected: boolean;
+    isConnecting: boolean;
+    activeUsersCount: number;
+  }>({
+    provider: null,
+    isConnected: false,
+    isConnecting: false,
+    activeUsersCount: 0
+  });
 
   // Debounce both title and content changes for autosave
   const debouncedTitle = useDebounce(title, 2000);
   const debouncedContent = useDebounce(content, 2000);
+  
+  // Get collaboration status
+  const collaborationStatus = useCollaborationStatus({
+    provider: collaborationInfo.provider,
+    isCollaborationEnabled,
+    activeUsersCount: collaborationInfo.activeUsersCount,
+    noteId
+  });
 
   // Clear unsaved changes when unmounting
   useEffect(() => {
@@ -397,6 +423,14 @@ export default function NotePage() {
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">{title || 'Untitled Note'}</span>
               </div>
+              
+              {/* Collaboration Status Badge */}
+              <CollaborationStatusBadge
+                mode={collaborationStatus.mode}
+                syncStatus={collaborationStatus.syncStatus}
+                activeUsers={collaborationStatus.activeUsers}
+                lastSyncTime={collaborationStatus.lastSyncTime}
+              />
             </div>
             <div className="flex items-center gap-2">
               {lastSaved && (
@@ -482,6 +516,16 @@ export default function NotePage() {
               </div>
             ) : (
               <>
+                {/* Sync Warning Banner */}
+                {collaborationStatus.syncWarning && !syncWarningDismissed && (
+                  <div className="mb-4">
+                    <SyncWarningBanner
+                      warning={collaborationStatus.syncWarning}
+                      onDismiss={() => setSyncWarningDismissed(true)}
+                    />
+                  </div>
+                )}
+                
                 {/* Title Input - Notion Style */}
                 {hasEditPermission && (
                   <div className="mb-6 pl-4 md:pl-28">
@@ -505,6 +549,7 @@ export default function NotePage() {
                       forceCollaboration={isCollaborationEnabled}
                       enableDragToCalendar={true}
                       onTextDragStart={(text) => console.log('Drag started:', text)}
+                      onCollaborationStatusChange={setCollaborationInfo}
                     />
                   ) : (
                     // View-only mode for collaborators without edit permission

@@ -41,6 +41,12 @@ interface CollaborativeEditorFinalProps {
   forceCollaboration?: boolean;
   enableDragToCalendar?: boolean;
   onTextDragStart?: (text: string) => void;
+  onCollaborationStatusChange?: (status: {
+    provider: WebsocketProvider | null;
+    isConnected: boolean;
+    isConnecting: boolean;
+    activeUsersCount: number;
+  }) => void;
 }
 
 export function CollaborativeEditorFinal({
@@ -52,6 +58,7 @@ export function CollaborativeEditorFinal({
   forceCollaboration = false,
   enableDragToCalendar = false,
   onTextDragStart,
+  onCollaborationStatusChange,
 }: CollaborativeEditorFinalProps) {
   // Ensure we have valid initial content
   const safeInitialContent = useMemo(() => {
@@ -224,12 +231,32 @@ export function CollaborativeEditorFinal({
     };
   }, [provider, forceCollaboration]);
   
+  // Report collaboration status changes
+  useEffect(() => {
+    onCollaborationStatusChange?.({
+      provider,
+      isConnected,
+      isConnecting,
+      activeUsersCount: activeUsers.length
+    });
+  }, [provider, isConnected, isConnecting, activeUsers.length, onCollaborationStatusChange]);
+  
   // Create AI model
   const model = useMemo(() => createCustomAIModel(), []);
   
-  // Create a single editor instance without collaboration
+  // Track if we have a stable provider connection
+  const [hasStableProvider, setHasStableProvider] = useState(false);
+  
+  useEffect(() => {
+    // Only mark provider as stable after initial connection
+    if (provider && isConnected) {
+      setHasStableProvider(true);
+    }
+  }, [provider, isConnected]);
+  
+  // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
-    initialContent: safeInitialContent,
+    initialContent: hasStableProvider ? undefined : safeInitialContent,
     dictionary: {
       ...en,
       ai: aiEn
@@ -248,44 +275,16 @@ export function CollaborativeEditorFinal({
     blockSpecs: {
       ...defaultBlockSpecs,
     },
-  }, []); // Empty dependencies - create only once
-  
-  // Sync Y.Doc with editor content
-  useEffect(() => {
-    if (!editor || !ydoc) return;
-    
-    // Create a Y.XmlFragment for the document
-    const yXmlFragment = ydoc.getXmlFragment("document-store");
-    
-    // Sync editor changes to Y.Doc
-    const handleEditorChange = () => {
-      ydoc.transact(() => {
-        // Convert editor content to Y.Doc format
-        // This is handled internally by BlockNote when collaboration is set up
-      });
-    };
-    
-    const unsubscribe = editor.onChange(handleEditorChange);
-    
-    return () => {
-      unsubscribe();
-    };
-  }, [editor, ydoc]);
-  
-  // Handle provider connection for collaboration features
-  useEffect(() => {
-    if (!editor || !provider) return;
-    
-    // When provider connects, it will automatically sync with the Y.Doc
-    // The Y.Doc already contains our content from IndexedDB or initial content
-    console.log('[CollaborativeEditor] Provider available for collaboration');
-    
-    // Set up collaboration bindings
-    const fragment = ydoc.getXmlFragment("document-store");
-    
-    // The provider will handle syncing automatically through Y.js
-    // No need to recreate the editor
-  }, [editor, provider, ydoc]);
+    collaboration: hasStableProvider && provider ? {
+      provider,
+      fragment: ydoc.getXmlFragment("document-store"),
+      user: {
+        name: user?.name || user?.email?.split('@')[0] || 'Anonymous',
+        color: userColor,
+      },
+      showCursorLabels: "activity",
+    } : undefined,
+  }, [hasStableProvider]); // Only recreate when provider stability changes
 
   // Handle text selection for drag to calendar
   const { selection } = useBlockNoteSelection({
@@ -381,8 +380,20 @@ export function CollaborativeEditorFinal({
     return <div className="h-full w-full animate-pulse bg-muted" />;
   }
   
+  // Get border color based on collaboration status
+  const getBorderColor = () => {
+    if (!provider) return '';
+    if (isConnected) return 'ring-2 ring-green-500/30';
+    if (isConnecting) return 'ring-2 ring-yellow-500/30 animate-pulse';
+    return 'ring-2 ring-red-500/30';
+  };
+  
   return (
-    <div className={cn("relative h-full", className)}>
+    <div className={cn(
+      "relative h-full transition-all duration-300",
+      provider && getBorderColor(),
+      className
+    )}>
       {/* Show collaboration UI only when provider exists */}
       <AnimatePresence>
         {provider && (
