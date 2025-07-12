@@ -20,9 +20,14 @@ import { createAIExtension } from "@/lib/editor/ai-extension";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Users, WifiOff, Wifi, RefreshCw } from "lucide-react";
+import { Users, WifiOff, Wifi } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { IndexeddbPersistence } from "y-indexeddb";
@@ -30,7 +35,6 @@ import { useAuth } from "@/lib/auth/auth-hooks";
 import { useAIAccess } from "@/hooks/useAIAccess";
 import { useBlockNoteSelection } from "@/hooks/useBlockNoteSelection";
 import { SelectionDragHandler } from "./selection-drag-handler";
-import { useWebSocketProvider } from "@/hooks/useWebSocketProvider";
 
 interface CollaborativeEditorFinalProps {
   noteId: string;
@@ -38,15 +42,9 @@ interface CollaborativeEditorFinalProps {
   onContentChange?: (content: any[]) => void;
   editable?: boolean;
   className?: string;
-  forceCollaboration?: boolean;
+  isShared?: boolean; // Simple flag indicating if note has collaborators
   enableDragToCalendar?: boolean;
   onTextDragStart?: (text: string) => void;
-  onCollaborationStatusChange?: (status: {
-    provider: WebsocketProvider | null;
-    isConnected: boolean;
-    isConnecting: boolean;
-    activeUsersCount: number;
-  }) => void;
 }
 
 export function CollaborativeEditorFinal({
@@ -55,10 +53,9 @@ export function CollaborativeEditorFinal({
   onContentChange,
   editable = true,
   className,
-  forceCollaboration = false,
+  isShared = false,
   enableDragToCalendar = false,
   onTextDragStart,
-  onCollaborationStatusChange,
 }: CollaborativeEditorFinalProps) {
   // Ensure we have valid initial content
   const safeInitialContent = useMemo(() => {
@@ -67,14 +64,13 @@ export function CollaborativeEditorFinal({
     }
     return initialContent;
   }, [initialContent]);
+  
   const { resolvedTheme } = useTheme();
   const { user } = useAuth();
   const { hasAIAccess } = useAIAccess();
-  const [activeUsers, setActiveUsers] = useState<Array<{ id: number; user: any }>>([]);
-  const [shouldUseCollaboration, setShouldUseCollaboration] = useState(forceCollaboration);
   
-  // Create Y.Doc
-  const ydoc = useMemo(() => new Y.Doc(), []);
+  // Create Y.Doc - stable reference
+  const ydoc = useMemo(() => new Y.Doc(), [noteId]); // Only recreate if note changes
   
   // Generate consistent user color
   const userColor = useMemo(() => {
@@ -86,40 +82,92 @@ export function CollaborativeEditorFinal({
     return '#' + ((hash & 0x00FFFFFF).toString(16).padStart(6, '0'));
   }, [user?.id]);
   
-  // Use the smart WebSocket provider hook
-  const wsUrl = process.env['NEXT_PUBLIC_YJS_SERVER_URL'] || 'ws://localhost:1234';
-  const {
-    provider,
-    isConnected,
-    isConnecting,
-    retryCount,
-    reconnect,
-    disconnect
-  } = useWebSocketProvider({
-    url: wsUrl,
-    roomName: `notesflow-${noteId}`,
-    doc: ydoc,
-    enabled: shouldUseCollaboration && !!user,
-    onConnect: () => {
-      console.log('[CollaborativeEditor] Connected to WebSocket');
-    },
-    onDisconnect: () => {
-      console.log('[CollaborativeEditor] Disconnected from WebSocket');
-    },
-    onError: (error) => {
-      console.error('[CollaborativeEditor] WebSocket error:', error);
-    }
+  // Create WebSocket provider only for shared notes
+  const provider = useMemo(() => {
+    if (!isShared || !user) return null;
+    
+    const wsUrl = process.env['NEXT_PUBLIC_YJS_SERVER_URL'] || 'ws://localhost:1234';
+    
+    const wsProvider = new WebsocketProvider(
+      wsUrl,
+      `notesflow-${noteId}`,
+      ydoc,
+      {
+        maxBackoffTime: 30000,
+        WebSocketPolyfill: typeof window !== 'undefined' ? WebSocket : undefined,
+      }
+    );
+    
+    // Ensure proper cleanup on unmount
+    return wsProvider;
+  }, [isShared, user?.id, noteId]); // Remove ydoc dependency
+  
+  // Get connection status from provider
+  const [connectionStatus, setConnectionStatus] = useState({
+    isConnected: false,
+    isConnecting: false,
+    activeUsers: 0
   });
+  
+  useEffect(() => {
+    if (!provider) {
+      setConnectionStatus({
+        isConnected: false,
+        isConnecting: false,
+        activeUsers: 0
+      });
+      return;
+    }
+    
+    const updateStatus = () => {
+      const states = provider.awareness.getStates();
+      let activeCount = 0;
+      
+      // Count only users with valid user data
+      states.forEach((state, clientId) => {
+        if (clientId !== provider.awareness.clientID && state?.user) {
+          activeCount++;
+        }
+      });
+      
+      setConnectionStatus({
+        isConnected: provider.wsconnected,
+        isConnecting: provider.wsconnecting,
+        activeUsers: activeCount
+      });
+    };
+    
+    // Update on status changes
+    const handleStatus = (event: any) => {
+      updateStatus();
+    };
+    
+    // Update on awareness changes with debouncing
+    let awarenessTimeout: NodeJS.Timeout;
+    const handleAwareness = () => {
+      clearTimeout(awarenessTimeout);
+      awarenessTimeout = setTimeout(updateStatus, 100);
+    };
+    
+    provider.on('status', handleStatus);
+    provider.on('sync', updateStatus);
+    provider.awareness.on('change', handleAwareness);
+    
+    // Initial update after a small delay to ensure provider is ready
+    setTimeout(updateStatus, 100);
+    
+    return () => {
+      clearTimeout(awarenessTimeout);
+      provider.off('status', handleStatus);
+      provider.off('sync', updateStatus);
+      provider.awareness.off('change', handleAwareness);
+    };
+  }, [provider]);
   
   // Create IndexedDB persistence
   const persistence = useMemo(() => {
-    const indexeddbProvider = new IndexeddbPersistence(`notesflow-${noteId}`, ydoc);
-    indexeddbProvider.on('synced', () => {
-      console.log('[CollaborativeEditor] IndexedDB synced');
-    });
-    return indexeddbProvider;
-  }, [noteId, ydoc]);
-  
+    return new IndexeddbPersistence(`notesflow-${noteId}`, ydoc);
+  }, [noteId]); // Remove ydoc dependency
   
   // Set awareness state when provider is connected
   useEffect(() => {
@@ -132,131 +180,46 @@ export function CollaborativeEditorFinal({
         id: user.id,
       };
       
-      // Set the full awareness state, not just a field
+      // Clear any existing state first
+      provider.awareness.setLocalState(null);
+      
+      // Then set new state
       provider.awareness.setLocalState({
         user: userInfo,
-        cursor: null // Initialize cursor position
-      });
-      
-      console.log('[CollaborativeEditor] Set awareness state:', {
-        clientID: provider.awareness.clientID,
-        userInfo
+        cursor: null
       });
     };
     
-    // Set immediately if already connected
-    if (isConnected) {
-      setUserInfo();
-    }
-    
-    // Also set when connection status changes
+    // Set on connection
     const handleStatus = (event: any) => {
       if (event.status === 'connected') {
-        // Delay to ensure WebSocket is fully ready
-        setTimeout(setUserInfo, 200);
+        // Delay to ensure connection is stable
+        setTimeout(setUserInfo, 100);
       }
     };
     
     provider.on('status', handleStatus);
     
+    // Set immediately if already connected
+    if (provider.wsconnected) {
+      setTimeout(setUserInfo, 100);
+    }
+    
     return () => {
       provider.off('status', handleStatus);
+      // Clear awareness state on cleanup
+      if (provider.awareness) {
+        provider.awareness.setLocalState(null);
+      }
     };
-  }, [provider, user, userColor, isConnected]);
-
-  // Track active users with optimized updates
-  useEffect(() => {
-    if (!provider) return;
-    
-    let updateTimeout: NodeJS.Timeout;
-    const pendingUpdates = new Set<number>();
-    
-    const processUpdates = () => {
-      const states = provider.awareness.getStates();
-      const users: Array<{ id: number; user: any }> = [];
-      const now = Date.now();
-      
-      states.forEach((state, clientId) => {
-        if (clientId !== provider.awareness.clientID && state?.user) {
-          // Only include users who have been active in the last 30 seconds
-          const lastUpdate = state.lastUpdate || now;
-          if (now - lastUpdate < 30000) {
-            users.push({ id: clientId, user: state.user });
-          }
-        }
-      });
-      
-      setActiveUsers(users);
-      
-      // Enable collaboration if there are other users or if forced
-      const hasOtherUsers = users.length > 0;
-      setShouldUseCollaboration(forceCollaboration || hasOtherUsers);
-      
-      pendingUpdates.clear();
-    };
-    
-    // Debounced update function
-    const scheduleUpdate = (clientId?: number) => {
-      if (clientId) pendingUpdates.add(clientId);
-      
-      if (updateTimeout) clearTimeout(updateTimeout);
-      
-      // Batch updates within 100ms
-      updateTimeout = setTimeout(() => {
-        requestIdleCallback(() => processUpdates(), { timeout: 1000 });
-      }, 100);
-    };
-    
-    // Update users on awareness changes
-    const handleAwarenessChange = ({ added, updated, removed }: any) => {
-      [...added, ...updated, ...removed].forEach((clientId: number) => {
-        scheduleUpdate(clientId);
-      });
-    };
-    
-    provider.awareness.on('change', handleAwarenessChange);
-    
-    // Initial update
-    processUpdates();
-    
-    // Clean up stale users every 30 seconds
-    const cleanupInterval = setInterval(() => {
-      processUpdates();
-    }, 30000);
-    
-    return () => {
-      provider.awareness.off('change', handleAwarenessChange);
-      if (updateTimeout) clearTimeout(updateTimeout);
-      clearInterval(cleanupInterval);
-    };
-  }, [provider, forceCollaboration]);
-  
-  // Report collaboration status changes
-  useEffect(() => {
-    onCollaborationStatusChange?.({
-      provider,
-      isConnected,
-      isConnecting,
-      activeUsersCount: activeUsers.length
-    });
-  }, [provider, isConnected, isConnecting, activeUsers.length, onCollaborationStatusChange]);
+  }, [provider, user, userColor]);
   
   // Create AI model
   const model = useMemo(() => createCustomAIModel(), []);
   
-  // Track if we have a stable provider connection
-  const [hasStableProvider, setHasStableProvider] = useState(false);
-  
-  useEffect(() => {
-    // Only mark provider as stable after initial connection
-    if (provider && isConnected) {
-      setHasStableProvider(true);
-    }
-  }, [provider, isConnected]);
-  
   // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
-    initialContent: hasStableProvider ? undefined : safeInitialContent,
+    initialContent: provider ? undefined : safeInitialContent,
     dictionary: {
       ...en,
       ai: aiEn
@@ -275,7 +238,7 @@ export function CollaborativeEditorFinal({
     blockSpecs: {
       ...defaultBlockSpecs,
     },
-    collaboration: hasStableProvider && provider ? {
+    collaboration: provider ? {
       provider,
       fragment: ydoc.getXmlFragment("document-store"),
       user: {
@@ -284,7 +247,7 @@ export function CollaborativeEditorFinal({
       },
       showCursorLabels: "activity",
     } : undefined,
-  }, [hasStableProvider]); // Only recreate when provider stability changes
+  }, [provider]); // Only recreate when provider changes
 
   // Handle text selection for drag to calendar
   const { selection } = useBlockNoteSelection({
@@ -293,228 +256,127 @@ export function CollaborativeEditorFinal({
   });
 
   const handleDragStart = useCallback((event: React.DragEvent, text: string) => {
-    console.log('[CollaborativeEditor] Drag started with text:', text);
     onTextDragStart?.(text);
   }, [onTextDragStart]);
   
-  // Initialize Y.Doc content when provider and editor are ready
+  // Initialize content for non-collaborative mode
   useEffect(() => {
-    if (!provider || !ydoc || !editor) return;
+    if (provider || !editor || !safeInitialContent) return;
     
-    let initialized = false;
-    
-    const initializeContent = () => {
-      if (initialized) return;
-      
-      const fragment = ydoc.getXmlFragment("document-store");
-      
-      // If document is empty and we have initial content
-      if (fragment.length === 0 && safeInitialContent && safeInitialContent.length > 0) {
-        console.log('[CollaborativeEditor] Initializing Y.Doc with content');
-        initialized = true;
-        
-        // Use a transaction to avoid conflicts
-        ydoc.transact(() => {
-          try {
-            // Initialize the editor content
-            editor.replaceBlocks(editor.document, safeInitialContent);
-          } catch (error) {
-            console.error('[CollaborativeEditor] Error setting initial content:', error);
-          }
-        });
-      }
-    };
-    
-    // Try to initialize when provider is synced
-    const handleSync = (synced: boolean) => {
-      if (synced) {
-        setTimeout(initializeContent, 100); // Small delay to ensure everything is ready
-      }
-    };
-    
-    provider.on('sync', handleSync);
-    
-    // Also try if already synced
-    if (provider.synced) {
-      setTimeout(initializeContent, 100);
+    // For non-collaborative mode, set content directly
+    if (editor.document.length === 0) {
+      editor.replaceBlocks(editor.document, safeInitialContent);
     }
-    
-    return () => {
-      provider.off('sync', handleSync);
-    };
-  }, [provider, ydoc, editor, safeInitialContent]);
+  }, [provider, editor, safeInitialContent]);
   
   // Handle content changes
   useEffect(() => {
     if (!editor) return;
     
-    console.log('[CollaborativeEditor] Editor initialized');
-    console.log('[CollaborativeEditor] Editor extensions:', editor.extensions);
-    console.log('[CollaborativeEditor] Editor _tiptapEditor extensions:', editor._tiptapEditor?.extensions);
-    
     const unsubscribe = editor.onChange(() => {
-      try {
-        if (onContentChange && editor.document) {
-          onContentChange(editor.document);
-        }
-      } catch (error) {
-        console.error('[CollaborativeEditor] Error in onChange:', error);
+      if (onContentChange && editor.document) {
+        onContentChange(editor.document);
       }
     });
     
     return unsubscribe;
   }, [editor, onContentChange]);
   
-  // Cleanup
+  // Cleanup only on unmount
   useEffect(() => {
     return () => {
-      console.log('[CollaborativeEditor] Cleaning up...');
-      
-      // Cleanup is handled in the provider effect above
+      // Clean up in proper order
+      if (provider) {
+        provider.awareness.setLocalState(null);
+        provider.disconnect();
+        provider.destroy();
+      }
       persistence?.destroy();
       ydoc.destroy();
     };
-  }, [persistence, ydoc]);
+  }, []); // Empty deps - only cleanup on unmount
   
   if (!editor) {
     return <div className="h-full w-full animate-pulse bg-muted" />;
   }
   
-  // Get border color based on collaboration status
-  const getBorderColor = () => {
-    if (!provider) return '';
-    if (isConnected) return 'ring-2 ring-green-500/30';
-    if (isConnecting) return 'ring-2 ring-yellow-500/30 animate-pulse';
-    return 'ring-2 ring-red-500/30';
-  };
-  
   return (
     <div className={cn(
-      "relative h-full transition-all duration-300",
-      provider && getBorderColor(),
+      "relative h-full",
       className
     )}>
-      {/* Show collaboration UI only when provider exists */}
-      <AnimatePresence>
-        {provider && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-4 right-4 z-10 flex items-center gap-2"
-          >
-            {/* Connection Status */}
-            <Badge 
-              variant={isConnected ? "default" : "secondary"}
-              className="flex items-center gap-1 transition-all duration-200"
-            >
-              <AnimatePresence mode="wait">
-                {isConnected ? (
-                  <motion.div
-                    key="connected"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center gap-1"
-                  >
-                    <Wifi className="h-3 w-3" />
-                    Connected
-                  </motion.div>
-                ) : isConnecting ? (
-                  <motion.div
-                    key="connecting"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center gap-1"
-                  >
-                    <WifiOff className="h-3 w-3 animate-pulse" />
-                    Connecting...
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="offline"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center gap-1"
-                  >
-                    <WifiOff className="h-3 w-3" />
-                    Offline
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Badge>
-            
-            {/* Manual reconnect button when not connected and not connecting */}
-            <AnimatePresence>
-              {!isConnected && !isConnecting && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.15 }}
+      {/* Simple collaboration indicator */}
+      {isShared && (
+        <div className="absolute top-4 right-4 z-10">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge 
+                  variant={connectionStatus.isConnected ? "default" : "secondary"}
+                  className="flex items-center gap-1 cursor-help"
                 >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={reconnect}
-                    className="flex items-center gap-1"
-                  >
-                    <RefreshCw className="h-3 w-3" />
-                    Reconnect
-                  </Button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-          {/* Active Users */}
-          {activeUsers.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {activeUsers.length + 1}
-              </Badge>
-              
-              {/* User Avatars */}
-              <div className="flex -space-x-2">
-                <AnimatePresence mode="popLayout">
-                  {activeUsers.slice(0, 5).map((activeUser) => (
-                    <motion.div
-                      key={activeUser.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                      className="relative h-8 w-8 rounded-full ring-2 ring-background"
-                      style={{ backgroundColor: activeUser.user.color }}
-                      title={activeUser.user.name}
-                    >
-                      <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
-                        {activeUser.user.name.charAt(0).toUpperCase()}
-                      </span>
-                    </motion.div>
-                  ))}
-                  {activeUsers.length > 5 && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="relative flex h-8 w-8 items-center justify-center rounded-full bg-muted ring-2 ring-background"
-                    >
-                      <span className="text-xs">+{activeUsers.length - 5}</span>
-                    </motion.div>
+                  {connectionStatus.isConnected ? (
+                    <>
+                      <Wifi className="h-3 w-3" />
+                      <span>Live</span>
+                      {connectionStatus.activeUsers > 0 && (
+                        <>
+                          <span className="text-xs">•</span>
+                          <Users className="h-3 w-3" />
+                          <span>{connectionStatus.activeUsers + 1}</span>
+                        </>
+                      )}
+                    </>
+                  ) : connectionStatus.isConnecting ? (
+                    <>
+                      <WifiOff className="h-3 w-3 animate-pulse" />
+                      <span>Connecting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <WifiOff className="h-3 w-3" />
+                      <span>Offline</span>
+                    </>
                   )}
-                </AnimatePresence>
-              </div>
-            </div>
-          )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-medium">
+                  {connectionStatus.isConnected 
+                    ? "Real-time collaboration active" 
+                    : connectionStatus.isConnecting 
+                    ? "Establishing connection to collaboration server"
+                    : "No connection to server"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {connectionStatus.isConnected 
+                    ? `Changes sync instantly with ${connectionStatus.activeUsers > 0 ? connectionStatus.activeUsers + ' other user(s)' : 'the server'}`
+                    : connectionStatus.isConnecting 
+                    ? "Please wait..."
+                    : "Changes saved locally and will sync when reconnected"}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      )}
+      {!isShared && (
+        <div className="absolute top-4 right-4 z-10">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="cursor-help">
+                  Private Note
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-medium">This note is private</p>
+                <p className="text-xs text-muted-foreground">Only you can see and edit this note</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      )}
 
       <BlockNoteView
         editor={editor}

@@ -27,10 +27,6 @@ import { useFolders } from '@/hooks/useFolders';
 import { suggestTitleFromContent } from '@/lib/utils/titleExtraction';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 import { useRecentNotes } from '@/hooks/useRecentNotes';
-import { useCollaborationStatus } from '@/hooks/useCollaborationStatus';
-import { CollaborationStatusBadge } from '@/components/editor/collaboration-status-badge';
-import { SyncWarningBanner } from '@/components/editor/sync-warning-banner';
-import { WebsocketProvider } from 'y-websocket';
 
 export default function NotePage() {
   const params = useParams();
@@ -49,36 +45,13 @@ export default function NotePage() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [isCollaborationEnabled, setIsCollaborationEnabled] = useState(false);
+  const [isSharedNote, setIsSharedNote] = useState(false);
   const [hasEditPermission, setHasEditPermission] = useState(true); // Default to true for owned notes
   const [isOwnNote, setIsOwnNote] = useState(true);
-  const [permissionsChecked, setPermissionsChecked] = useState(false);
-  const [syncWarningDismissed, setSyncWarningDismissed] = useState(false);
-  
-  // Collaboration status tracking
-  const [collaborationInfo, setCollaborationInfo] = useState<{
-    provider: WebsocketProvider | null;
-    isConnected: boolean;
-    isConnecting: boolean;
-    activeUsersCount: number;
-  }>({
-    provider: null,
-    isConnected: false,
-    isConnecting: false,
-    activeUsersCount: 0
-  });
 
   // Debounce both title and content changes for autosave
   const debouncedTitle = useDebounce(title, 2000);
   const debouncedContent = useDebounce(content, 2000);
-  
-  // Get collaboration status
-  const collaborationStatus = useCollaborationStatus({
-    provider: collaborationInfo.provider,
-    isCollaborationEnabled,
-    activeUsersCount: collaborationInfo.activeUsersCount,
-    noteId
-  });
 
   // Clear unsaved changes when unmounting
   useEffect(() => {
@@ -89,8 +62,6 @@ export default function NotePage() {
 
   // Load note data
   useEffect(() => {
-    // Reset permissions check when note changes
-    setPermissionsChecked(false);
 
     const loadNote = async () => {
       setIsLoading(true);
@@ -162,9 +133,7 @@ export default function NotePage() {
 
     // Check permissions and sharing status
     const checkPermissions = async () => {
-      if (!noteId || noteId.startsWith('new-') || permissionsChecked) return;
-
-      setPermissionsChecked(true);
+      if (!noteId || noteId.startsWith('new-')) return;
 
       try {
         // First check if we own the note
@@ -193,7 +162,7 @@ export default function NotePage() {
                 myCollaboration.permissionLevel === 'edit' ||
                   myCollaboration.permissionLevel === 'admin'
               );
-              setIsCollaborationEnabled(true);
+              setIsSharedNote(true);
             } else {
               // Not a collaborator, shouldn't have access
               toast.error('You do not have access to this note');
@@ -207,7 +176,8 @@ export default function NotePage() {
           const collabResponse = await fetch(`/api/notes/${noteId}/collaborators`);
           if (collabResponse.ok) {
             const data = await collabResponse.json();
-            setIsCollaborationEnabled(data.collaborators?.length > 0 || data.publicAccess);
+            const hasCollaborators = data.collaborators?.length > 0 || data.publicAccess;
+            setIsSharedNote(hasCollaborators);
           }
         }
       } catch (error) {
@@ -423,14 +393,6 @@ export default function NotePage() {
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">{title || 'Untitled Note'}</span>
               </div>
-              
-              {/* Collaboration Status Badge */}
-              <CollaborationStatusBadge
-                mode={collaborationStatus.mode}
-                syncStatus={collaborationStatus.syncStatus}
-                activeUsers={collaborationStatus.activeUsers}
-                lastSyncTime={collaborationStatus.lastSyncTime}
-              />
             </div>
             <div className="flex items-center gap-2">
               {lastSaved && (
@@ -516,16 +478,6 @@ export default function NotePage() {
               </div>
             ) : (
               <>
-                {/* Sync Warning Banner */}
-                {collaborationStatus.syncWarning && !syncWarningDismissed && (
-                  <div className="mb-4">
-                    <SyncWarningBanner
-                      warning={collaborationStatus.syncWarning}
-                      onDismiss={() => setSyncWarningDismissed(true)}
-                    />
-                  </div>
-                )}
-                
                 {/* Title Input - Notion Style */}
                 {hasEditPermission && (
                   <div className="mb-6 pl-4 md:pl-28">
@@ -542,14 +494,13 @@ export default function NotePage() {
                 {content &&
                   (hasEditPermission ? (
                     <CollaborativeEditorFinal
-                      key={`editor-${noteId}`} // Single stable key
+                      key={noteId} // Stable key based on noteId only
                       noteId={noteId}
                       initialContent={content}
                       onContentChange={handleContentChange}
-                      forceCollaboration={isCollaborationEnabled}
+                      isShared={isSharedNote}
                       enableDragToCalendar={true}
-                      onTextDragStart={(text) => console.log('Drag started:', text)}
-                      onCollaborationStatusChange={setCollaborationInfo}
+                      onTextDragStart={() => {}}
                     />
                   ) : (
                     // View-only mode for collaborators without edit permission
@@ -584,9 +535,7 @@ export default function NotePage() {
         open={isShareDialogOpen}
         onOpenChange={setIsShareDialogOpen}
         onSharingEnabled={() => {
-          setIsCollaborationEnabled(true);
-          // Force page reload to switch to collaborative editor
-          window.location.reload();
+          setIsSharedNote(true);
         }}
       />
     </div>
