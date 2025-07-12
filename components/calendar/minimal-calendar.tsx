@@ -527,34 +527,50 @@ export function MinimalCalendar({
       )}
 
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b bg-background z-10">
-        <div className="flex items-center gap-4">
-          <div className="text-xs text-muted-foreground">
-            Today<br />
-            <span className="text-muted-foreground">AEST</span>
+      <div className="flex-shrink-0 px-4 py-3 border-b bg-background">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-muted-foreground leading-tight">
+              <div>Today</div>
+              <div className="text-muted-foreground">AEST</div>
+            </div>
+            <div className="h-8 w-px bg-border" />
+            <div className="text-sm font-medium">
+              {format(currentDate, 'EEE MMM d')}
+            </div>
           </div>
-          <div className="text-sm font-medium">
-            {format(currentDate, 'EEE MMM d')}
+          
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => onDateChange(new Date())}
+              title="Go to today (T)"
+            >
+              Today
+            </Button>
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => onDateChange(new Date(currentDate.getTime() - 86400000))}
+                title="Previous day"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => onDateChange(new Date(currentDate.getTime() + 86400000))}
+                title="Next day"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={() => onDateChange(new Date(currentDate.getTime() - 86400000))}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={() => onDateChange(new Date(currentDate.getTime() + 86400000))}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
