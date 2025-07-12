@@ -17,27 +17,34 @@ DROP POLICY IF EXISTS "Authenticated users can upload images" ON storage.objects
 DROP POLICY IF EXISTS "Anyone can view images" ON storage.objects;
 DROP POLICY IF EXISTS "Users can update their own images" ON storage.objects;
 DROP POLICY IF EXISTS "Users can delete their own images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload images 20250112" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can view images 20250112" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own images 20250112" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own images 20250112" ON storage.objects;
 
--- Create new policies
-CREATE POLICY "Authenticated users can upload images"
+-- Enable RLS on storage.objects if not already enabled
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- Create new policies with proper syntax
+CREATE POLICY "Authenticated users can upload images 20250112"
 ON storage.objects
 FOR INSERT
 TO authenticated
 WITH CHECK (bucket_id = 'notes-assets');
 
-CREATE POLICY "Anyone can view images"
+CREATE POLICY "Anyone can view images 20250112"
 ON storage.objects
 FOR SELECT
 TO public
 USING (bucket_id = 'notes-assets');
 
-CREATE POLICY "Users can update their own images"
+CREATE POLICY "Users can update their own images 20250112"
 ON storage.objects
 FOR UPDATE
 TO authenticated
 USING (bucket_id = 'notes-assets' AND (auth.uid())::text = (owner)::text);
 
-CREATE POLICY "Users can delete their own images"
+CREATE POLICY "Users can delete their own images 20250112"
 ON storage.objects
 FOR DELETE
 TO authenticated
