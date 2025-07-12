@@ -348,21 +348,45 @@ export function MinimalCalendar({
   useEffect(() => {
     if (scrollRef.current) {
       const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinutes = now.getMinutes();
       
-      // Calculate scroll position to center current time in view
-      const scrollPosition = (currentHour * HOUR_HEIGHT + (currentMinutes / 60) * HOUR_HEIGHT) - (window.innerHeight / 3);
+      // Check if we're viewing today
+      const isToday = 
+        currentDate.getFullYear() === now.getFullYear() &&
+        currentDate.getMonth() === now.getMonth() &&
+        currentDate.getDate() === now.getDate();
       
-      // Use setTimeout to ensure the scroll happens after render
-      setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            top: Math.max(0, scrollPosition),
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
+      if (isToday) {
+        const currentHour = now.getHours();
+        const currentMinutes = now.getMinutes();
+        
+        // Get the scroll container height
+        const containerHeight = scrollRef.current.clientHeight;
+        
+        // Calculate the position of current time
+        const currentTimePosition = currentHour * HOUR_HEIGHT + (currentMinutes / 60) * HOUR_HEIGHT;
+        
+        // Calculate scroll position to center current time in view
+        const scrollPosition = currentTimePosition - (containerHeight / 2);
+        
+        // Add a slight delay for smoother initial load
+        setTimeout(() => {
+          if (scrollRef.current) {
+            // Check if current time is already visible
+            const currentScrollTop = scrollRef.current.scrollTop;
+            const isVisible = 
+              currentTimePosition >= currentScrollTop && 
+              currentTimePosition <= currentScrollTop + containerHeight;
+            
+            // Only scroll if current time is not already nicely visible
+            if (!isVisible || Math.abs(currentScrollTop - scrollPosition) > 100) {
+              scrollRef.current.scrollTo({
+                top: Math.max(0, Math.min(scrollPosition, scrollRef.current.scrollHeight - containerHeight)),
+                behavior: 'smooth'
+              });
+            }
+          }
+        }, 150);
+      }
     }
   }, [currentDate]);
 
@@ -530,7 +554,17 @@ export function MinimalCalendar({
           })()}
 
           {/* Render blocks */}
-          {blocks.map((block) => {
+          {blocks
+            .filter((block) => {
+              // Filter blocks to only show those on the current date
+              const blockDate = new Date(block.startTime);
+              return (
+                blockDate.getFullYear() === currentDate.getFullYear() &&
+                blockDate.getMonth() === currentDate.getMonth() &&
+                blockDate.getDate() === currentDate.getDate()
+              );
+            })
+            .map((block) => {
             const startHour = block.startTime.getHours();
             const startMinutes = block.startTime.getMinutes();
             const endHour = block.endTime.getHours();
@@ -639,17 +673,29 @@ export function MinimalCalendar({
             );
           })}
 
-          {/* Current time indicator */}
-          <div
-            className="absolute left-0 right-0 flex items-center pointer-events-none z-10"
-            style={{ 
-              top: `${new Date().getHours() * HOUR_HEIGHT + (new Date().getMinutes() / 60) * HOUR_HEIGHT}px` 
-            }}
-          >
-            <div className="w-16" />
-            <div className="h-0.5 bg-red-500 flex-1" />
-            <div className="w-2 h-2 bg-red-500 rounded-full -ml-1" />
-          </div>
+          {/* Current time indicator - only show on today */}
+          {(() => {
+            const now = new Date();
+            const isToday = 
+              currentDate.getFullYear() === now.getFullYear() &&
+              currentDate.getMonth() === now.getMonth() &&
+              currentDate.getDate() === now.getDate();
+            
+            if (!isToday) return null;
+            
+            return (
+              <div
+                className="absolute left-0 right-0 flex items-center pointer-events-none z-10 current-time-indicator"
+                style={{ 
+                  top: `${now.getHours() * HOUR_HEIGHT + (now.getMinutes() / 60) * HOUR_HEIGHT}px` 
+                }}
+              >
+                <div className="w-16" />
+                <div className="h-0.5 bg-red-500 flex-1" />
+                <div className="w-2 h-2 bg-red-500 rounded-full -ml-1" />
+              </div>
+            );
+          })()}
         </div>
       </ScrollArea>
 

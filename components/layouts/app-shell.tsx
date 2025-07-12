@@ -127,7 +127,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
       
       {/* Theme toggle and Calendar toggle buttons */}
-      <div className="fixed top-4 right-4 z-40 flex items-center gap-2">
+      <div className={cn(
+        "fixed top-4 z-40 flex items-center gap-2 transition-all duration-200",
+        calendarOpen ? "right-[300px]" : "right-4"
+      )}>
         <ThemeToggle />
         {!calendarOpen && (
           <Button
