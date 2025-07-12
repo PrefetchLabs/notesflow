@@ -72,6 +72,11 @@ export function MinimalCalendar({
   const [draggingBlock, setDraggingBlock] = useState<string | null>(null);
   const [dragStartY, setDragStartY] = useState(0);
   const [mouseOffsetY, setMouseOffsetY] = useState(0);
+  const [resizingBlock, setResizingBlock] = useState<{
+    id: string;
+    initialEndTime: Date;
+    initialMouseY: number;
+  } | null>(null);
   const [ghostBlock, setGhostBlock] = useState<GhostBlock | null>(null);
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
@@ -282,8 +287,31 @@ export function MinimalCalendar({
         ...ghostBlock,
         startY: Math.max(0, snappedY)
       });
+    } else if (resizingBlock) {
+      const block = blocks.find(b => b.id === resizingBlock.id);
+      if (!block) return;
+      
+      // Calculate new end time based on mouse position
+      const deltaY = e.clientY - resizingBlock.initialMouseY;
+      const deltaMinutes = Math.round((deltaY / HOUR_HEIGHT) * 60 / 15) * 15; // Snap to 15 min
+      
+      const newEndTime = new Date(resizingBlock.initialEndTime);
+      newEndTime.setMinutes(newEndTime.getMinutes() + deltaMinutes);
+      
+      // Ensure minimum duration of 15 minutes
+      const minEndTime = new Date(block.startTime);
+      minEndTime.setMinutes(minEndTime.getMinutes() + 15);
+      
+      if (newEndTime > minEndTime) {
+        const height = ((newEndTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
+        setGhostBlock({
+          id: resizingBlock.id,
+          startY: block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT,
+          height: Math.max(HOUR_HEIGHT / 4, height) // Min 15 minutes
+        });
+      }
     }
-  }, [isDragging, dragSelection, draggingBlock, ghostBlock, mouseOffsetY, blocks, yToTime, timeToY]);
+  }, [isDragging, dragSelection, draggingBlock, ghostBlock, mouseOffsetY, blocks, yToTime, timeToY, resizingBlock]);
 
   // Handle mouse up to end drag
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
@@ -369,8 +397,30 @@ export function MinimalCalendar({
       setGhostBlock(null);
       setMouseOffsetY(0);
       onInteractionEnd?.();
+    } else if (resizingBlock && onUpdateBlock) {
+      // Handle resize end
+      const block = blocks.find(b => b.id === resizingBlock.id);
+      if (block && ghostBlock) {
+        const deltaY = e.clientY - resizingBlock.initialMouseY;
+        const deltaMinutes = Math.round((deltaY / HOUR_HEIGHT) * 60 / 15) * 15; // Snap to 15 min
+        
+        const newEndTime = new Date(resizingBlock.initialEndTime);
+        newEndTime.setMinutes(newEndTime.getMinutes() + deltaMinutes);
+        
+        // Ensure minimum duration of 15 minutes
+        const minEndTime = new Date(block.startTime);
+        minEndTime.setMinutes(minEndTime.getMinutes() + 15);
+        
+        if (newEndTime > minEndTime && !hasOverlap(block.startTime, newEndTime, resizingBlock.id)) {
+          onUpdateBlock(resizingBlock.id, block.startTime, newEndTime);
+        }
+      }
+      
+      setResizingBlock(null);
+      setGhostBlock(null);
+      onInteractionEnd?.();
     }
-  }, [isDragging, dragSelection, draggingBlock, ghostBlock, blocks, currentDate, hasOverlap, onUpdateBlock, yToTime, onInteractionEnd]);
+  }, [isDragging, dragSelection, draggingBlock, ghostBlock, blocks, currentDate, hasOverlap, onUpdateBlock, yToTime, onInteractionEnd, resizingBlock]);
 
   // Store the selection data for menu handlers
   const [menuSelectionData, setMenuSelectionData] = useState<{ startTime: Date; endTime: Date } | null>(null);
@@ -428,6 +478,23 @@ export function MinimalCalendar({
     setDragStartY(startY);
     setMouseOffsetY(offset);
     setGhostBlock({ id: blockId, startY, height });
+    onInteractionStart?.();
+  }, [blocks, onInteractionStart]);
+
+  // Handle resize start
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const block = blocks.find(b => b.id === blockId);
+    if (!block) return;
+    
+    setResizingBlock({
+      id: blockId,
+      initialEndTime: block.endTime,
+      initialMouseY: e.clientY
+    });
+    
     onInteractionStart?.();
   }, [blocks, onInteractionStart]);
 
@@ -754,13 +821,26 @@ export function MinimalCalendar({
             const block = blocks.find(b => b.id === ghostBlock.id);
             if (!block) return null;
             
-            const time = yToTime(ghostBlock.startY);
-            const duration = block.endTime.getTime() - block.startTime.getTime();
-            const newStartTime = new Date(currentDate);
-            newStartTime.setHours(time.hour, time.minutes, 0, 0);
-            const newEndTime = new Date(newStartTime.getTime() + duration);
+            let newStartTime: Date;
+            let newEndTime: Date;
+            let isValidDrop: boolean;
             
-            const isValidDrop = !hasOverlap(newStartTime, newEndTime, ghostBlock.id);
+            if (resizingBlock && resizingBlock.id === ghostBlock.id) {
+              // For resizing, the start time stays the same
+              newStartTime = block.startTime;
+              // Calculate new end time based on ghost block height
+              const durationHours = ghostBlock.height / HOUR_HEIGHT;
+              newEndTime = new Date(newStartTime.getTime() + durationHours * 60 * 60 * 1000);
+              isValidDrop = !hasOverlap(newStartTime, newEndTime, ghostBlock.id);
+            } else {
+              // For dragging
+              const time = yToTime(ghostBlock.startY);
+              const duration = block.endTime.getTime() - block.startTime.getTime();
+              newStartTime = new Date(currentDate);
+              newStartTime.setHours(time.hour, time.minutes, 0, 0);
+              newEndTime = new Date(newStartTime.getTime() + duration);
+              isValidDrop = !hasOverlap(newStartTime, newEndTime, ghostBlock.id);
+            }
             
             return (
               <div
@@ -811,6 +891,7 @@ export function MinimalCalendar({
             const top = startHour * HOUR_HEIGHT + (startMinutes / 60) * HOUR_HEIGHT;
             const height = (endHour - startHour) * HOUR_HEIGHT + ((endMinutes - startMinutes) / 60) * HOUR_HEIGHT;
             const isDragging = draggingBlock === block.id;
+            const isResizing = resizingBlock?.id === block.id;
             const isHovered = hoveredBlockId === block.id;
             
             return (
@@ -819,13 +900,14 @@ export function MinimalCalendar({
                 className={cn(
                   "calendar-block absolute left-16 right-4 rounded-lg p-2 text-xs text-white group",
                   isDragging ? "opacity-30" : "hover:shadow-lg transition-shadow",
+                  isResizing ? "opacity-50" : "",
                   "cursor-grab active:cursor-grabbing"
                 )}
                 style={{
                   top: `${top}px`,
                   height: `${Math.max(30, height)}px`, // Min height for visibility
                   backgroundColor: block.color || '#3B82F6',
-                  opacity: block.isCompleted ? 0.6 : isDragging ? 0.3 : 1,
+                  opacity: block.isCompleted ? 0.6 : isDragging ? 0.3 : isResizing ? 0.5 : 1,
                 }}
                 onMouseDown={(e) => {
                   // Don't start drag if clicking on interactive elements
@@ -916,6 +998,18 @@ export function MinimalCalendar({
                       <Trash2 className="h-3 w-3" />
                     </button>
                   )}
+                </div>
+                
+                {/* Resize handle at bottom */}
+                <div
+                  className={cn(
+                    "absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize group/resize",
+                    "hover:bg-white/20 transition-colors",
+                    isHovered ? "opacity-100" : "opacity-0"
+                  )}
+                  onMouseDown={(e) => handleResizeMouseDown(e, block.id)}
+                >
+                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-white/40 group-hover/resize:bg-white/60 transition-colors" />
                 </div>
               </div>
             );
