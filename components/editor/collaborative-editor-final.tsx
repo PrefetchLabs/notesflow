@@ -20,7 +20,8 @@ import { createAIExtension } from "@/lib/editor/ai-extension";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Users, WifiOff, Wifi } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, WifiOff, Wifi, RefreshCw } from "lucide-react";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { IndexeddbPersistence } from "y-indexeddb";
@@ -77,37 +78,100 @@ export function CollaborativeEditorFinal({
     return '#' + ((hash & 0x00FFFFFF).toString(16).padStart(6, '0'));
   }, [user?.id]);
   
-  // Create WebSocket provider
-  const provider = useMemo(() => {
-    if (!user) return null;
+  // Create WebSocket provider (optional - only for collaboration)
+  const [provider, setProvider] = useState<WebsocketProvider | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 5;
+  const retryDelay = useCallback((attempt: number) => Math.min(1000 * Math.pow(2, attempt), 30000), []);
+  
+  // Function to create WebSocket provider
+  const createProvider = useCallback(() => {
+    if (!user || !shouldUseCollaboration) return null;
     
-    const wsUrl = process.env['NEXT_PUBLIC_YJS_SERVER_URL'] || 'ws://localhost:1234';
-    console.log('[CollaborativeEditor] Creating WebSocket provider:', wsUrl);
+    try {
+      const wsUrl = process.env['NEXT_PUBLIC_YJS_SERVER_URL'] || 'ws://localhost:1234';
+      console.log('[CollaborativeEditor] Creating WebSocket provider:', wsUrl);
+      
+      const wsProvider = new WebsocketProvider(
+        wsUrl,
+        `notesflow-${noteId}`,
+        ydoc,
+        {
+          WebSocketPolyfill: WebSocket,
+          resyncInterval: 5000,
+          connect: true,
+          params: {},
+          protocols: [],
+        }
+      );
+      
+      // Monitor connection status
+      wsProvider.on('status', (event: any) => {
+        console.log('[CollaborativeEditor] WebSocket status:', event.status);
+        setIsConnected(event.status === 'connected');
+        
+        if (event.status === 'connected') {
+          // Reset retry count on successful connection
+          setRetryCount(0);
+        }
+      });
+      
+      wsProvider.on('sync', (isSynced: boolean) => {
+        console.log('[CollaborativeEditor] Sync status:', isSynced);
+      });
+      
+      wsProvider.on('connection-error', (error: any) => {
+        console.warn('[CollaborativeEditor] Connection error:', error);
+      });
+      
+      wsProvider.on('close', () => {
+        console.log('[CollaborativeEditor] WebSocket closed');
+        setIsConnected(false);
+        
+        // Attempt reconnection with exponential backoff
+        if (retryCount < maxRetries && shouldUseCollaboration) {
+          const delay = retryDelay(retryCount);
+          console.log(`[CollaborativeEditor] Retrying connection in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            setProvider(null); // Clear old provider
+          }, delay);
+        }
+      });
+      
+      return wsProvider;
+    } catch (error) {
+      console.warn('[CollaborativeEditor] Failed to create WebSocket provider:', error);
+      return null;
+    }
+  }, [user, noteId, ydoc, shouldUseCollaboration, retryCount, retryDelay, maxRetries]);
+  
+  // Create/recreate provider when needed
+  useEffect(() => {
+    let mounted = true;
     
-    const wsProvider = new WebsocketProvider(
-      wsUrl,
-      `notesflow-${noteId}`,
-      ydoc,
-      {
-        WebSocketPolyfill: WebSocket,
-        resyncInterval: 5000,
+    if (!provider && shouldUseCollaboration && user) {
+      const newProvider = createProvider();
+      if (newProvider && mounted) {
+        setProvider(newProvider);
       }
-    );
+    } else if (provider && !shouldUseCollaboration) {
+      // Clean up provider when collaboration is disabled
+      provider.awareness.setLocalState(null);
+      provider.disconnect();
+      provider.destroy();
+      setProvider(null);
+    }
     
-    // Don't set user info here - do it after connection
-    
-    // Monitor connection status
-    wsProvider.on('status', (event: any) => {
-      console.log('[CollaborativeEditor] WebSocket status:', event.status);
-      setIsConnected(event.status === 'connected');
-    });
-    
-    wsProvider.on('sync', (isSynced: boolean) => {
-      console.log('[CollaborativeEditor] Sync status:', isSynced);
-    });
-    
-    return wsProvider;
-  }, [user, noteId, ydoc]);
+    return () => {
+      mounted = false;
+      if (provider) {
+        provider.awareness.setLocalState(null);
+        provider.disconnect();
+        provider.destroy();
+      }
+    };
+  }, [provider, shouldUseCollaboration, user, createProvider]);
   
   // Create IndexedDB persistence
   const persistence = useMemo(() => {
@@ -212,11 +276,21 @@ export function CollaborativeEditorFinal({
   // Create AI model
   const model = useMemo(() => createCustomAIModel(), []);
   
-  // Create editor - always with provider for seamless collaboration switching
+  // Track if we should use collaboration in editor config
+  const [useCollaborativeEditor, setUseCollaborativeEditor] = useState(false);
+  
+  // Only switch to collaborative editor when provider is actually connected
+  useEffect(() => {
+    if (provider && isConnected && !useCollaborativeEditor) {
+      setUseCollaborativeEditor(true);
+    } else if (!provider && useCollaborativeEditor) {
+      setUseCollaborativeEditor(false);
+    }
+  }, [provider, isConnected, useCollaborativeEditor]);
+  
+  // Create editor with or without collaboration based on state
   const editor = useCreateBlockNote({
-    // Only provide initialContent when NOT using collaboration
-    // When using collaboration, content comes from Y.Doc
-    initialContent: provider ? undefined : safeInitialContent,
+    initialContent: useCollaborativeEditor ? undefined : safeInitialContent,
     dictionary: {
       ...en,
       ai: aiEn
@@ -235,17 +309,16 @@ export function CollaborativeEditorFinal({
     blockSpecs: {
       ...defaultBlockSpecs,
     },
-    collaboration: provider ? {
+    collaboration: useCollaborativeEditor && provider ? {
       provider,
       fragment: ydoc.getXmlFragment("document-store"),
       user: {
         name: user?.name || user?.email?.split('@')[0] || 'Anonymous',
         color: userColor,
       },
-      // Show cursor labels when active
       showCursorLabels: "activity"
     } : undefined,
-  }, [provider, ydoc, user, userColor, hasAIAccess, model]);
+  }, [useCollaborativeEditor]); // Only recreate when switching collaboration modes
 
   // Handle text selection for drag to calendar
   const { selection } = useBlockNoteSelection({
@@ -331,17 +404,11 @@ export function CollaborativeEditorFinal({
     return () => {
       console.log('[CollaborativeEditor] Cleaning up...');
       
-      // Clear awareness state before disconnecting
-      if (provider) {
-        provider.awareness.setLocalState(null);
-        provider.disconnect();
-        provider.destroy();
-      }
-      
+      // Cleanup is handled in the provider effect above
       persistence?.destroy();
       ydoc.destroy();
     };
-  }, [provider, persistence, ydoc]);
+  }, [persistence, ydoc]);
   
   if (!editor) {
     return <div className="h-full w-full animate-pulse bg-muted" />;
@@ -349,8 +416,8 @@ export function CollaborativeEditorFinal({
   
   return (
     <div className={cn("relative h-full", className)}>
-      {/* Show collaboration UI only when active */}
-      {shouldUseCollaboration && (
+      {/* Show collaboration UI only when provider exists */}
+      {provider && (
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
           {/* Connection Status */}
           <Badge 
@@ -365,10 +432,26 @@ export function CollaborativeEditorFinal({
             ) : (
               <>
                 <WifiOff className="h-3 w-3" />
-                Connecting...
+                {retryCount >= maxRetries ? 'Offline' : 'Connecting...'}
               </>
             )}
           </Badge>
+          
+          {/* Manual reconnect button when max retries exceeded */}
+          {retryCount >= maxRetries && !isConnected && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setRetryCount(0);
+                setProvider(null);
+              }}
+              className="flex items-center gap-1"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Reconnect
+            </Button>
+          )}
 
           {/* Active Users */}
           {activeUsers.length > 0 && (
@@ -404,6 +487,7 @@ export function CollaborativeEditorFinal({
       )}
 
       <BlockNoteView
+        key={useCollaborativeEditor ? 'collaborative' : 'standalone'}
         editor={editor}
         editable={editable}
         theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
