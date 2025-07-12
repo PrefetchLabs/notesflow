@@ -92,9 +92,15 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     }
 
     try {
+      console.log('[SubscriptionContext] Fetching subscription for user:', user.email);
       const response = await fetch('/api/subscription');
       if (response.ok) {
         const data = await response.json();
+        console.log('[SubscriptionContext] Subscription loaded:', {
+          plan: data.subscription?.plan,
+          status: data.subscription?.status,
+          metadata: data.subscription?.metadata,
+        });
         setSubscription(data.subscription);
       }
     } catch (error) {
@@ -102,7 +108,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.email]);
 
   useEffect(() => {
     fetchSubscription();
@@ -113,6 +119,16 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const isBeta = subscription?.plan === 'beta';
   const isPro = isAdmin || (subscription && (subscription.plan === 'pro_monthly' || subscription.plan === 'pro_yearly' || subscription.plan === 'early_bird'));
   const isFreeTier = !isAdmin && !isPro && !isBeta;
+
+  // Debug logging for plan detection
+  console.log('[SubscriptionContext] Plan detection:', {
+    isAdmin,
+    isBeta,
+    isPro,
+    isFreeTier,
+    subscriptionPlan: subscription?.plan,
+    user: user?.email,
+  });
   
   const limits = subscription?.limits || (isBeta ? betaLimits : defaultLimits);
   const usage = subscription?.usage || defaultUsage;

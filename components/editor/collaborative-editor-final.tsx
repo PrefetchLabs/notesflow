@@ -68,7 +68,7 @@ export function CollaborativeEditorFinal({
   
   const { resolvedTheme } = useTheme();
   const { user } = useAuth();
-  const { hasAIAccess } = useAIAccess();
+  const { hasAIAccess, isLoading: isAIAccessLoading } = useAIAccess();
   
   // Create Y.Doc - stable reference
   const ydoc = useMemo(() => new Y.Doc(), [noteId]); // Only recreate if note changes
@@ -226,6 +226,15 @@ export function CollaborativeEditorFinal({
     return uploadFile(file);
   }, [user]);
   
+  // Debug logging for AI access
+  useEffect(() => {
+    console.log('[CollaborativeEditor] AI Access Status:', {
+      hasAIAccess,
+      isAIAccessLoading,
+      user: user?.email,
+    });
+  }, [hasAIAccess, isAIAccessLoading, user]);
+
   // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
     initialContent: provider ? undefined : safeInitialContent,
@@ -257,7 +266,7 @@ export function CollaborativeEditorFinal({
       },
       showCursorLabels: "activity",
     } : undefined,
-  }, [provider]); // Only recreate when provider changes
+  }, [provider, hasAIAccess]); // Recreate when provider or AI access changes
 
   // Handle text selection for drag to calendar
   const { selection } = useBlockNoteSelection({
@@ -306,7 +315,8 @@ export function CollaborativeEditorFinal({
     };
   }, []); // Empty deps - only cleanup on unmount
   
-  if (!editor) {
+  // Don't render editor until we know the AI access status
+  if (!editor || isAIAccessLoading) {
     return <div className="h-full w-full animate-pulse bg-muted" />;
   }
   

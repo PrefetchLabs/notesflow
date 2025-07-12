@@ -5,6 +5,7 @@ import { SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blockn
 import { Sparkles } from 'lucide-react';
 import { BlockNoteEditor } from '@blocknote/core';
 import { getAIExtension } from '@/lib/editor/ai-extension';
+import { toast } from 'sonner';
 
 export function SuggestionMenuWithAI({ editor }: { editor: BlockNoteEditor }) {
   const aiMenuItem = {
@@ -24,7 +25,13 @@ export function SuggestionMenuWithAI({ editor }: { editor: BlockNoteEditor }) {
             console.log('[AI Menu] Opening AI menu at block:', textCursorPosition.block.id);
             aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
           } else {
-            console.error('[AI Menu] AI extension not available - make sure you have Pro access');
+            console.error('[AI Menu] AI extension not available');
+            toast.error('AI features are only available for Beta and Pro users', {
+              action: {
+                label: 'Upgrade to Pro',
+                onClick: () => window.location.href = '/upgrade'
+              }
+            });
           }
         } else {
           console.error('[AI Menu] No text cursor position found');
