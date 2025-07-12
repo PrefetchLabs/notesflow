@@ -36,7 +36,7 @@ export default function NotePage() {
   const { setHasUnsavedChanges: setGlobalUnsavedChanges, promptToSave } = useUnsavedChanges();
   const { addToRecent } = useRecentNotes();
   const { isPro } = useSubscription();
-  
+
   const [note, setNote] = useState<any>(null);
   const [content, setContent] = useState<any>(null);
   const [title, setTitle] = useState('Untitled Note');
@@ -49,7 +49,7 @@ export default function NotePage() {
   const [hasEditPermission, setHasEditPermission] = useState(true); // Default to true for owned notes
   const [isOwnNote, setIsOwnNote] = useState(true);
   const [permissionsChecked, setPermissionsChecked] = useState(false);
-  
+
   // Debounce both title and content changes for autosave
   const debouncedTitle = useDebounce(title, 2000);
   const debouncedContent = useDebounce(content, 2000);
@@ -65,7 +65,7 @@ export default function NotePage() {
   useEffect(() => {
     // Reset permissions check when note changes
     setPermissionsChecked(false);
-    
+
     const loadNote = async () => {
       setIsLoading(true);
       try {
@@ -83,7 +83,7 @@ export default function NotePage() {
               children: [],
             },
           ];
-          
+
           const response = await fetch('/api/notes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -92,33 +92,36 @@ export default function NotePage() {
               content: defaultContent,
             }),
           });
-          
+
           if (!response.ok) throw new Error('Failed to create note');
-          
+
           const { note: newNote } = await response.json();
           router.replace(`/notes/${newNote.id}`);
           return;
         }
-        
+
         // Load existing note
         const response = await fetch(`/api/notes/${noteId}`);
         if (!response.ok) throw new Error('Failed to load note');
-        
+
         const { note } = await response.json();
         setNote(note);
         setTitle(note.title);
         // Ensure content is never empty for BlockNote
-        const noteContent = note.content && Array.isArray(note.content) && note.content.length > 0 
-          ? note.content 
-          : [{
-              type: 'paragraph',
-              props: {
-                textColor: 'default',
-                backgroundColor: 'default',
-              },
-              content: [],
-              children: [],
-            }];
+        const noteContent =
+          note.content && Array.isArray(note.content) && note.content.length > 0
+            ? note.content
+            : [
+                {
+                  type: 'paragraph',
+                  props: {
+                    textColor: 'default',
+                    backgroundColor: 'default',
+                  },
+                  content: [],
+                  children: [],
+                },
+              ];
         setContent(noteContent);
         setLastSaved(new Date(note.updatedAt));
       } catch (error) {
@@ -128,37 +131,42 @@ export default function NotePage() {
         setIsLoading(false);
       }
     };
-    
+
     loadNote();
-    
+
     // Check permissions and sharing status
     const checkPermissions = async () => {
       if (!noteId || noteId.startsWith('new-') || permissionsChecked) return;
-      
+
       setPermissionsChecked(true);
-      
+
       try {
         // First check if we own the note
         const meResponse = await fetch('/api/me');
         if (!meResponse.ok) return;
         const { user: currentUser } = await meResponse.json();
-        
+
         // We need to fetch the note info to check ownership
         const noteResponse = await fetch(`/api/notes/${noteId}`);
         if (!noteResponse.ok) return;
         const { note: noteData } = await noteResponse.json();
-        
+
         const isOwner = noteData?.userId === currentUser?.id;
         setIsOwnNote(isOwner);
-        
+
         if (!isOwner) {
           // Check if we're a collaborator
           const collabResponse = await fetch(`/api/notes/${noteId}/collaborators`);
           if (collabResponse.ok) {
             const data = await collabResponse.json();
-            const myCollaboration = data.collaborators?.find((c: any) => c.userId === currentUser?.id);
+            const myCollaboration = data.collaborators?.find(
+              (c: any) => c.userId === currentUser?.id
+            );
             if (myCollaboration) {
-              setHasEditPermission(myCollaboration.permissionLevel === 'edit' || myCollaboration.permissionLevel === 'admin');
+              setHasEditPermission(
+                myCollaboration.permissionLevel === 'edit' ||
+                  myCollaboration.permissionLevel === 'admin'
+              );
               setIsCollaborationEnabled(true);
             } else {
               // Not a collaborator, shouldn't have access
@@ -180,7 +188,7 @@ export default function NotePage() {
         console.error('Failed to check permissions:', error);
       }
     };
-    
+
     checkPermissions();
   }, [noteId, router]);
 
@@ -198,7 +206,7 @@ export default function NotePage() {
   // Define handleSave first
   const handleSave = useCallback(async () => {
     if (!noteId || noteId.startsWith('new-')) return;
-    
+
     setIsSaving(true);
     try {
       const response = await fetch(`/api/notes/${noteId}`, {
@@ -206,10 +214,9 @@ export default function NotePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content }),
       });
-      
+
       if (!response.ok) throw new Error('Failed to save');
-      
-      
+
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
       setGlobalUnsavedChanges(false);
@@ -222,44 +229,55 @@ export default function NotePage() {
       setIsSaving(false);
     }
   }, [noteId, title, content, setGlobalUnsavedChanges]);
-  
+
   // Track changes
-  const handleContentChange = useCallback((newContent: any) => {
-    setContent(newContent);
-    setHasUnsavedChanges(true);
-    setGlobalUnsavedChanges(true);
-    
-    // Auto-extract title from content if current title is generic
-    const suggestedTitle = suggestTitleFromContent(title, newContent);
-    if (suggestedTitle) {
-      setTitle(suggestedTitle);
-    }
-  }, [title, setGlobalUnsavedChanges]);
-  
-  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-    setHasUnsavedChanges(true);
-    setGlobalUnsavedChanges(true);
-  }, [setGlobalUnsavedChanges]);
-  
+  const handleContentChange = useCallback(
+    (newContent: any) => {
+      setContent(newContent);
+      setHasUnsavedChanges(true);
+      setGlobalUnsavedChanges(true);
+
+      // Auto-extract title from content if current title is generic
+      const suggestedTitle = suggestTitleFromContent(title, newContent);
+      if (suggestedTitle) {
+        setTitle(suggestedTitle);
+      }
+    },
+    [title, setGlobalUnsavedChanges]
+  );
+
+  const handleTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTitle(e.target.value);
+      setHasUnsavedChanges(true);
+      setGlobalUnsavedChanges(true);
+    },
+    [setGlobalUnsavedChanges]
+  );
+
   // Autosave functionality
   useEffect(() => {
-    if (hasUnsavedChanges && noteId && !noteId.startsWith('new-') && (debouncedContent || debouncedTitle)) {
+    if (
+      hasUnsavedChanges &&
+      noteId &&
+      !noteId.startsWith('new-') &&
+      (debouncedContent || debouncedTitle)
+    ) {
       handleSave();
     }
   }, [debouncedContent, debouncedTitle, hasUnsavedChanges, handleSave, noteId]);
 
   const handleDelete = useCallback(async () => {
     if (!noteId || noteId.startsWith('new-')) return;
-    
+
     if (confirm('Are you sure you want to delete this note?')) {
       try {
         const response = await fetch(`/api/notes/${noteId}`, {
           method: 'DELETE',
         });
-        
+
         if (!response.ok) throw new Error('Failed to delete');
-        
+
         toast.success('Note moved to trash');
         // Trigger refresh event to update the sidebar
         window.dispatchEvent(new Event('refresh-notes'));
@@ -272,15 +290,12 @@ export default function NotePage() {
 
   const handleShare = () => {
     if (!isPro) {
-      toast.error(
-        'Sharing is only available for Pro users',
-        {
-          action: {
-            label: 'Upgrade to Pro',
-            onClick: () => router.push('/upgrade'),
-          },
-        }
-      );
+      toast.error('Sharing is only available for Pro users', {
+        action: {
+          label: 'Upgrade to Pro',
+          onClick: () => router.push('/upgrade'),
+        },
+      });
       return;
     }
     setIsShareDialogOpen(true);
@@ -288,7 +303,7 @@ export default function NotePage() {
 
   const handleMoveToFolder = async (folderId: string | null) => {
     if (!noteId || noteId.startsWith('new-')) return;
-    
+
     try {
       const response = await fetch(`/api/notes/${noteId}`, {
         method: 'PUT',
@@ -297,10 +312,10 @@ export default function NotePage() {
           folderId: folderId,
         }),
       });
-      
+
       if (!response.ok) throw new Error('Failed to move note');
-      
-      const folderName = folderId ? folders.find(f => f.id === folderId)?.name : 'root';
+
+      const folderName = folderId ? folders.find((f) => f.id === folderId)?.name : 'root';
       toast.success(`Note moved to ${folderName || 'folder'}`);
       // Trigger refresh event to update the sidebar
       window.dispatchEvent(new Event('refresh-notes'));
@@ -312,7 +327,7 @@ export default function NotePage() {
   // Get folder name for breadcrumb
   const getFolderPath = () => {
     if (!note?.folderId || !folders.length) return null;
-    
+
     const findFolder = (folders: any[], id: string): any => {
       for (const folder of folders) {
         if (folder.id === id) return folder;
@@ -323,7 +338,7 @@ export default function NotePage() {
       }
       return null;
     };
-    
+
     const folder = findFolder(folders, note.folderId);
     return folder?.name;
   };
@@ -359,20 +374,14 @@ export default function NotePage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => promptToSave(
-                  handleSave,
-                  () => router.push('/dashboard')
-                )}
+                onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
                 className="h-8 w-8"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-1.5 text-sm">
                 <button
-                  onClick={() => promptToSave(
-                    handleSave,
-                    () => router.push('/dashboard')
-                  )}
+                  onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Dashboard
@@ -395,7 +404,7 @@ export default function NotePage() {
                   <RelativeTime date={lastSaved} />
                 </span>
               )}
-              
+
               {isSaving && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -407,74 +416,55 @@ export default function NotePage() {
                   <span>Saving...</span>
                 </motion.div>
               )}
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSave}
-                disabled={isSaving}
-              >
+
+              <Button variant="ghost" size="sm" onClick={handleSave} disabled={isSaving}>
                 <Save className="h-4 w-4" />
               </Button>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Folder className="mr-2 h-4 w-4" />
-                  Move to Folder
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => handleMoveToFolder(null)}>
-                    No Folder (Root)
-                  </DropdownMenuItem>
-                  {folders.length > 0 && <DropdownMenuSeparator />}
-                  {folders.map((folder) => (
-                    <DropdownMenuItem
-                      key={folder.id}
-                      onClick={() => handleMoveToFolder(folder.id)}
-                    >
-                      {folder.name}
+                <DropdownMenuContent align="end">
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Folder className="mr-2 h-4 w-4" />
+                      Move to Folder
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={() => handleMoveToFolder(null)}>
+                        No Folder (Root)
+                      </DropdownMenuItem>
+                      {folders.length > 0 && <DropdownMenuSeparator />}
+                      {folders.map((folder) => (
+                        <DropdownMenuItem
+                          key={folder.id}
+                          onClick={() => handleMoveToFolder(folder.id)}
+                        >
+                          {folder.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  {isOwnNote && (
+                    <DropdownMenuItem onClick={handleShare}>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      <span className="flex items-center gap-2">
+                        Share
+                        {!isPro && <ProBadge size="sm" showIcon={false} />}
+                      </span>
                     </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              {isOwnNote && (
-                <DropdownMenuItem onClick={handleShare}>
-                  <Share2 className="mr-2 h-4 w-4" />
-                  <span className="flex items-center gap-2">
-                    Share
-                    {!isPro && <ProBadge size="sm" showIcon={false} />}
-                  </span>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </div>
-          
-          {/* Title editing section */}
-          <div className="mt-6">
-            <input
-              type="text"
-              value={title}
-              onChange={handleTitleChange}
-              className="w-full bg-transparent text-3xl font-semibold tracking-tight outline-none placeholder:text-muted-foreground/50 focus:ring-0"
-              placeholder="Untitled Note"
-            />
           </div>
         </div>
       </header>
@@ -491,41 +481,60 @@ export default function NotePage() {
                 </div>
               </div>
             ) : (
-              content && (
-                hasEditPermission ? (
-                  <CollaborativeEditorFinal
-                    key={`editor-${noteId}`} // Single stable key
-                    noteId={noteId}
-                    initialContent={content}
-                    onContentChange={handleContentChange}
-                    forceCollaboration={isCollaborationEnabled}
-                    enableDragToCalendar={true}
-                    onTextDragStart={(text) => console.log('Drag started:', text)}
-                  />
-                ) : (
-                  // View-only mode for collaborators without edit permission
-                  <div className="rounded-lg border bg-muted/10 p-8">
-                    <BlockNoteAIEditor
-                      key={`readonly-${noteId}`}
-                      initialContent={content}
-                      onContentChange={() => {}} // No-op for read-only
-                      showAIUsage={false}
-                      editable={false}
+              <>
+                {/* Title Input - Notion Style */}
+                {hasEditPermission && (
+                  <div className="mb-6 pl-4 md:pl-28">
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={handleTitleChange}
+                      className="w-full bg-transparent text-5xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/40 focus:ring-0"
+                      placeholder="Untitled"
                     />
-                    <p className="mt-4 text-center text-sm text-muted-foreground">
-                      You have view-only access to this note.
-                    </p>
                   </div>
-                )
-              )
+                )}
+
+                {content &&
+                  (hasEditPermission ? (
+                    <CollaborativeEditorFinal
+                      key={`editor-${noteId}`} // Single stable key
+                      noteId={noteId}
+                      initialContent={content}
+                      onContentChange={handleContentChange}
+                      forceCollaboration={isCollaborationEnabled}
+                      enableDragToCalendar={true}
+                      onTextDragStart={(text) => console.log('Drag started:', text)}
+                    />
+                  ) : (
+                    // View-only mode for collaborators without edit permission
+                    <>
+                      <div className="mb-6 pl-4 md:pl-8">
+                        <h1 className="text-5xl font-bold tracking-tight">{title || 'Untitled'}</h1>
+                      </div>
+                      <div className="rounded-lg border bg-muted/10 p-8">
+                        <BlockNoteAIEditor
+                          key={`readonly-${noteId}`}
+                          initialContent={content}
+                          onContentChange={() => {}} // No-op for read-only
+                          showAIUsage={false}
+                          editable={false}
+                        />
+                        <p className="mt-4 text-center text-sm text-muted-foreground">
+                          You have view-only access to this note.
+                        </p>
+                      </div>
+                    </>
+                  ))}
+              </>
             )}
           </div>
         </div>
       </main>
 
       {/* Share Dialog */}
-      <ShareDialogV2 
-        noteId={noteId} 
+      <ShareDialogV2
+        noteId={noteId}
         noteTitle={title}
         open={isShareDialogOpen}
         onOpenChange={setIsShareDialogOpen}

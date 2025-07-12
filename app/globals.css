@@ -532,6 +532,30 @@
   @apply outline-none;
 }
 
+/* Remove all focus borders from editor */
+.bn-editor *:focus,
+.bn-editor *:focus-visible {
+  @apply outline-none ring-0 border-transparent;
+  box-shadow: none !important;
+}
+
+/* Remove focus from the editor container itself */
+.bn-container:focus,
+.bn-container:focus-visible,
+.bn-editor:focus,
+.bn-editor:focus-visible {
+  @apply outline-none ring-0;
+  box-shadow: none !important;
+}
+
+/* Remove focus from ProseMirror editor */
+.ProseMirror:focus,
+.ProseMirror:focus-visible,
+.ProseMirror-focused {
+  @apply outline-none ring-0;
+  box-shadow: none !important;
+}
+
 /* Drag handle */
 .bn-editor .bn-drag-handle {
   @apply opacity-0 transition-opacity duration-200;
