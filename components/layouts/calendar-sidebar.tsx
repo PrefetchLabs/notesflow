@@ -44,13 +44,24 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
     }
   };
 
+  // Handle updating block times
+  const handleUpdateBlock = async (id: string, startTime: Date, endTime: Date) => {
+    try {
+      await updateBlock(id, { startTime, endTime });
+      toast.success('Time updated');
+    } catch (error) {
+      toast.error('Failed to update time');
+    }
+  };
+
   return (
-    <aside className="calendar-sidebar relative w-[280px] h-full bg-gray-950 border-l border-gray-800">
+    <aside className="calendar-sidebar relative w-[280px] h-full bg-background border-l">
       <MinimalCalendar 
         currentDate={currentDate} 
         onDateChange={setCurrentDate}
         onCreateEvent={handleCreateEvent}
         onCreateTask={handleCreateTask}
+        onUpdateBlock={handleUpdateBlock}
         blocks={blocks}
       />
     </aside>

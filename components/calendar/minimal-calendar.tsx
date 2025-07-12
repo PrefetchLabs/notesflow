@@ -16,6 +16,7 @@ interface MinimalCalendarProps {
   onDateChange: (date: Date) => void;
   onCreateEvent?: (startTime: Date, endTime: Date) => void;
   onCreateTask?: (startTime: Date, endTime: Date) => void;
+  onUpdateBlock?: (id: string, startTime: Date, endTime: Date) => void;
   blocks?: Array<{
     id: string;
     title: string;
@@ -38,14 +39,31 @@ export function MinimalCalendar({
   onDateChange, 
   onCreateEvent, 
   onCreateTask,
+  onUpdateBlock,
   blocks = []
 }: MinimalCalendarProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragSelection, setDragSelection] = useState<DragSelection | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [draggingBlock, setDraggingBlock] = useState<string | null>(null);
+  const [blockDragOffset, setBlockDragOffset] = useState(0);
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Check if a time range overlaps with existing blocks
+  const hasOverlap = useCallback((startTime: Date, endTime: Date, excludeId?: string) => {
+    return blocks.some(block => {
+      if (excludeId && block.id === excludeId) return false;
+      
+      const blockStart = block.startTime.getTime();
+      const blockEnd = block.endTime.getTime();
+      const selectionStart = startTime.getTime();
+      const selectionEnd = endTime.getTime();
+      
+      return (selectionStart < blockEnd && selectionEnd > blockStart);
+    });
+  }, [blocks]);
 
   // Convert Y position to time
   const yToTime = useCallback((y: number): { hour: number; minutes: number } => {
@@ -68,7 +86,7 @@ export function MinimalCalendar({
 
   // Handle mouse down to start drag
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!gridRef.current) return;
+    if (!gridRef.current || draggingBlock) return;
     
     const rect = gridRef.current.getBoundingClientRect();
     const scrollTop = scrollRef.current?.scrollTop || 0;
@@ -84,7 +102,7 @@ export function MinimalCalendar({
       startTime,
       endTime: startTime
     });
-  }, [yToTime]);
+  }, [yToTime, draggingBlock]);
 
   // Handle mouse move during drag
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -116,12 +134,32 @@ export function MinimalCalendar({
     const duration = endY - startY;
     
     if (duration >= HOUR_HEIGHT / 2) { // At least 30 minutes
-      setMenuPosition({ x: e.clientX, y: e.clientY });
-      setShowMenu(true);
+      // Parse times to check for overlap
+      const [startHour, startMin] = dragSelection.startTime.split(':').map(Number);
+      const [endHour, endMin] = dragSelection.endTime.split(':').map(Number);
+      
+      const startTime = new Date(currentDate);
+      startTime.setHours(startHour, startMin, 0, 0);
+      
+      const endTime = new Date(currentDate);
+      endTime.setHours(endHour, endMin, 0, 0);
+      
+      if (endTime <= startTime) {
+        endTime.setDate(endTime.getDate() + 1);
+      }
+      
+      // Check for overlap
+      if (!hasOverlap(startTime, endTime)) {
+        setMenuPosition({ x: e.clientX, y: e.clientY });
+        setShowMenu(true);
+      } else {
+        // Show some feedback that the slot is occupied
+        setDragSelection(null);
+      }
     } else {
       setDragSelection(null);
     }
-  }, [isDragging, dragSelection]);
+  }, [isDragging, dragSelection, currentDate, hasOverlap]);
 
   // Handle menu item clicks
   const handleCreateEvent = () => {
@@ -183,25 +221,104 @@ export function MinimalCalendar({
     }
   }, [showMenu]);
 
-  // Scroll to current time on mount
+  // Scroll to current time on mount with smooth behavior
   useEffect(() => {
     if (scrollRef.current) {
       const now = new Date();
-      const scrollPosition = now.getHours() * HOUR_HEIGHT - 200;
-      scrollRef.current.scrollTop = Math.max(0, scrollPosition);
+      const scrollPosition = now.getHours() * HOUR_HEIGHT + (now.getMinutes() / 60) * HOUR_HEIGHT - 200;
+      
+      // Use requestAnimationFrame for smooth initial scroll
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: Math.max(0, scrollPosition),
+            behavior: 'smooth'
+          });
+        }
+      });
     }
   }, []);
 
+  // Handle block drag start
+  const handleBlockMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
+    e.stopPropagation();
+    if (!gridRef.current) return;
+    
+    const rect = gridRef.current.getBoundingClientRect();
+    const scrollTop = scrollRef.current?.scrollTop || 0;
+    const y = e.clientY - rect.top + scrollTop;
+    
+    const block = blocks.find(b => b.id === blockId);
+    if (!block) return;
+    
+    const blockTop = block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT;
+    
+    setDraggingBlock(blockId);
+    setBlockDragOffset(y - blockTop);
+  }, [blocks]);
+
+  // Handle block drag
+  const handleBlockDrag = useCallback((e: React.MouseEvent) => {
+    if (!draggingBlock || !gridRef.current) return;
+    
+    const rect = gridRef.current.getBoundingClientRect();
+    const scrollTop = scrollRef.current?.scrollTop || 0;
+    const y = e.clientY - rect.top + scrollTop - blockDragOffset;
+    
+    const time = yToTime(y);
+    const block = blocks.find(b => b.id === draggingBlock);
+    if (!block) return;
+    
+    // Calculate new times
+    const duration = block.endTime.getTime() - block.startTime.getTime();
+    const newStartTime = new Date(currentDate);
+    newStartTime.setHours(time.hour, time.minutes, 0, 0);
+    const newEndTime = new Date(newStartTime.getTime() + duration);
+    
+    // Check for overlap
+    if (!hasOverlap(newStartTime, newEndTime, draggingBlock) && onUpdateBlock) {
+      // Update visual position temporarily (the actual update happens on mouse up)
+      e.currentTarget.style.transform = `translateY(${y - (block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT)}px)`;
+    }
+  }, [draggingBlock, blockDragOffset, yToTime, blocks, currentDate, hasOverlap, onUpdateBlock]);
+
+  // Handle block drop
+  const handleBlockMouseUp = useCallback((e: React.MouseEvent) => {
+    if (!draggingBlock || !gridRef.current || !onUpdateBlock) return;
+    
+    const rect = gridRef.current.getBoundingClientRect();
+    const scrollTop = scrollRef.current?.scrollTop || 0;
+    const y = e.clientY - rect.top + scrollTop - blockDragOffset;
+    
+    const time = yToTime(y);
+    const block = blocks.find(b => b.id === draggingBlock);
+    if (!block) return;
+    
+    // Calculate new times
+    const duration = block.endTime.getTime() - block.startTime.getTime();
+    const newStartTime = new Date(currentDate);
+    newStartTime.setHours(time.hour, time.minutes, 0, 0);
+    const newEndTime = new Date(newStartTime.getTime() + duration);
+    
+    // Check for overlap and update
+    if (!hasOverlap(newStartTime, newEndTime, draggingBlock)) {
+      onUpdateBlock(draggingBlock, newStartTime, newEndTime);
+    }
+    
+    setDraggingBlock(null);
+    setBlockDragOffset(0);
+  }, [draggingBlock, blockDragOffset, yToTime, blocks, currentDate, hasOverlap, onUpdateBlock]);
+
   return (
-    <div className="h-full flex flex-col bg-gray-950">
+    <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+      <div className="flex items-center justify-between px-4 py-3 border-b">
         <div className="flex items-center gap-4">
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-muted-foreground">
             Today<br />
-            <span className="text-gray-400">AEST</span>
+            <span className="text-muted-foreground">AEST</span>
           </div>
-          <div className="text-sm font-medium text-gray-200">
+          <div className="text-sm font-medium">
             {format(currentDate, 'EEE MMM d')}
           </div>
         </div>
@@ -210,7 +327,7 @@ export function MinimalCalendar({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-gray-400 hover:text-gray-200"
+            className="h-7 w-7"
             onClick={() => onDateChange(new Date(currentDate.getTime() - 86400000))}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -218,7 +335,7 @@ export function MinimalCalendar({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-gray-400 hover:text-gray-200"
+            className="h-7 w-7"
             onClick={() => onDateChange(new Date(currentDate.getTime() + 86400000))}
           >
             <ChevronRight className="h-4 w-4" />
@@ -245,31 +362,55 @@ export function MinimalCalendar({
               style={{ top: `${hour * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
             >
               <div className="w-16 flex-shrink-0 text-right pr-3 pt-2">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {hour} {hour < 12 ? 'AM' : 'PM'}
                 </span>
               </div>
-              <div className="flex-1 border-t border-gray-800" />
+              <div className="flex-1 border-t border-border" />
             </div>
           ))}
 
           {/* Drag selection overlay */}
-          {dragSelection && (
-            <div
-              className={cn(
-                "absolute left-16 right-0 bg-blue-500/20 border-2 border-blue-500 rounded-lg",
-                "pointer-events-none"
-              )}
-              style={{
-                top: `${Math.min(dragSelection.startY, dragSelection.endY)}px`,
-                height: `${Math.abs(dragSelection.endY - dragSelection.startY)}px`,
-              }}
-            >
-              <div className="px-3 py-1 text-sm text-blue-200">
-                {dragSelection.startTime} - {dragSelection.endTime}
+          {dragSelection && (() => {
+            // Check if current selection overlaps
+            const [startHour, startMin] = dragSelection.startTime.split(':').map(Number);
+            const [endHour, endMin] = dragSelection.endTime.split(':').map(Number);
+            
+            const startTime = new Date(currentDate);
+            startTime.setHours(startHour, startMin, 0, 0);
+            
+            const endTime = new Date(currentDate);
+            endTime.setHours(endHour, endMin, 0, 0);
+            
+            if (endTime <= startTime) {
+              endTime.setDate(endTime.getDate() + 1);
+            }
+            
+            const isOverlapping = hasOverlap(startTime, endTime);
+            
+            return (
+              <div
+                className={cn(
+                  "absolute left-16 right-0 rounded-lg pointer-events-none",
+                  isOverlapping 
+                    ? "bg-red-500/20 border-2 border-red-500" 
+                    : "bg-blue-500/20 border-2 border-blue-500"
+                )}
+                style={{
+                  top: `${Math.min(dragSelection.startY, dragSelection.endY)}px`,
+                  height: `${Math.abs(dragSelection.endY - dragSelection.startY)}px`,
+                }}
+              >
+                <div className={cn(
+                  "px-3 py-1 text-sm",
+                  isOverlapping ? "text-red-200" : "text-blue-200"
+                )}>
+                  {dragSelection.startTime} - {dragSelection.endTime}
+                  {isOverlapping && " (Occupied)"}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Render blocks */}
           {blocks.map((block) => {
@@ -280,17 +421,27 @@ export function MinimalCalendar({
             
             const top = startHour * HOUR_HEIGHT + (startMinutes / 60) * HOUR_HEIGHT;
             const height = (endHour - startHour) * HOUR_HEIGHT + ((endMinutes - startMinutes) / 60) * HOUR_HEIGHT;
+            const isDragging = draggingBlock === block.id;
             
             return (
               <div
                 key={block.id}
-                className="absolute left-16 right-4 rounded-lg p-2 text-xs text-white"
+                className={cn(
+                  "absolute left-16 right-4 rounded-lg p-2 text-xs text-white",
+                  isDragging ? "cursor-grabbing z-20" : "cursor-grab hover:shadow-lg transition-shadow",
+                  "pointer-events-auto"
+                )}
                 style={{
                   top: `${top}px`,
                   height: `${height}px`,
                   backgroundColor: block.color || '#3B82F6',
-                  opacity: block.isCompleted ? 0.6 : 1,
+                  opacity: block.isCompleted ? 0.6 : isDragging ? 0.8 : 1,
+                  transition: isDragging ? 'none' : 'all 0.2s',
                 }}
+                onMouseDown={(e) => handleBlockMouseDown(e, block.id)}
+                onMouseMove={handleBlockDrag}
+                onMouseUp={handleBlockMouseUp}
+                onMouseLeave={handleBlockMouseUp}
               >
                 <div className="font-medium truncate">{block.title}</div>
                 <div className="text-xs opacity-80">
@@ -322,7 +473,7 @@ export function MinimalCalendar({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
-            className="fixed z-50 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 py-1"
+            className="fixed z-50 bg-card rounded-lg shadow-2xl border py-1"
             style={{
               left: `${menuPosition.x}px`,
               top: `${menuPosition.y}px`,
@@ -330,17 +481,17 @@ export function MinimalCalendar({
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              className="w-full px-4 py-2.5 text-left text-sm text-gray-200 hover:bg-gray-700 flex items-center gap-3"
+              className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
               onClick={handleCreateEvent}
             >
-              <CalendarIcon className="h-4 w-4 text-gray-400" />
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               Create event
             </button>
             <button
-              className="w-full px-4 py-2.5 text-left text-sm text-gray-200 hover:bg-gray-700 flex items-center gap-3"
+              className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
               onClick={handleCreateTask}
             >
-              <CheckSquare className="h-4 w-4 text-gray-400" />
+              <CheckSquare className="h-4 w-4 text-muted-foreground" />
               Create task (fixed time)
             </button>
           </motion.div>
