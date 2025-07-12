@@ -218,6 +218,14 @@ export function CollaborativeEditorFinal({
   // Create AI model
   const model = useMemo(() => createCustomAIModel(), []);
   
+  // Create upload handler with authentication check
+  const authenticatedUploadFile = useCallback(async (file: File): Promise<string> => {
+    if (!user) {
+      throw new Error('You must be logged in to upload images');
+    }
+    return uploadFile(file);
+  }, [user]);
+  
   // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
     initialContent: provider ? undefined : safeInitialContent,
@@ -239,7 +247,7 @@ export function CollaborativeEditorFinal({
     blockSpecs: {
       ...defaultBlockSpecs,
     },
-    uploadFile: uploadFile, // Enable image uploads
+    uploadFile: authenticatedUploadFile, // Enable image uploads with auth check
     collaboration: provider ? {
       provider,
       fragment: ydoc.getXmlFragment("document-store"),
