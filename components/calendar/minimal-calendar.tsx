@@ -16,7 +16,7 @@ interface MinimalCalendarProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
   onCreateEvent?: (startTime: Date, endTime: Date) => void;
-  onCreateTask?: (startTime: Date, endTime: Date) => void;
+  onCreateTask?: (startTime: Date, endTime: Date, title?: string, color?: string) => void;
   onUpdateBlock?: (id: string, startTime: Date, endTime: Date) => void;
   onDeleteBlock?: (id: string) => void;
   onToggleComplete?: (id: string) => void;
@@ -24,6 +24,7 @@ interface MinimalCalendarProps {
   onUpdateColor?: (id: string, color: string) => void;
   onInteractionStart?: () => void;
   onInteractionEnd?: () => void;
+  userEmail?: string;
   blocks?: Array<{
     id: string;
     title: string;
@@ -60,6 +61,7 @@ export function MinimalCalendar({
   onUpdateColor,
   onInteractionStart,
   onInteractionEnd,
+  userEmail,
   blocks = []
 }: MinimalCalendarProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -382,14 +384,25 @@ export function MinimalCalendar({
     setDragSelection(null);
   };
 
-  const handleCreateTask = () => {
+  const handleCreateTask = (title?: string, color?: string) => {
     if (!menuSelectionData || !onCreateTask) return;
     
-    onCreateTask(menuSelectionData.startTime, menuSelectionData.endTime);
+    onCreateTask(menuSelectionData.startTime, menuSelectionData.endTime, title, color);
     setShowMenu(false);
     setMenuSelectionData(null);
     setDragSelection(null);
   };
+
+  // Task presets for specific user
+  const TASK_PRESETS = [
+    { title: 'Coding', emoji: '💻', color: '#3B82F6' }, // Blue
+    { title: 'Research', emoji: '🔍', color: '#8B5CF6' }, // Purple
+    { title: 'Break', emoji: '☕', color: '#10B981' }, // Green
+    { title: 'Crypto', emoji: '🪙', color: '#F59E0B' }, // Amber
+    { title: 'Food', emoji: '🍽️', color: '#EF4444' }, // Red
+  ];
+
+  const isSpecialUser = userEmail === 'samid@pockethunter.io';
 
   // Handle block drag start
   const handleBlockMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
@@ -948,13 +961,44 @@ export function MinimalCalendar({
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               Create event
             </button>
-            <button
-              className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
-              onClick={handleCreateTask}
-            >
-              <CheckSquare className="h-4 w-4 text-muted-foreground" />
-              Create task (fixed time)
-            </button>
+            {isSpecialUser ? (
+              <>
+                <div className="border-t my-1" />
+                <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                  TASK PRESETS
+                </div>
+                {TASK_PRESETS.map((preset) => (
+                  <button
+                    key={preset.title}
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
+                    onClick={() => handleCreateTask(preset.title, preset.color)}
+                  >
+                    <span className="text-lg">{preset.emoji}</span>
+                    <span>{preset.title}</span>
+                    <div
+                      className="ml-auto w-3 h-3 rounded-full"
+                      style={{ backgroundColor: preset.color }}
+                    />
+                  </button>
+                ))}
+                <div className="border-t my-1" />
+                <button
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
+                  onClick={() => handleCreateTask()}
+                >
+                  <CheckSquare className="h-4 w-4 text-muted-foreground" />
+                  Custom task
+                </button>
+              </>
+            ) : (
+              <button
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
+                onClick={() => handleCreateTask()}
+              >
+                <CheckSquare className="h-4 w-4 text-muted-foreground" />
+                Create task (fixed time)
+              </button>
+            )}
         </div>
       )}
       

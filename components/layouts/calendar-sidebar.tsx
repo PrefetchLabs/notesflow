@@ -5,6 +5,7 @@ import { MinimalCalendar } from '@/components/calendar/minimal-calendar';
 import { useTimeBlocks } from '@/hooks/useTimeBlocks';
 import { TimeBlock } from '@/components/calendar/time-block';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth/auth-context';
 
 interface CalendarSidebarProps {
   onToggle: () => void;
@@ -14,6 +15,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [isInteracting, setIsInteracting] = useState(false);
   const { blocks, isLoading, error, createBlock, updateBlock, deleteBlock } = useTimeBlocks(currentDate, isInteracting);
+  const { user } = useAuth();
 
   // Handle creating events from the calendar
   const handleCreateEvent = async (startTime: Date, endTime: Date) => {
@@ -32,13 +34,13 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   };
 
   // Handle creating tasks from the calendar
-  const handleCreateTask = async (startTime: Date, endTime: Date) => {
+  const handleCreateTask = async (startTime: Date, endTime: Date, title?: string, color?: string) => {
     try {
       await createBlock({
-        title: 'New Task',
+        title: title || 'New Task',
         startTime,
         endTime,
-        color: '#10B981', // Green for tasks
+        color: color || '#10B981', // Green for tasks by default
         type: 'task',
       });
       toast.success('Task created');
@@ -118,6 +120,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         blocks={blocks}
         onInteractionStart={() => setIsInteracting(true)}
         onInteractionEnd={() => setIsInteracting(false)}
+        userEmail={user?.email}
       />
     </aside>
   );
