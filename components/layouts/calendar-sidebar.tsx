@@ -12,7 +12,8 @@ interface CalendarSidebarProps {
 
 export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const { blocks, isLoading, error, createBlock, updateBlock, deleteBlock } = useTimeBlocks(currentDate);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const { blocks, isLoading, error, createBlock, updateBlock, deleteBlock } = useTimeBlocks(currentDate, isInteracting);
 
   // Handle creating events from the calendar
   const handleCreateEvent = async (startTime: Date, endTime: Date) => {
@@ -104,6 +105,8 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         onToggleComplete={handleToggleComplete}
         onRenameBlock={handleRenameBlock}
         blocks={blocks}
+        onInteractionStart={() => setIsInteracting(true)}
+        onInteractionEnd={() => setIsInteracting(false)}
       />
     </aside>
   );

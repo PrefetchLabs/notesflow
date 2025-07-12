@@ -20,6 +20,8 @@ interface MinimalCalendarProps {
   onDeleteBlock?: (id: string) => void;
   onToggleComplete?: (id: string) => void;
   onRenameBlock?: (id: string, newTitle: string) => void;
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
   blocks?: Array<{
     id: string;
     title: string;
@@ -53,6 +55,8 @@ export function MinimalCalendar({
   onDeleteBlock,
   onToggleComplete,
   onRenameBlock,
+  onInteractionStart,
+  onInteractionEnd,
   blocks = []
 }: MinimalCalendarProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -172,13 +176,14 @@ export function MinimalCalendar({
     const startTime = formatTime(time.hour, time.minutes);
     
     setIsDragging(true);
+    onInteractionStart?.();
     setDragSelection({
       startY: snappedY,
       endY: snappedY,
       startTime,
       endTime: startTime
     });
-  }, [yToTime, timeToY]);
+  }, [yToTime, timeToY, onInteractionStart]);
 
   // Handle mouse move during drag
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -218,6 +223,7 @@ export function MinimalCalendar({
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
     if (isDragging && dragSelection) {
       setIsDragging(false);
+      onInteractionEnd?.();
       
       // Calculate duration
       const minY = Math.min(dragSelection.startY, dragSelection.endY);
@@ -296,8 +302,9 @@ export function MinimalCalendar({
       setDraggingBlock(null);
       setGhostBlock(null);
       setMouseOffsetY(0);
+      onInteractionEnd?.();
     }
-  }, [isDragging, dragSelection, draggingBlock, ghostBlock, blocks, currentDate, hasOverlap, onUpdateBlock, yToTime]);
+  }, [isDragging, dragSelection, draggingBlock, ghostBlock, blocks, currentDate, hasOverlap, onUpdateBlock, yToTime, onInteractionEnd]);
 
   // Store the selection data for menu handlers
   const [menuSelectionData, setMenuSelectionData] = useState<{ startTime: Date; endTime: Date } | null>(null);
@@ -344,7 +351,8 @@ export function MinimalCalendar({
     setDragStartY(startY);
     setMouseOffsetY(offset);
     setGhostBlock({ id: blockId, startY, height });
-  }, [blocks]);
+    onInteractionStart?.();
+  }, [blocks, onInteractionStart]);
 
   // Handle double click to edit block title
   const handleBlockDoubleClick = useCallback((e: React.MouseEvent, block: { id: string; title: string }) => {
@@ -352,7 +360,8 @@ export function MinimalCalendar({
     e.preventDefault();
     setEditingBlockId(block.id);
     setEditingTitle(block.title);
-  }, []);
+    onInteractionStart?.();
+  }, [onInteractionStart]);
 
   // Handle title edit submit
   const handleTitleSubmit = useCallback((blockId: string) => {
@@ -361,7 +370,8 @@ export function MinimalCalendar({
     }
     setEditingBlockId(null);
     setEditingTitle('');
-  }, [onRenameBlock, editingTitle]);
+    onInteractionEnd?.();
+  }, [onRenameBlock, editingTitle, onInteractionEnd]);
 
   // Handle checkbox click for tasks
   const handleCheckboxClick = useCallback((e: React.MouseEvent, blockId: string) => {
@@ -780,6 +790,7 @@ export function MinimalCalendar({
                             } else if (e.key === 'Escape') {
                               setEditingBlockId(null);
                               setEditingTitle('');
+                              onInteractionEnd?.();
                             }
                           }}
                           onClick={(e) => e.stopPropagation()}
