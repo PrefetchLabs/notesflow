@@ -530,9 +530,8 @@ export function MinimalCalendar({
       <div className="flex-shrink-0 px-4 py-3 border-b bg-background">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="text-xs text-muted-foreground leading-tight">
-              <div>Today</div>
-              <div className="text-muted-foreground">AEST</div>
+            <div className="text-xs text-muted-foreground">
+              AEST
             </div>
             <div className="h-8 w-px bg-border" />
             <div className="text-sm font-medium">
@@ -541,15 +540,17 @@ export function MinimalCalendar({
           </div>
           
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={() => onDateChange(new Date())}
-              title="Go to today (T)"
-            >
-              Today
-            </Button>
+            {!isToday && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => onDateChange(new Date())}
+                title="Go to today (T)"
+              >
+                Today
+              </Button>
+            )}
             <div className="flex items-center">
               <Button
                 variant="ghost"
