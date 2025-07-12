@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, CalendarIcon, CheckSquare, Trash2, Check, Circle, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarIcon, CheckSquare, Trash2, Check, Circle, CheckCircle2, Coffee, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -66,8 +66,56 @@ export function MinimalCalendar({
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Get current event
+  const getCurrentEvent = useCallback(() => {
+    const now = currentTime.getTime();
+    
+    // Only check today's blocks
+    const todayBlocks = blocks.filter(block => {
+      const blockDate = new Date(block.startTime);
+      return (
+        blockDate.getFullYear() === currentDate.getFullYear() &&
+        blockDate.getMonth() === currentDate.getMonth() &&
+        blockDate.getDate() === currentDate.getDate()
+      );
+    });
+    
+    return todayBlocks.find(block => {
+      const startTime = block.startTime.getTime();
+      const endTime = block.endTime.getTime();
+      return now >= startTime && now < endTime;
+    });
+  }, [blocks, currentTime, currentDate]);
+
+  // Calculate time remaining for current event
+  const getTimeRemaining = useCallback((endTime: Date) => {
+    const now = currentTime.getTime();
+    const end = endTime.getTime();
+    const diff = end - now;
+    
+    if (diff <= 0) return 'Ending now';
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m left`;
+    }
+    return `${minutes}m left`;
+  }, [currentTime]);
+
+  // Update current time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+    
+    return () => clearInterval(timer);
+  }, []);
 
   // Check if a time range overlaps with existing blocks
   const hasOverlap = useCallback((startTime: Date, endTime: Date, excludeId?: string) => {
@@ -390,8 +438,94 @@ export function MinimalCalendar({
     }
   }, [currentDate]);
 
+  // Listen for keyboard shortcut to go to today
+  useEffect(() => {
+    const handleGoToToday = () => {
+      const today = new Date();
+      onDateChange(today);
+    };
+
+    window.addEventListener('calendar-today', handleGoToToday);
+    return () => window.removeEventListener('calendar-today', handleGoToToday);
+  }, [onDateChange]);
+
+  const currentEvent = getCurrentEvent();
+  const isToday = 
+    currentDate.getFullYear() === currentTime.getFullYear() &&
+    currentDate.getMonth() === currentTime.getMonth() &&
+    currentDate.getDate() === currentTime.getDate();
+
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
+      {/* Current Event Status */}
+      {isToday && (
+        <div className="flex-shrink-0 border-b bg-muted/30">
+          <AnimatePresence mode="wait">
+            {currentEvent ? (
+              <motion.div
+                key="event"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="px-4 py-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-2 h-2 rounded-full animate-pulse"
+                      style={{ backgroundColor: currentEvent.color || '#3B82F6' }}
+                    />
+                    <div>
+                      <div className="font-medium text-sm">{currentEvent.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {format(currentEvent.startTime, 'h:mm a')} - {format(currentEvent.endTime, 'h:mm a')}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span>{getTimeRemaining(currentEvent.endTime)}</span>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: currentEvent.color || '#3B82F6' }}
+                    initial={{ width: 0 }}
+                    animate={{ 
+                      width: `${Math.min(100, Math.max(0, 
+                        ((currentTime.getTime() - currentEvent.startTime.getTime()) / 
+                         (currentEvent.endTime.getTime() - currentEvent.startTime.getTime())) * 100
+                      ))}%` 
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="free"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <Coffee className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium text-sm">Free time</div>
+                    <div className="text-xs text-muted-foreground">No events scheduled</div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b bg-background z-10">
         <div className="flex items-center gap-4">
