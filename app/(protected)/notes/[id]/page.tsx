@@ -366,37 +366,37 @@ export default function NotePage() {
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div className="flex items-center gap-1.5 text-sm">
+              <div className="flex items-center gap-1.5 text-sm min-w-0 flex-1">
                 <button
                   onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
                 >
                   Dashboard
                 </button>
                 {getFolderPath() && (
                   <>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground hover:text-foreground transition-colors">
+                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-muted-foreground hover:text-foreground transition-colors truncate">
                       {getFolderPath()}
                     </span>
                   </>
                 )}
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{title || 'Untitled Note'}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <span className="font-medium truncate">{title || 'Untitled Note'}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0 pl-4">
               {lastSaved && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground hidden sm:block">
                   <RelativeTime date={lastSaved} />
                 </span>
               )}
@@ -409,13 +409,16 @@ export default function NotePage() {
                   className="flex items-center gap-2 text-sm text-muted-foreground"
                 >
                   <Save className="h-3 w-3 animate-pulse" />
-                  <span>Saving...</span>
+                  <span className="hidden sm:inline">Saving...</span>
                 </motion.div>
               )}
 
               <Button variant="ghost" size="sm" onClick={handleSave} disabled={isSaving}>
                 <Save className="h-4 w-4" />
               </Button>
+              
+              {/* Reserve space for floating controls */}
+              <div className="w-24" />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

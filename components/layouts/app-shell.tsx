@@ -129,7 +129,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Theme toggle and Calendar toggle buttons */}
       {!sidebarHidden && (
         <div className={cn(
-          "fixed top-4 z-40 flex items-center gap-2 transition-all duration-200",
+          "fixed top-4 z-[60] flex items-center gap-2 transition-all duration-200",
           calendarOpen ? "right-[300px]" : "right-4"
         )}>
           <ThemeToggle />
@@ -159,7 +159,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onClick={() => setCalendarOpen(true)}
           title="Show calendar"
           className={cn(
-            "fixed top-[88px] right-4 z-40",
+            "fixed top-[88px] right-4 z-[60]",
             "h-8 w-8 rounded-full border bg-background shadow-sm",
             "hover:bg-accent hover:shadow-md",
             "transition-all duration-200"
