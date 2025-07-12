@@ -94,7 +94,7 @@ export async function PATCH(request: NextRequest) {
       message: isActive ? 'Account enabled' : 'Account disabled' 
     });
   } catch (error) {
-    console.error('Error updating user status:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update user status' },
       { status: 500 }

@@ -53,7 +53,7 @@ export default function DashboardPage() {
         router.push(`/notes/${note.id}`);
       }
     } catch (error) {
-      console.error('Error creating first note:', error);
+      // [REMOVED_CONSOLE]
     }
   };
 

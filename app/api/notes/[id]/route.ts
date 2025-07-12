@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
 import { notes, collaborators } from '@/lib/db/schema';
 import { eq, and, isNull, or } from 'drizzle-orm';
+import { withTimeout, QUERY_TIMEOUTS } from '@/lib/db/query-timeout';
 
 export async function GET(
   request: NextRequest,
@@ -20,15 +21,18 @@ export async function GET(
     }
 
     // First try to get the note
-    const [note] = await db
-      .select()
-      .from(notes)
-      .where(
-        and(
-          eq(notes.id, id),
-          isNull(notes.deletedAt)
-        )
-      );
+    const [note] = await withTimeout(
+      db
+        .select()
+        .from(notes)
+        .where(
+          and(
+            eq(notes.id, id),
+            isNull(notes.deletedAt)
+          )
+        ),
+      QUERY_TIMEOUTS.SHORT
+    );
 
     if (!note) {
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });
@@ -39,15 +43,18 @@ export async function GET(
     
     if (!isOwner) {
       // Check if user is a collaborator
-      const [collaboration] = await db
-        .select()
-        .from(collaborators)
-        .where(
-          and(
-            eq(collaborators.noteId, id),
-            eq(collaborators.userId, session.user.id)
-          )
-        );
+      const [collaboration] = await withTimeout(
+        db
+          .select()
+          .from(collaborators)
+          .where(
+            and(
+              eq(collaborators.noteId, id),
+              eq(collaborators.userId, session.user.id)
+            )
+          ),
+        QUERY_TIMEOUTS.SHORT
+      );
       
       if (!collaboration) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
@@ -55,14 +62,17 @@ export async function GET(
     }
     
     // Update lastAccessedAt timestamp
-    await db
-      .update(notes)
-      .set({ lastAccessedAt: new Date() })
-      .where(eq(notes.id, id));
+    await withTimeout(
+      db
+        .update(notes)
+        .set({ lastAccessedAt: new Date() })
+        .where(eq(notes.id, id)),
+      QUERY_TIMEOUTS.SHORT
+    );
 
     return NextResponse.json({ note });
   } catch (error) {
-    console.error('Error fetching note:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch note' },
       { status: 500 }
@@ -157,7 +167,7 @@ export async function PUT(
 
     return NextResponse.json({ note: updated });
   } catch (error) {
-    console.error('Error updating note:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update note' },
       { status: 500 }
@@ -203,7 +213,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, note: deleted });
   } catch (error) {
-    console.error('Error deleting note:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to delete note' },
       { status: 500 }

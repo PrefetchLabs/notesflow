@@ -59,7 +59,7 @@ export function CollaborativeEditorSimple({
     });
     
     wsProvider.on('status', (event: any) => {
-      console.log('[Simple] WebSocket status:', event.status);
+      // [REMOVED_CONSOLE]
       setIsConnected(event.status === 'connected');
     });
     

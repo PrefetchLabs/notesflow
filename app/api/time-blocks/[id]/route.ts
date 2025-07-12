@@ -65,7 +65,7 @@ export async function PATCH(
 
     return NextResponse.json({ block });
   } catch (error) {
-    console.error('Error updating time block:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update time block' },
       { status: 500 }
@@ -103,7 +103,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting time block:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to delete time block' },
       { status: 500 }

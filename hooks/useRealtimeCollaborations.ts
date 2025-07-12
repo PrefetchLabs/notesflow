@@ -10,7 +10,7 @@ export function useRealtimeCollaborations(onNewCollaboration?: () => void) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  console.log('useRealtimeCollaborations - user:', user?.id);
+  // [REMOVED_CONSOLE]
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

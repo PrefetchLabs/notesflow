@@ -13,19 +13,19 @@ export function SuggestionMenuWithAI({ editor }: { editor: BlockNoteEditor }) {
     subtext: "Use AI to help write",
     onItemClick: () => {
       try {
-        console.log('[AI Menu] Attempting to open AI menu...');
+        // [REMOVED_CONSOLE]
         const textCursorPosition = editor.getTextCursorPosition();
-        console.log('[AI Menu] Text cursor position:', textCursorPosition);
+        // [REMOVED_CONSOLE]
         
         if (textCursorPosition?.block) {
           const aiExtension = getAIExtension(editor);
-          console.log('[AI Menu] AI extension:', aiExtension);
+          // [REMOVED_CONSOLE]
           
           if (aiExtension) {
-            console.log('[AI Menu] Opening AI menu at block:', textCursorPosition.block.id);
+            // [REMOVED_CONSOLE]
             aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
           } else {
-            console.error('[AI Menu] AI extension not available');
+            // [REMOVED_CONSOLE]
             toast.error('AI features are only available for Beta and Pro users', {
               action: {
                 label: 'Upgrade to Pro',
@@ -34,10 +34,10 @@ export function SuggestionMenuWithAI({ editor }: { editor: BlockNoteEditor }) {
             });
           }
         } else {
-          console.error('[AI Menu] No text cursor position found');
+          // [REMOVED_CONSOLE]
         }
       } catch (error) {
-        console.error('[AI Menu] Error opening AI menu:', error);
+        // [REMOVED_CONSOLE]
       }
     },
     aliases: ["ai", "assistant", "help"],

@@ -296,7 +296,7 @@ export default function TestUIPage() {
                   <h4 className="test-ui-font-medium" style={{ marginBottom: '0.5rem' }}>Code Example</h4>
                   <pre className="test-ui-code">
                     <code>{`const greeting = "Hello, NotesFlow!"
-console.log(greeting)`}</code>
+// [REMOVED_CONSOLE]`}</code>
                   </pre>
                 </div>
 

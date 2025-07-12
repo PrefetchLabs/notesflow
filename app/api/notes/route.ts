@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
 import { notes, collaborators, user, subscriptions } from '@/lib/db/schema';
 import { eq, and, isNull, or, ne, count } from 'drizzle-orm';
+import { withTimeout, QUERY_TIMEOUTS } from '@/lib/db/query-timeout';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,29 +16,35 @@ export async function GET(request: NextRequest) {
     }
 
     // Get notes owned by the user
-    const ownedNotes = await db
-      .select()
-      .from(notes)
-      .where(
-        and(
-          eq(notes.userId, session.user.id),
-          isNull(notes.deletedAt)
-        )
-      );
+    const ownedNotes = await withTimeout(
+      db
+        .select()
+        .from(notes)
+        .where(
+          and(
+            eq(notes.userId, session.user.id),
+            isNull(notes.deletedAt)
+          )
+        ),
+      QUERY_TIMEOUTS.DEFAULT
+    );
 
     // Get notes shared with the user
-    const sharedCollaborations = await db
-      .select({
-        noteId: collaborators.noteId,
-        permissionLevel: collaborators.permissionLevel,
-      })
-      .from(collaborators)
-      .where(
-        and(
-          eq(collaborators.userId, session.user.id),
-          ne(collaborators.noteId, 'public-access') // This ensures we don't get public-only shares
-        )
-      );
+    const sharedCollaborations = await withTimeout(
+      db
+        .select({
+          noteId: collaborators.noteId,
+          permissionLevel: collaborators.permissionLevel,
+        })
+        .from(collaborators)
+        .where(
+          and(
+            eq(collaborators.userId, session.user.id),
+            ne(collaborators.noteId, 'public-access') // This ensures we don't get public-only shares
+          )
+        ),
+      QUERY_TIMEOUTS.DEFAULT
+    );
 
     // Get details of shared notes if any
     let sharedNotesData: any[] = [];
@@ -45,20 +52,23 @@ export async function GET(request: NextRequest) {
       const sharedNoteIds = sharedCollaborations.map(c => c.noteId);
       
       // Fetch the shared notes with owner info
-      const sharedNotesQuery = await db
-        .select({
-          note: notes,
-          ownerName: user.name,
-          ownerEmail: user.email,
-        })
-        .from(notes)
-        .leftJoin(user, eq(notes.userId, user.id))
-        .where(
-          and(
-            or(...sharedNoteIds.map(id => eq(notes.id, id))),
-            isNull(notes.deletedAt)
-          )
-        );
+      const sharedNotesQuery = await withTimeout(
+        db
+          .select({
+            note: notes,
+            ownerName: user.name,
+            ownerEmail: user.email,
+          })
+          .from(notes)
+          .leftJoin(user, eq(notes.userId, user.id))
+          .where(
+            and(
+              or(...sharedNoteIds.map(id => eq(notes.id, id))),
+              isNull(notes.deletedAt)
+            )
+          ),
+        QUERY_TIMEOUTS.DEFAULT
+      );
 
       // Map the shared notes with permission info
       sharedNotesData = sharedNotesQuery.map(({ note, ownerName, ownerEmail }) => {
@@ -115,7 +125,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ notes: allNotes });
   } catch (error) {
-    console.error('Error fetching notes:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch notes' },
       { status: 500 }
@@ -134,22 +144,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Check subscription limits
-    const [subscription] = await db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, session.user.id));
+    const [subscription] = await withTimeout(
+      db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, session.user.id)),
+      QUERY_TIMEOUTS.SHORT
+    );
 
     if (subscription && subscription.plan === 'free') {
       // Count existing notes
-      const [notesCount] = await db
-        .select({ count: count() })
-        .from(notes)
-        .where(
-          and(
-            eq(notes.userId, session.user.id),
-            isNull(notes.deletedAt)
-          )
-        );
+      const [notesCount] = await withTimeout(
+        db
+          .select({ count: count() })
+          .from(notes)
+          .where(
+            and(
+              eq(notes.userId, session.user.id),
+              isNull(notes.deletedAt)
+            )
+          ),
+        QUERY_TIMEOUTS.SHORT
+      );
 
       const noteLimit = subscription.limits?.maxNotes || 10;
       const currentCount = notesCount?.count || 0;
@@ -183,19 +199,22 @@ export async function POST(request: NextRequest) {
           children: [],
         }];
 
-    const [newNote] = await db
-      .insert(notes)
-      .values({
-        title,
-        content: validContent,
-        userId: session.user.id,
-        folderId: folderId || null,
-      })
-      .returning();
+    const [newNote] = await withTimeout(
+      db
+        .insert(notes)
+        .values({
+          title,
+          content: validContent,
+          userId: session.user.id,
+          folderId: folderId || null,
+        })
+        .returning(),
+      QUERY_TIMEOUTS.DEFAULT
+    );
 
     return NextResponse.json({ note: newNote });
   } catch (error) {
-    console.error('Error creating note:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to create note' },
       { status: 500 }

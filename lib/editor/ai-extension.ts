@@ -20,7 +20,7 @@ export function getAIExtension(editor: BlockNoteEditor): AIExtension | null {
   try {
     return getBlockNoteAIExtension(editor);
   } catch (error) {
-    console.error('[AI Extension] Failed to get AI extension:', error);
+    // [REMOVED_CONSOLE]
     return null;
   }
 }
@@ -70,24 +70,19 @@ export function createAIExtension(options: AIExtensionOptions) {
         // Track usage after successful call (but don't let tracking failures break AI)
         if (result) {
           try {
-            console.log('[AI Extension] Tracking AI usage for user');
+            // [REMOVED_CONSOLE]
             const trackingResult = await trackAIUsage(opts.userPrompt || "unknown", 0);
-            console.log('[AI Extension] AI usage tracked:', trackingResult);
+            // [REMOVED_CONSOLE]
           } catch (trackingError) {
             // Log the error but don't fail the AI request
-            console.error('[AI Extension] Failed to track AI usage:', trackingError);
+            // [REMOVED_CONSOLE]
             // For Beta/Pro users, this shouldn't prevent AI from working
           }
         }
 
         return result;
       } catch (error) {
-        console.error("[AI Extension] Error details:", {
-          error,
-          message: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined,
-          opts
-        });
+        // [REMOVED_CONSOLE]
         
         if (error instanceof Error) {
           if (error.message.includes("limit reached")) {

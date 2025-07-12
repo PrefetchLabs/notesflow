@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     await checkAndExpireBetaPlans();
     return NextResponse.json({ success: true, message: 'Beta expiration check completed' });
   } catch (error) {
-    console.error('Error in beta expiration cron:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to check beta expirations' },
       { status: 500 }

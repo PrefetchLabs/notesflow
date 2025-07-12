@@ -182,7 +182,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching content:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch content' },
       { status: 500 }
@@ -237,7 +237,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting content:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to delete content' },
       { status: 500 }

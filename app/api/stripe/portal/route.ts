@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: portalSession.url });
   } catch (error) {
-    console.error('Portal session error:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to create portal session' },
       { status: 500 }

@@ -42,7 +42,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, note: restored });
   } catch (error) {
-    console.error('Error restoring note:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to restore note' },
       { status: 500 }

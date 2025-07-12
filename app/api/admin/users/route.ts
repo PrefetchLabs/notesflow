@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }
@@ -181,7 +181,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating user:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update user' },
       { status: 500 }

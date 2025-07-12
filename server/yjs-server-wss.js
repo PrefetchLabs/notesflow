@@ -43,48 +43,48 @@ const wss = new WebSocket.Server({ server });
 // Handle WebSocket connections
 wss.on('connection', (ws, request) => {
   // Log all headers for debugging
-  console.log('[YJS-WSS] New connection');
-  console.log('[YJS-WSS] URL:', request.url);
-  console.log('[YJS-WSS] Headers:', JSON.stringify(request.headers, null, 2));
-  console.log('[YJS-WSS] Remote Address:', request.socket.remoteAddress);
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]);
+  // [REMOVED_CONSOLE]
   
   // Check for X-Forwarded headers (from reverse proxy)
   const realIp = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress;
-  console.log('[YJS-WSS] Real IP:', realIp);
+  // [REMOVED_CONSOLE]
   
   // Setup Yjs connection
   try {
     setupWSConnection(ws, request, {
       gc: true // Enable garbage collection
     });
-    console.log('[YJS-WSS] WebSocket connection setup complete');
+    // [REMOVED_CONSOLE]
   } catch (error) {
-    console.error('[YJS-WSS] Error setting up connection:', error);
+    // [REMOVED_CONSOLE]
   }
   
   ws.on('close', (code, reason) => {
-    console.log('[YJS-WSS] Connection closed. Code:', code, 'Reason:', reason);
+    // [REMOVED_CONSOLE]
   });
   
   ws.on('error', (err) => {
-    console.error('[YJS-WSS] WebSocket error:', err);
+    // [REMOVED_CONSOLE]
   });
 });
 
 // Start server
 server.listen(port, '0.0.0.0', () => {
-  console.log(`[YJS-WSS] WebSocket Secure server running on port ${port}`);
-  console.log(`[YJS-WSS] wss://localhost:${port}`);
-  console.log(`[YJS-WSS] Listening on all interfaces (0.0.0.0)`);
-  console.log(`[YJS-WSS] Note: This uses a self-signed certificate. You may need to accept it in your browser.`);
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]`);
+  // [REMOVED_CONSOLE]
 });
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n[YJS-WSS] Shutting down server...');
+  // [REMOVED_CONSOLE]
   wss.close(() => {
     server.close(() => {
-      console.log('[YJS-WSS] Server closed');
+      // [REMOVED_CONSOLE]
       process.exit(0);
     });
   });

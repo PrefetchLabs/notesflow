@@ -19,7 +19,7 @@ export async function checkAndExpireBetaPlans() {
       
       // If beta period has expired
       if (betaEndDate && now > betaEndDate) {
-        console.log(`Beta period expired for user ${subscription.userId}`);
+        // [REMOVED_CONSOLE]
         
         // Revert to previous plan or free
         const previousPlan = subscription.metadata?.previousPlan || 'free';
@@ -43,11 +43,11 @@ export async function checkAndExpireBetaPlans() {
           })
           .where(eq(subscriptions.id, subscription.id));
         
-        console.log(`Reverted user ${subscription.userId} to ${previousPlan} plan`);
+        // [REMOVED_CONSOLE]
       }
     }
   } catch (error) {
-    console.error('Error checking beta expirations:', error);
+    // [REMOVED_CONSOLE]
   }
 }
 

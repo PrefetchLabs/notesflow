@@ -18,7 +18,7 @@ export async function getUser() {
 
     return session?.user || null;
   } catch (error) {
-    console.error('Failed to get user:', error);
+    // [REMOVED_CONSOLE]
     return null;
   }
 }
@@ -61,7 +61,7 @@ export async function authMiddleware(request: Request) {
       session,
     };
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    // [REMOVED_CONSOLE]
     return {
       success: false,
       error: 'Authentication failed',

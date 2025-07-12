@@ -54,11 +54,11 @@ export function CollaborativeEditorV2({
   // Initialize collaboration
   useEffect(() => {
     if (!user || !noteId) {
-      console.log('[CollaborativeEditorV2] Missing user or noteId');
+      // [REMOVED_CONSOLE]
       return;
     }
     
-    console.log('[CollaborativeEditorV2] Initializing collaboration for note:', noteId);
+    // [REMOVED_CONSOLE]
     
     // Create Y.Doc
     const doc = new Y.Doc();
@@ -80,7 +80,7 @@ export function CollaborativeEditorV2({
     
     // Listen to connection changes
     const unsubscribeConnection = provider.onConnectionChange((connected) => {
-      console.log('[CollaborativeEditorV2] Connection changed:', connected);
+      // [REMOVED_CONSOLE]
       setIsConnected(connected);
     });
     
@@ -139,7 +139,7 @@ export function CollaborativeEditorV2({
     
     // Cleanup
     return () => {
-      console.log('[CollaborativeEditorV2] Cleaning up');
+      // [REMOVED_CONSOLE]
       awareness.off('change', updateUsers);
       unsubscribeConnection();
       provider.disconnect();

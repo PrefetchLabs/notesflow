@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     // Otherwise redirect to intended destination
     return NextResponse.redirect(new URL(returnTo, request.url));
   } catch (error) {
-    console.error('Auth callback error:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }

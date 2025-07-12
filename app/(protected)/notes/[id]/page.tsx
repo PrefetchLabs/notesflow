@@ -185,7 +185,7 @@ export default function NotePage() {
           }
         }
       } catch (error) {
-        console.error('Failed to check permissions:', error);
+        // [REMOVED_CONSOLE]
       }
     };
 

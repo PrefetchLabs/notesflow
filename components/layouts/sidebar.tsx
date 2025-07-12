@@ -93,7 +93,7 @@ export function Sidebar({ onToggle }: SidebarProps) {
       await refreshSubscription();
       router.push(`/notes/${note.id}`);
     } catch (error) {
-      console.error('Error creating note:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to create note');
     }
   };

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { timeBlocks } from '@/lib/db/schema';
 import { and, eq, gte, lte } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { withTimeout, QUERY_TIMEOUTS } from '@/lib/db/query-timeout';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,21 +27,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const blocks = await db
-      .select()
-      .from(timeBlocks)
-      .where(
-        and(
-          eq(timeBlocks.userId, session.user.id),
-          gte(timeBlocks.startTime, new Date(startDate)),
-          lte(timeBlocks.startTime, new Date(endDate))
+    const blocks = await withTimeout(
+      db
+        .select()
+        .from(timeBlocks)
+        .where(
+          and(
+            eq(timeBlocks.userId, session.user.id),
+            gte(timeBlocks.startTime, new Date(startDate)),
+            lte(timeBlocks.startTime, new Date(endDate))
+          )
         )
-      )
-      .orderBy(timeBlocks.startTime);
+        .orderBy(timeBlocks.startTime),
+      QUERY_TIMEOUTS.DEFAULT
+    );
 
     return NextResponse.json({ blocks });
   } catch (error) {
-    console.error('Error fetching time blocks:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch time blocks' },
       { status: 500 }
@@ -78,25 +82,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [block] = await db
-      .insert(timeBlocks)
-      .values({
-        id: nanoid(),
-        userId: session.user.id,
-        title,
-        startTime: start,
-        endTime: end,
-        color: color || '#3B82F6',
-        icon: icon || null,
-        noteId: noteId || null,
-        isCompleted: false,
-        type: type || 'event',
-      })
-      .returning();
+    const [block] = await withTimeout(
+      db
+        .insert(timeBlocks)
+        .values({
+          id: nanoid(),
+          userId: session.user.id,
+          title,
+          startTime: start,
+          endTime: end,
+          color: color || '#3B82F6',
+          icon: icon || null,
+          noteId: noteId || null,
+          isCompleted: false,
+          type: type || 'event',
+        })
+        .returning(),
+      QUERY_TIMEOUTS.DEFAULT
+    );
 
     return NextResponse.json({ block });
   } catch (error) {
-    console.error('Error creating time block:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to create time block' },
       { status: 500 }

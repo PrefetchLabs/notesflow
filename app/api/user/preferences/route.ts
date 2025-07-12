@@ -32,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json({ preferences: preferences[0] });
   } catch (error) {
-    console.error('Failed to fetch user preferences:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch preferences' },
       { status: 500 }
@@ -88,7 +88,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ preferences: preferences[0] });
   } catch (error) {
-    console.error('Failed to update user preferences:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update preferences' },
       { status: 500 }

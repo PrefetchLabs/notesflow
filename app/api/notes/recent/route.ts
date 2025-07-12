@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ notes: recentNotes });
   } catch (error) {
-    console.error('Error fetching recent notes:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch recent notes' },
       { status: 500 }

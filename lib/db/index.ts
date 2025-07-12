@@ -23,6 +23,10 @@ const queryClient =
     // Query configuration
     prepare: true, // Use prepared statements for better performance
     
+    // Query timeout configuration
+    timeout: 5, // Default query timeout in seconds
+    idle_timeout: 20, // Close idle connections after 20 seconds
+    
     // Connection retry configuration
     max_lifetime: 60 * 30, // 30 minutes
     
@@ -57,7 +61,7 @@ export async function checkDatabaseConnection() {
     await queryClient`SELECT 1`;
     return { connected: true };
   } catch (error) {
-    console.error('Database connection failed:', error);
+    // [REMOVED_CONSOLE]
     return { connected: false, error };
   }
 }

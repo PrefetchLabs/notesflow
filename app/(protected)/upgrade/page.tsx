@@ -41,7 +41,7 @@ export default function UpgradePage() {
         window.location.href = url;
       }
     } catch (error) {
-      console.error('Upgrade error:', error);
+      // [REMOVED_CONSOLE]
       // You could show a toast here
     }
   };

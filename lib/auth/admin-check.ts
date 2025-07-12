@@ -42,7 +42,7 @@ export async function checkAdminPermission(permissions?: string[]): Promise<{
 
     return { isAuthorized: true, user: dbUser };
   } catch (error) {
-    console.error('Admin permission check failed:', error);
+    // [REMOVED_CONSOLE]
     return { isAuthorized: false, error: 'Internal server error' };
   }
 }

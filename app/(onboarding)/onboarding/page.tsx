@@ -47,7 +47,7 @@ export default function OnboardingPage() {
 
       router.push('/dashboard');
     } catch (error) {
-      console.error('Failed to skip onboarding:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to skip setup. Please try again.');
     } finally {
       setIsCompleting(false);
@@ -146,7 +146,7 @@ export default function OnboardingPage() {
 
       if (!noteResponse.ok) {
         const errorData = await noteResponse.json();
-        console.error('Failed to create sample note:', errorData);
+        // [REMOVED_CONSOLE]
         // Don't throw error - sample note is optional
         toast.warning('Sample note could not be created, but you can start creating your own notes!');
       }
@@ -172,7 +172,7 @@ export default function OnboardingPage() {
         router.push('/dashboard');
       }
     } catch (error) {
-      console.error('Failed to complete onboarding:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to complete setup. Please try again.');
     } finally {
       setIsCompleting(false);

@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       isFirstAdmin,
     });
   } catch (error) {
-    console.error('Error promoting user:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to promote user' },
       { status: 500 }

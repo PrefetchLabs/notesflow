@@ -61,7 +61,7 @@ export default function ContentPage() {
       setTotalContent(data.pagination.total);
       setTotalPages(data.pagination.pages);
     } catch (error) {
-      console.error('Error fetching content:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to load content');
     } finally {
       setLoading(false);
@@ -109,7 +109,7 @@ export default function ContentPage() {
       toast.success('Content deleted successfully');
       fetchContent(); // Refresh the list
     } catch (error) {
-      console.error('Error deleting content:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to delete content');
     }
   };

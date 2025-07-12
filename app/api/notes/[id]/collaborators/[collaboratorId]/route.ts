@@ -64,7 +64,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating collaborator permission:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
@@ -121,7 +121,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error removing collaborator:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

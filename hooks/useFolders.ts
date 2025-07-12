@@ -28,7 +28,7 @@ export function useFolders() {
       const { folders } = await response.json();
       setFolders(folders);
     } catch (error) {
-      console.error('Error loading folders:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to load folders');
     } finally {
       setIsLoading(false);
@@ -51,7 +51,7 @@ export function useFolders() {
       toast.success('Folder created');
       return folder;
     } catch (error) {
-      console.error('Error creating folder:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to create folder');
       return null;
     }
@@ -72,7 +72,7 @@ export function useFolders() {
       await loadFolders(); // Reload to get updated tree
       return folder;
     } catch (error) {
-      console.error('Error updating folder:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to update folder');
       return null;
     }
@@ -94,7 +94,7 @@ export function useFolders() {
       toast.success('Folder deleted');
       return true;
     } catch (error: any) {
-      console.error('Error deleting folder:', error);
+      // [REMOVED_CONSOLE]
       toast.error(error.message || 'Failed to delete folder');
       return false;
     }
@@ -119,7 +119,7 @@ export function useFolders() {
       
       await loadFolders(); // Reload to get updated tree
     } catch (error) {
-      console.error('Error updating folder positions:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to update folder order');
     }
   }, [loadFolders]);

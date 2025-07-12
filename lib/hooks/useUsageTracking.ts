@@ -15,7 +15,7 @@ export function useUsageTracking() {
   const trackEvent = useCallback(async (event: UsageEvent) => {
     try {
       // Log the event for analytics
-      console.log('[Usage Tracking]', event);
+      // [REMOVED_CONSOLE]
 
       // Send to analytics endpoint if needed
       await fetch('/api/analytics/track', {
@@ -35,7 +35,7 @@ export function useUsageTracking() {
         await refetchSubscription();
       }
     } catch (error) {
-      console.error('Failed to track usage event:', error);
+      // [REMOVED_CONSOLE]
     }
   }, [refetchSubscription]);
 

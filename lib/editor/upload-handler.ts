@@ -20,7 +20,7 @@ export async function uploadFile(file: File): Promise<string> {
 
     return data.url;
   } catch (error) {
-    console.error('Error uploading file:', error);
+    // [REMOVED_CONSOLE]
     toast.error(error instanceof Error ? error.message : 'Failed to upload image');
     throw error;
   }

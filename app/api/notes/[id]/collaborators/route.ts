@@ -87,7 +87,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error fetching collaborators:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
@@ -218,7 +218,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('Error inviting collaborator:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

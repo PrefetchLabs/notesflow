@@ -22,7 +22,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error getting user:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

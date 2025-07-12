@@ -89,7 +89,7 @@ export function useFoldersWithNotes() {
       setRootNotes(rootNotes);
       setSharedNotes(sharedNotesArray);
     } catch (error) {
-      console.error('Error loading data:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to load folders and notes');
     } finally {
       setIsLoading(false);
@@ -125,7 +125,7 @@ export function useFoldersWithNotes() {
       toast.success('Folder created');
       return folder;
     } catch (error) {
-      console.error('Error creating folder:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to create folder');
       return null;
     }
@@ -147,7 +147,7 @@ export function useFoldersWithNotes() {
       await loadData(); // Reload to get updated tree
       return folder;
     } catch (error) {
-      console.error('Error updating folder:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to update folder');
       return null;
     }
@@ -170,7 +170,7 @@ export function useFoldersWithNotes() {
       toast.success('Folder deleted');
       return true;
     } catch (error: any) {
-      console.error('Error deleting folder:', error);
+      // [REMOVED_CONSOLE]
       toast.error(error.message || 'Failed to delete folder');
       return false;
     }
@@ -196,7 +196,7 @@ export function useFoldersWithNotes() {
       
       await loadData(); // Reload to get updated tree
     } catch (error) {
-      console.error('Error updating folder positions:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to update folder order');
     }
   }, [loadData]);
@@ -218,7 +218,7 @@ export function useFoldersWithNotes() {
       toast.success(`Note moved to ${folderName || 'folder'}`);
       return true;
     } catch (error) {
-      console.error('Error moving note:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to move note');
       return false;
     }

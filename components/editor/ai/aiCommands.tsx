@@ -23,7 +23,7 @@ export const continueWriting = (
     try {
       const aiExtension = getAIExtension(editor);
       if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
+        // [REMOVED_CONSOLE]
         return;
       }
       
@@ -37,7 +37,7 @@ export const continueWriting = (
         },
       });
     } catch (error) {
-      console.error('[AI Command] Continue Writing error:', error);
+      // [REMOVED_CONSOLE]
     }
   },
   size: "small",
@@ -54,9 +54,9 @@ export const improveClarity = (
   onItemClick: async () => {
     try {
       const aiExtension = getAIExtension(editor);
-      console.log('[AI Command] Improve Clarity - AI Extension:', aiExtension);
+      // [REMOVED_CONSOLE]
       if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
+        // [REMOVED_CONSOLE]
         return;
       }
       await aiExtension.callLLM({
@@ -69,7 +69,7 @@ export const improveClarity = (
         },
       });
     } catch (error) {
-      console.error('[AI Command] Improve Clarity error:', error);
+      // [REMOVED_CONSOLE]
     }
   },
   size: "small",
@@ -87,7 +87,7 @@ export const summarize = (
     try {
       const aiExtension = getAIExtension(editor);
       if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
+        // [REMOVED_CONSOLE]
         return;
       }
       await aiExtension.callLLM({
@@ -100,7 +100,7 @@ export const summarize = (
         },
       });
     } catch (error) {
-      console.error('[AI Command] Summarize error:', error);
+      // [REMOVED_CONSOLE]
     }
   },
   size: "small",
@@ -118,7 +118,7 @@ export const extractTasks = (
     try {
       const aiExtension = getAIExtension(editor);
       if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
+        // [REMOVED_CONSOLE]
         return;
       }
       await aiExtension.callLLM({
@@ -131,7 +131,7 @@ export const extractTasks = (
         },
       });
     } catch (error) {
-      console.error('[AI Command] Extract Tasks error:', error);
+      // [REMOVED_CONSOLE]
     }
   },
   size: "small",
@@ -149,7 +149,7 @@ export const makeInformal = (
     try {
       const aiExtension = getAIExtension(editor);
       if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
+        // [REMOVED_CONSOLE]
         return;
       }
       await aiExtension.callLLM({
@@ -162,7 +162,7 @@ export const makeInformal = (
         },
       });
     } catch (error) {
-      console.error('[AI Command] Make Informal error:', error);
+      // [REMOVED_CONSOLE]
     }
   },
   size: "small",
@@ -180,7 +180,7 @@ export const makeFormal = (
     try {
       const aiExtension = getAIExtension(editor);
       if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
+        // [REMOVED_CONSOLE]
         return;
       }
       await aiExtension.callLLM({
@@ -193,7 +193,7 @@ export const makeFormal = (
         },
       });
     } catch (error) {
-      console.error('[AI Command] Make Formal error:', error);
+      // [REMOVED_CONSOLE]
     }
   },
   size: "small",
@@ -211,7 +211,7 @@ export const quickFix = (
     try {
       const aiExtension = getAIExtension(editor);
       if (!aiExtension) {
-        console.error('[AI Command] AI extension not found on editor');
+        // [REMOVED_CONSOLE]
         return;
       }
       await aiExtension.callLLM({
@@ -224,7 +224,7 @@ export const quickFix = (
         },
       });
     } catch (error) {
-      console.error('[AI Command] Quick Fix error:', error);
+      // [REMOVED_CONSOLE]
     }
   },
   size: "small",

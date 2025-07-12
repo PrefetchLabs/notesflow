@@ -91,7 +91,7 @@ export function ContentPreviewModal({
         );
       }
     } catch (e) {
-      console.error('Error rendering content:', e);
+      // [REMOVED_CONSOLE]
     }
 
     return (

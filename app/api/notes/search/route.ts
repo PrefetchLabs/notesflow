@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ notes: searchResults });
   } catch (error) {
-    console.error('Error searching notes:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to search notes' },
       { status: 500 }

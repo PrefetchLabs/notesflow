@@ -76,7 +76,7 @@ export function UnsavedChangesProvider({ children }: { children: React.ReactNode
           pendingAction.onDiscard();
         }
       } catch (error) {
-        console.error('Failed to save:', error);
+        // [REMOVED_CONSOLE]
       }
     }
     

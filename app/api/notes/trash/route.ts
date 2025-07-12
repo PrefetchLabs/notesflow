@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ notes: trashedNotes });
   } catch (error) {
-    console.error('Error fetching trashed notes:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch trashed notes' },
       { status: 500 }

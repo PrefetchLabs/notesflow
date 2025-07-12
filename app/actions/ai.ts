@@ -103,11 +103,7 @@ export async function trackAIUsage(commandType: string, tokensUsed: number = 0) 
     resetAt: sql`date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + interval '1 month'`,
   }).returning();
 
-  console.log('[trackAIUsage] AI usage recorded:', {
-    id: newUsage[0]?.id,
-    userId: session.user.id,
-    commandType,
-  });
+  // [REMOVED_CONSOLE]
 
   return {
     success: true,

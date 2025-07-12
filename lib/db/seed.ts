@@ -46,11 +46,11 @@ const sampleNoteContent = {
 };
 
 async function seed() {
-  console.log('🌱 Starting seed...');
+  // [REMOVED_CONSOLE]
 
   try {
     // Clear existing data in the correct order
-    console.log('🧹 Clearing existing data...');
+    // [REMOVED_CONSOLE]
     await db.delete(collaborators).execute();
     await db.delete(timeBlocks).execute();
     await db.delete(notes).execute();
@@ -61,15 +61,15 @@ async function seed() {
     const existingUsers = await db.select().from(user).limit(1).execute();
     
     if (existingUsers.length === 0) {
-      console.log('⚠️  No users found. Please sign up first through the app.');
+      // [REMOVED_CONSOLE]
       return;
     }
 
     const testUser = existingUsers[0];
-    console.log(`👤 Using existing user: ${testUser.email}`);
+    // [REMOVED_CONSOLE]
 
     // Create folders
-    console.log('📁 Creating folders...');
+    // [REMOVED_CONSOLE]
     const personalFolder = await db
       .insert(folders)
       .values({
@@ -125,7 +125,7 @@ async function seed() {
       .execute();
 
     // Create notes
-    console.log('📝 Creating notes...');
+    // [REMOVED_CONSOLE]
     const welcomeNote = await db
       .insert(notes)
       .values({
@@ -227,7 +227,7 @@ async function seed() {
       .execute();
 
     // Create time blocks
-    console.log('📅 Creating time blocks...');
+    // [REMOVED_CONSOLE]
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -267,16 +267,13 @@ async function seed() {
       })
       .execute();
 
-    console.log('✅ Seed completed successfully!');
-    console.log(`
-📊 Created:
-- 4 folders (including 1 subfolder)
-- 3 notes with rich content
+    // [REMOVED_CONSOLE]
+    // [REMOVED_CONSOLE]- 3 notes with rich content
 - 2 time blocks (1 recurring)
     `);
 
   } catch (error) {
-    console.error('❌ Seed failed:', error);
+    // [REMOVED_CONSOLE]
     throw error;
   } finally {
     // Close the database connection
@@ -286,6 +283,6 @@ async function seed() {
 
 // Run the seed
 seed().catch((error) => {
-  console.error('Fatal error during seed:', error);
+  // [REMOVED_CONSOLE]
   process.exit(1);
 });

@@ -228,11 +228,7 @@ export function CollaborativeEditorFinal({
   
   // Debug logging for AI access
   useEffect(() => {
-    console.log('[CollaborativeEditor] AI Access Status:', {
-      hasAIAccess,
-      isAIAccessLoading,
-      user: user?.email,
-    });
+    // [REMOVED_CONSOLE]
   }, [hasAIAccess, isAIAccessLoading, user]);
 
   // Create editor with collaboration when provider is available

@@ -25,7 +25,7 @@ export class AuthErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Auth error:', error, errorInfo);
+    // [REMOVED_CONSOLE]
   }
 
   render() {

@@ -25,7 +25,7 @@ export function useRecentNotes() {
           setRecentNotes(notes);
         }
       } catch (error) {
-        console.error('Failed to load recent notes from localStorage:', error);
+        // [REMOVED_CONSOLE]
       }
       setIsLoading(false);
     };
@@ -50,7 +50,7 @@ export function useRecentNotes() {
       setRecentNotes(notes);
       localStorage.setItem(RECENT_NOTES_KEY, JSON.stringify(notes));
     } catch (error) {
-      console.error('Failed to fetch recent notes:', error);
+      // [REMOVED_CONSOLE]
     }
   };
 

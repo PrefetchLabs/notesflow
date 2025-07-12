@@ -83,7 +83,7 @@ export async function POST(
       });
     }
   } catch (error) {
-    console.error('Error managing note sharing:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
@@ -126,7 +126,7 @@ export async function GET(
       collaboratorCount: allCollaborators.length,
     });
   } catch (error) {
-    console.error('Error getting sharing status:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

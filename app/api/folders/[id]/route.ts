@@ -91,7 +91,7 @@ export async function PUT(
 
     return NextResponse.json({ folder: updated });
   } catch (error) {
-    console.error('Error updating folder:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update folder' },
       { status: 500 }
@@ -144,8 +144,8 @@ export async function DELETE(
     const folderIds = [id, ...descendantFolders.map(f => f.id)];
     
     // Safety check: log what we're about to delete
-    console.log(`Deleting folder ${id} with path ${folder.path}`);
-    console.log(`Will delete ${folderIds.length} folders total:`, folderIds);
+    // [REMOVED_CONSOLE]
+    // [REMOVED_CONSOLE]
 
     // Delete all notes in this folder and all descendant folders
     if (folderIds.length > 0) {
@@ -173,7 +173,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting folder:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to delete folder' },
       { status: 500 }

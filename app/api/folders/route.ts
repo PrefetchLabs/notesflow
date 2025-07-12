@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ folders: rootFolders });
   } catch (error) {
-    console.error('Error fetching folders:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch folders' },
       { status: 500 }
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ folder: newFolder });
   } catch (error) {
-    console.error('Error creating folder:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to create folder' },
       { status: 500 }

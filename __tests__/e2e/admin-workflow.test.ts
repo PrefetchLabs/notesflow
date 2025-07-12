@@ -23,12 +23,12 @@ describe('Admin Workflow E2E', () => {
   beforeAll(async () => {
     // In a real E2E test, this would authenticate as an admin user
     // For now, we'll simulate the setup
-    console.log('Setting up E2E test environment...');
+    // [REMOVED_CONSOLE]
   });
 
   afterAll(async () => {
     // Cleanup test data
-    console.log('Cleaning up E2E test environment...');
+    // [REMOVED_CONSOLE]
   });
 
   describe('Admin Authentication', () => {

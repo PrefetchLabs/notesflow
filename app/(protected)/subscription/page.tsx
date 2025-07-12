@@ -52,7 +52,7 @@ export default function SubscriptionPage() {
         window.location.href = url;
       }
     } catch (error) {
-      console.error('Portal error:', error);
+      // [REMOVED_CONSOLE]
     } finally {
       setIsLoading(false);
     }

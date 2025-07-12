@@ -74,7 +74,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
         setBlocks(blocksData);
       }
     } catch (error) {
-      console.error('Error fetching time blocks:', error);
+      // [REMOVED_CONSOLE]
       setError('Failed to load time blocks');
       // Only show error toast on initial load
       if (showLoading) {
@@ -166,7 +166,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
       } catch (error) {
         // Remove optimistic block on error
         setBlocks((prev) => prev.filter((b) => b.id !== tempId));
-        console.error('Error creating time block:', error);
+        // [REMOVED_CONSOLE]
         toast.error('Failed to create time block');
         throw error;
       }
@@ -231,7 +231,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
         setBlocks((prev) =>
           prev.map((b) => (b.id === id ? originalBlock : b))
         );
-        console.error('Error updating time block:', error);
+        // [REMOVED_CONSOLE]
         toast.error('Failed to update time block');
         throw error;
       }
@@ -265,7 +265,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
     } catch (error) {
       // Rollback on error
       setBlocks((prev) => [...prev, originalBlock]);
-      console.error('Error deleting time block:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to delete time block');
       throw error;
     }

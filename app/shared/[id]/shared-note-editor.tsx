@@ -90,7 +90,7 @@ export function SharedNoteEditor({ noteId, initialContent, noteTitle }: SharedNo
           throw new Error('Failed to save');
         }
       } catch (error) {
-        console.error('Auto-save error:', error);
+        // [REMOVED_CONSOLE]
         toast.error('Failed to save changes');
       }
     }, 1000); // 1 second debounce

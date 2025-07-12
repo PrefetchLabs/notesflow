@@ -161,7 +161,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Subscription updated successfully' 
     });
   } catch (error) {
-    console.error('Error updating subscription:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update subscription' },
       { status: 500 }

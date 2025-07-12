@@ -45,7 +45,7 @@ export function FormattingToolbarWithAI() {
             try {
               aiExtension = getAIExtension(fullEditor);
             } catch (error) {
-              console.error('Error getting AI extension:', error);
+              // [REMOVED_CONSOLE]
               toast.error('AI extension not available');
               return;
             }
@@ -128,7 +128,7 @@ export function FormattingToolbarWithAI() {
             
             const config = commandConfigs[command];
             if (!config) {
-              console.error('Unknown command:', command);
+              // [REMOVED_CONSOLE]
               return;
             }
             
@@ -146,7 +146,7 @@ export function FormattingToolbarWithAI() {
             });
             
           } catch (error) {
-            console.error('Error executing AI command:', error);
+            // [REMOVED_CONSOLE]
             toast.error('Failed to execute AI command');
           }
         };

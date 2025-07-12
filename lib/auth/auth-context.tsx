@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await authClient.signOut();
       router.push('/login');
     } catch (error) {
-      console.error('Failed to sign out:', error);
+      // [REMOVED_CONSOLE]
     }
   };
 

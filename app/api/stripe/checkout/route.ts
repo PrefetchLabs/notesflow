@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
-    console.error('Checkout session error:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to create checkout session' },
       { status: 500 }

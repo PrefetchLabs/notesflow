@@ -65,11 +65,11 @@ export async function POST(req: Request) {
 
     // AI usage tracking is handled by the AI extension in the client
     // This prevents duplicate tracking
-    console.log('[AI Proxy] Processing request for user:', session.user.email, 'Command type:', commandType);
+    // [REMOVED_CONSOLE]
 
     // Check if OpenAI API key is configured
     if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+      // [REMOVED_CONSOLE]
       return NextResponse.json(
         { error: 'AI service is not configured' },
         { status: 500 }
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     // Check if the response is ok
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('OpenAI API error:', response.status, errorData);
+      // [REMOVED_CONSOLE]
       return NextResponse.json(
         { error: `OpenAI API error: ${response.status}` },
         { status: response.status }
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
       return NextResponse.json(data);
     }
   } catch (error) {
-    console.error('AI proxy error:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to process AI request' },
       { status: 500 }

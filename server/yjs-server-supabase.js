@@ -20,7 +20,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('[YJS] Missing Supabase credentials');
+  // [REMOVED_CONSOLE]
   process.exit(1);
 }
 
@@ -33,7 +33,7 @@ const docs = new Map();
 // Persistence functions
 const persistence = {
   bindState: async (docName, ydoc) => {
-    console.log(`[YJS] Loading document: ${docName}`);
+    // [REMOVED_CONSOLE]
     
     try {
       // Extract noteId from docName (format: "notesflow-{noteId}")
@@ -47,7 +47,7 @@ const persistence = {
         .single();
       
       if (error) {
-        console.error('[YJS] Error loading document:', error);
+        // [REMOVED_CONSOLE]
         return;
       }
       
@@ -55,15 +55,15 @@ const persistence = {
         // Apply the saved state to the Y.Doc
         const update = Buffer.from(data.content, 'base64');
         Y.applyUpdate(ydoc, update);
-        console.log(`[YJS] Document loaded: ${docName}`);
+        // [REMOVED_CONSOLE]
       }
     } catch (err) {
-      console.error('[YJS] Failed to load document:', err);
+      // [REMOVED_CONSOLE]
     }
   },
   
   writeState: async (docName, ydoc) => {
-    console.log(`[YJS] Saving document: ${docName}`);
+    // [REMOVED_CONSOLE]
     
     try {
       // Extract noteId from docName
@@ -83,12 +83,12 @@ const persistence = {
         .eq('id', noteId);
       
       if (error) {
-        console.error('[YJS] Error saving document:', error);
+        // [REMOVED_CONSOLE]
       } else {
-        console.log(`[YJS] Document saved: ${docName}`);
+        // [REMOVED_CONSOLE]
       }
     } catch (err) {
-      console.error('[YJS] Failed to save document:', err);
+      // [REMOVED_CONSOLE]
     }
   }
 };
@@ -118,7 +118,7 @@ const wss = new WebSocket.Server({ server });
 
 // Handle WebSocket connections
 wss.on('connection', (ws, request) => {
-  console.log('[YJS] New connection from:', request.socket.remoteAddress);
+  // [REMOVED_CONSOLE]
   
   // Setup Yjs connection with persistence
   setupWSConnection(ws, request, {
@@ -127,11 +127,11 @@ wss.on('connection', (ws, request) => {
   });
   
   ws.on('close', () => {
-    console.log('[YJS] Connection closed');
+    // [REMOVED_CONSOLE]
   });
   
   ws.on('error', (err) => {
-    console.error('[YJS] WebSocket error:', err);
+    // [REMOVED_CONSOLE]
   });
 });
 
@@ -144,13 +144,13 @@ setInterval(() => {
 
 // Start server
 server.listen(port, () => {
-  console.log(`[YJS] WebSocket server with Supabase persistence running on port ${port}`);
-  console.log(`[YJS] ws://localhost:${port}`);
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]
 });
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n[YJS] Shutting down server...');
+  // [REMOVED_CONSOLE]
   
   // Save all documents before shutdown
   const savePromises = [];
@@ -161,7 +161,7 @@ process.on('SIGINT', () => {
   Promise.all(savePromises).then(() => {
     wss.close(() => {
       server.close(() => {
-        console.log('[YJS] Server closed');
+        // [REMOVED_CONSOLE]
         process.exit(0);
       });
     });

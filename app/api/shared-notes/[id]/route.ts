@@ -37,7 +37,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating shared note:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
@@ -81,7 +81,7 @@ export async function GET(
       content: note.content,
     });
   } catch (error) {
-    console.error('Error getting shared note:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

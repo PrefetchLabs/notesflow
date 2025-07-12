@@ -69,7 +69,7 @@ export default function UsersPage() {
       setTotalUsers(data.pagination.total);
       setTotalPages(data.pagination.pages);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
@@ -116,7 +116,7 @@ export default function UsersPage() {
         fetchUsers(); // Refresh the list
       }
     } catch (error: any) {
-      console.error('Error updating user:', error);
+      // [REMOVED_CONSOLE]
       toast.error(error.message || 'Failed to update user');
     }
   };
@@ -135,7 +135,7 @@ export default function UsersPage() {
       toast.success('Subscription updated successfully');
       fetchUsers(); // Refresh the list
     } catch (error) {
-      console.error('Error updating subscription:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to update subscription');
     }
   };

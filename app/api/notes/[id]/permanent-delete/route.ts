@@ -37,7 +37,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error permanently deleting note:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to permanently delete note' },
       { status: 500 }

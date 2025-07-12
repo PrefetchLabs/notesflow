@@ -38,23 +38,23 @@ export function CollaborativeEditor({
     initialContent,
   });
   
-  console.log('[CollaborativeEditor] Render - isConnected:', isConnected, 'awareness:', awareness);
+  // [REMOVED_CONSOLE]
   
   const [activeUsers, setActiveUsers] = useState<Array<{ id: number; user: any }>>([]);
   const previousUsersRef = useRef<Array<{ id: number; user: any }>>([]);
   
   // Test realtime connection on mount
   useEffect(() => {
-    console.log('[CollaborativeEditor] Testing realtime connection...');
+    // [REMOVED_CONSOLE]
     testRealtimeConnection().then(result => {
-      console.log('[CollaborativeEditor] Realtime test result:', result);
+      // [REMOVED_CONSOLE]
     });
   }, []);
 
   // Track active users and show join/leave notifications
   useEffect(() => {
     if (!awareness) {
-      console.log('[CollaborativeEditor] No awareness yet');
+      // [REMOVED_CONSOLE]
       return;
     }
 

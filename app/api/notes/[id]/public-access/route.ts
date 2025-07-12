@@ -100,7 +100,7 @@ export async function POST(
       });
     }
   } catch (error) {
-    console.error('Error managing public access:', error);
+    // [REMOVED_CONSOLE]
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

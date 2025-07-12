@@ -48,26 +48,26 @@ export function useCollaborativeBlockNote({
   const docRef = useRef<Y.Doc | null>(null);
   const providerRef = useRef<SupabaseProvider | null>(null);
   
-  console.log('[useCollaborativeBlockNote] Hook called - user:', user);
+  // [REMOVED_CONSOLE]
 
   // Initialize Y.Doc and provider
   useEffect(() => {
-    console.log('[useCollaborativeBlockNote] Effect running, user:', user?.id, 'noteId:', noteId);
+    // [REMOVED_CONSOLE]
     if (!user || !noteId) {
-      console.log('[useCollaborativeBlockNote] Missing user or noteId, skipping');
+      // [REMOVED_CONSOLE]
       return;
     }
 
     // Create Y.Doc if not exists
     if (!docRef.current) {
-      console.log('[useCollaborativeBlockNote] Creating new Y.Doc');
+      // [REMOVED_CONSOLE]
       docRef.current = new Y.Doc();
     }
 
     // Create provider if not exists
     if (!providerRef.current) {
       const color = userColor || generateUserColor();
-      console.log('[useCollaborativeBlockNote] Creating SupabaseProvider with color:', color);
+      // [REMOVED_CONSOLE]
       
       providerRef.current = new SupabaseProvider(docRef.current, {
         noteId,
@@ -80,7 +80,7 @@ export function useCollaborativeBlockNote({
 
       // Listen to connection changes
       const unsubscribe = providerRef.current.onConnectionChange((connected) => {
-        console.log('[useCollaborativeBlockNote] Connection status changed:', connected);
+        // [REMOVED_CONSOLE]
         setIsConnected(connected);
       });
 
@@ -88,7 +88,7 @@ export function useCollaborativeBlockNote({
       setIsInitialized(true);
 
       return () => {
-        console.log('[useCollaborativeBlockNote] Cleaning up provider');
+        // [REMOVED_CONSOLE]
         unsubscribe();
         providerRef.current?.disconnect();
         providerRef.current = null;

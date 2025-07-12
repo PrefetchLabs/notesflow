@@ -69,7 +69,7 @@ export function useBlockNoteSelection({
         bounds,
       };
     } catch (error) {
-      console.error('Error getting selected text:', error);
+      // [REMOVED_CONSOLE]
       return null;
     }
   }, [editor]);

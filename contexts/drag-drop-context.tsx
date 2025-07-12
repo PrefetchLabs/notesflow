@@ -29,26 +29,26 @@ export function DragDropProvider({ children }: { children: React.ReactNode }) {
   const [dropZoneHandlers] = useState(new Map<string, (text: string, metadata: any) => void>());
 
   const startDrag = useCallback((text: string, metadata?: any) => {
-    console.log('[DragDropContext] Starting drag:', { text, metadata });
+    // [REMOVED_CONSOLE]
     setIsDragging(true);
     setDraggedText(text);
     setDraggedMetadata(metadata || {});
   }, []);
 
   const endDrag = useCallback(() => {
-    console.log('[DragDropContext] Ending drag');
+    // [REMOVED_CONSOLE]
     setIsDragging(false);
     setDraggedText(null);
     setDraggedMetadata(null);
   }, []);
 
   const registerDropZone = useCallback((id: string, handler: (text: string, metadata: any) => void) => {
-    console.log('[DragDropContext] Registering drop zone:', id);
+    // [REMOVED_CONSOLE]
     dropZoneHandlers.set(id, handler);
   }, [dropZoneHandlers]);
 
   const unregisterDropZone = useCallback((id: string) => {
-    console.log('[DragDropContext] Unregistering drop zone:', id);
+    // [REMOVED_CONSOLE]
     dropZoneHandlers.delete(id);
   }, [dropZoneHandlers]);
 
@@ -57,7 +57,7 @@ export function DragDropProvider({ children }: { children: React.ReactNode }) {
     
     const handler = dropZoneHandlers.get(dropZoneId);
     if (handler) {
-      console.log('[DragDropContext] Handling drop in zone:', dropZoneId);
+      // [REMOVED_CONSOLE]
       handler(draggedText, draggedMetadata);
     }
     

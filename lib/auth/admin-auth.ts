@@ -106,7 +106,7 @@ export async function checkAdminAuth(
       permissions,
     };
   } catch (error) {
-    console.error('Admin auth error:', error);
+    // [REMOVED_CONSOLE]
     return {
       success: false,
       error: 'Authentication error',
@@ -149,7 +149,7 @@ export async function getAdminStatus(): Promise<{
       permissions,
     };
   } catch (error) {
-    console.error('Error getting admin status:', error);
+    // [REMOVED_CONSOLE]
     return {
       isAdmin: false,
       isSystemAdmin: false,

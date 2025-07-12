@@ -22,10 +22,7 @@ export function usePerformance(componentName: string) {
 
     // Log performance metrics in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(
-        `[Performance] ${componentName} ${
-          isFirstRender.current ? 'initial' : 're-'
-        }render: ${renderTime.toFixed(2)}ms`
+      // [REMOVED_CONSOLE]}ms`
       );
     }
 
@@ -58,8 +55,7 @@ export function usePerformance(componentName: string) {
         return result.finally(() => {
           const duration = performance.now() - startTime;
           if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `[Performance] ${componentName}.${actionName}: ${duration.toFixed(2)}ms`
+            // [REMOVED_CONSOLE]}ms`
             );
           }
         });
@@ -67,8 +63,7 @@ export function usePerformance(componentName: string) {
 
       const duration = performance.now() - startTime;
       if (process.env.NODE_ENV === 'development') {
-        console.log(
-          `[Performance] ${componentName}.${actionName}: ${duration.toFixed(2)}ms`
+        // [REMOVED_CONSOLE]}ms`
         );
       }
       return result;

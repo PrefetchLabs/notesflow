@@ -69,11 +69,11 @@ export class SupabaseProvider extends EventTarget {
   }
 
   private async setupConnection() {
-    console.log(`[SupabaseProvider] Connecting to note:${this.noteId}...`);
+    // [REMOVED_CONSOLE]
     try {
       // Get current session for auth
       const { data: { session } } = await this.supabase.auth.getSession();
-      console.log('[SupabaseProvider] Auth session exists:', !!session);
+      // [REMOVED_CONSOLE]
       
       // Create channel for this note with auth
       this.channel = this.supabase.channel(`note:${this.noteId}`, {
@@ -90,7 +90,7 @@ export class SupabaseProvider extends EventTarget {
       
       // Subscribe to sync requests
       this.channel.on('broadcast', { event: 'sync-request' }, async (payload) => {
-        console.log('[SupabaseProvider] Received sync request from:', payload.payload.clientId);
+        // [REMOVED_CONSOLE]
         // Send current state to the requesting client
         const stateVector = Y.encodeStateAsUpdate(this.doc);
         if (stateVector.length > 10) { // Only send if we have content
@@ -101,7 +101,7 @@ export class SupabaseProvider extends EventTarget {
       // Subscribe to document updates
       this.channel.on('broadcast', { event: 'doc-update' }, (payload) => {
         try {
-          console.log('[SupabaseProvider] Received doc update');
+          // [REMOVED_CONSOLE]
           
           // Decode based on encoding type
           let update: Uint8Array;
@@ -122,7 +122,7 @@ export class SupabaseProvider extends EventTarget {
           
           Y.applyUpdate(this.doc, update, 'supabase');
         } catch (error) {
-          console.error('[SupabaseProvider] Error applying doc update:', error);
+          // [REMOVED_CONSOLE]
         }
       });
 
@@ -148,14 +148,14 @@ export class SupabaseProvider extends EventTarget {
           
           applyAwarenessUpdate(this.awareness, update, 'supabase');
         } catch (error) {
-          console.error('[SupabaseProvider] Error applying awareness update:', error);
+          // [REMOVED_CONSOLE]
         }
       });
 
       // Subscribe to presence for user tracking
       this.channel.on('presence', { event: 'sync' }, () => {
         const state = this.channel?.presenceState();
-        console.log('[SupabaseProvider] Presence sync event, state:', state);
+        // [REMOVED_CONSOLE]
         if (state) {
           // Get all current client IDs from presence
           const currentClientIds = new Set<number>();
@@ -234,10 +234,10 @@ export class SupabaseProvider extends EventTarget {
 
       // Subscribe to the channel
       const subscribeResult = await this.channel.subscribe(async (status, error) => {
-        console.log(`[SupabaseProvider] Channel status: ${status}`, error ? `Error: ${error}` : '');
+        // [REMOVED_CONSOLE]
         
         if (error) {
-          console.error(`[SupabaseProvider] Subscription error:`, error);
+          // [REMOVED_CONSOLE]
           this._connected = false;
           this.notifyConnectionListeners(false);
           this.dispatchEvent(new Event('status'));
@@ -248,7 +248,7 @@ export class SupabaseProvider extends EventTarget {
           this._connected = true;
           this.notifyConnectionListeners(true);
           this.dispatchEvent(new Event('status'));
-          console.log(`[SupabaseProvider] Connected successfully to note:${this.noteId}`);
+          // [REMOVED_CONSOLE]
 
           // Track presence - wait a bit to ensure channel is ready
           setTimeout(async () => {
@@ -257,9 +257,9 @@ export class SupabaseProvider extends EventTarget {
                 user: this.user,
                 clientId: this.awareness.clientID,
               });
-              console.log('[SupabaseProvider] Presence tracked:', trackResult);
+              // [REMOVED_CONSOLE]
             } catch (error) {
-              console.error('[SupabaseProvider] Failed to track presence:', error);
+              // [REMOVED_CONSOLE]
             }
           }, 100);
 
@@ -270,10 +270,10 @@ export class SupabaseProvider extends EventTarget {
             const isEmpty = stateVector.length < 10; // Very small state = empty doc
             
             if (isEmpty) {
-              console.log('[SupabaseProvider] Document is empty, waiting for sync from other users');
+              // [REMOVED_CONSOLE]
               // Don't broadcast empty state, wait for sync
             } else {
-              console.log('[SupabaseProvider] Sending initial document state, size:', stateVector.length);
+              // [REMOVED_CONSOLE]
               await this.broadcastDocUpdate(stateVector);
             }
 
@@ -282,7 +282,7 @@ export class SupabaseProvider extends EventTarget {
             if (awarenessStates.size > 0) {
               // Use the proper awareness encoding
               const update = encodeAwarenessUpdate(this.awareness, Array.from(awarenessStates.keys()));
-              console.log('[SupabaseProvider] Sending initial awareness state');
+              // [REMOVED_CONSOLE]
               await this.broadcastAwarenessUpdate(update);
             }
             
@@ -308,7 +308,7 @@ export class SupabaseProvider extends EventTarget {
                 clientId: this.awareness.clientID,
                 timestamp: Date.now(),
               };
-              console.log('[SupabaseProvider] Periodic presence update:', trackData);
+              // [REMOVED_CONSOLE]
               await this.channel.track(trackData);
             }
           }, 10000); // Update every 10 seconds
@@ -317,13 +317,13 @@ export class SupabaseProvider extends EventTarget {
           this.notifyConnectionListeners(false);
           this.dispatchEvent(new Event('status'));
         } else {
-          console.log(`[SupabaseProvider] Channel status changed to: ${status}`);
+          // [REMOVED_CONSOLE]
         }
       });
       
-      console.log('[SupabaseProvider] Subscribe result:', subscribeResult);
+      // [REMOVED_CONSOLE]
     } catch (error) {
-      console.error('Failed to connect to Supabase:', error);
+      // [REMOVED_CONSOLE]
       this._connected = false;
       this.notifyConnectionListeners(false);
       this.dispatchEvent(new Event('status'));
@@ -382,7 +382,7 @@ export class SupabaseProvider extends EventTarget {
         });
       }
     } catch (error) {
-      console.error('Failed to broadcast doc update:', error);
+      // [REMOVED_CONSOLE]
     }
   }
 
@@ -400,7 +400,7 @@ export class SupabaseProvider extends EventTarget {
         },
       });
     } catch (error) {
-      console.error('Failed to broadcast awareness update:', error);
+      // [REMOVED_CONSOLE]
     }
   }
 

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       permissions,
     });
   } catch (error) {
-    console.error('Error fetching admin permissions:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch permissions' },
       { status: 500 }

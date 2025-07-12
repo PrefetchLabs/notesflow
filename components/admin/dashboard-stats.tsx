@@ -79,7 +79,7 @@ export function DashboardStats() {
           },
         ]);
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        // [REMOVED_CONSOLE]
       } finally {
         setLoading(false);
       }

@@ -15,14 +15,7 @@ export function useAIAccess() {
   const hasAIAccess = isAdmin || isPro || isBeta;
 
   // Debug logging
-  console.log('[useAIAccess] Status:', {
-    hasAIAccess,
-    isLoading,
-    isPro,
-    isBeta,
-    isAdmin,
-    user: user?.email,
-  });
+  // [REMOVED_CONSOLE]
 
   const checkAIAccess = () => {
     if (!hasAIAccess) {

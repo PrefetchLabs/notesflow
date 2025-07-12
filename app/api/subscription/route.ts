@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching subscription:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch subscription' },
       { status: 500 }
@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ subscription: updated });
   } catch (error) {
-    console.error('Error updating subscription usage:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to update subscription usage' },
       { status: 500 }

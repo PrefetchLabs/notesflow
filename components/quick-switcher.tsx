@@ -55,7 +55,7 @@ export function QuickSwitcher({ open, onOpenChange }: QuickSwitcherProps) {
             setSearchResults(data.notes);
           }
         } catch (error) {
-          console.error('Search failed:', error);
+          // [REMOVED_CONSOLE]
         } finally {
           setIsSearching(false);
         }

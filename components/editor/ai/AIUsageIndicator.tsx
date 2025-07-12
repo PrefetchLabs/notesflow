@@ -27,14 +27,14 @@ export function AIUsageIndicator() {
     try {
       const response = await fetch('/api/ai/usage');
       if (!response.ok) {
-        console.error('Failed to fetch AI usage');
+        // [REMOVED_CONSOLE]
         return;
       }
 
       const data: AIUsageData = await response.json();
       setUsageData(data);
     } catch (error) {
-      console.error('Error fetching AI usage:', error);
+      // [REMOVED_CONSOLE]
     } finally {
       setLoading(false);
     }

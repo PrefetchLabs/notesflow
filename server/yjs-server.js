@@ -36,52 +36,52 @@ const wss = new WebSocket.Server({ server });
 // Handle WebSocket connections
 wss.on('connection', (ws, request) => {
   // Log all headers for debugging
-  console.log('[YJS] New connection');
-  console.log('[YJS] URL:', request.url);
-  console.log('[YJS] Headers:', JSON.stringify(request.headers, null, 2));
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]);
   
   // Check for X-Forwarded headers (from reverse proxy)
   const realIp = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress;
-  console.log('[YJS] Real IP:', realIp);
-  console.log('[YJS] Host:', request.headers.host);
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]
   
   // Setup Yjs connection
   try {
     setupWSConnection(ws, request, {
       gc: true // Enable garbage collection
     });
-    console.log('[YJS] WebSocket connection setup complete');
+    // [REMOVED_CONSOLE]
   } catch (error) {
-    console.error('[YJS] Error setting up connection:', error);
+    // [REMOVED_CONSOLE]
   }
   
   ws.on('close', (code, reason) => {
-    console.log('[YJS] Connection closed. Code:', code, 'Reason:', reason?.toString());
+    // [REMOVED_CONSOLE]);
   });
   
   ws.on('error', (err) => {
-    console.error('[YJS] WebSocket error:', err);
+    // [REMOVED_CONSOLE]
   });
 });
 
 // Add error handler for the WebSocket server itself
 wss.on('error', (error) => {
-  console.error('[YJS] WebSocket server error:', error);
+  // [REMOVED_CONSOLE]
 });
 
 // Start server
 server.listen(port, '0.0.0.0', () => {
-  console.log(`[YJS] WebSocket server running on port ${port}`);
-  console.log(`[YJS] ws://localhost:${port}`);
-  console.log(`[YJS] Listening on all interfaces (0.0.0.0)`);
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]
+  // [REMOVED_CONSOLE]`);
 });
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n[YJS] Shutting down server...');
+  // [REMOVED_CONSOLE]
   wss.close(() => {
     server.close(() => {
-      console.log('[YJS] Server closed');
+      // [REMOVED_CONSOLE]
       process.exit(0);
     });
   });

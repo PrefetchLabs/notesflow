@@ -39,7 +39,7 @@ export function WebVitals() {
   useReportWebVitals((metric) => {
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.log('Web Vital:', metric);
+      // [REMOVED_CONSOLE]
     }
 
     // Update metrics state for debug display
@@ -78,7 +78,7 @@ export function WebVitals() {
             'Content-Type': 'application/json',
           },
         }).catch((error) => {
-          console.error('Failed to send web vitals:', error);
+          // [REMOVED_CONSOLE]
         });
       }
     }

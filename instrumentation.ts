@@ -1,7 +1,7 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     // Server-side instrumentation
-    console.log('[Instrumentation] Server started');
+    // [REMOVED_CONSOLE]
     
     // Track server startup time
     const startTime = performance.now();
@@ -12,7 +12,7 @@ export async function register() {
   
   if (process.env.NEXT_RUNTIME === 'edge') {
     // Edge runtime instrumentation
-    console.log('[Instrumentation] Edge runtime started');
+    // [REMOVED_CONSOLE]
   }
 }
 
@@ -24,14 +24,7 @@ export function onRequestError(
     headers: { [key: string]: string };
   }
 ) {
-  console.error('[Request Error]', {
-    digest: error.digest,
-    message: error.message,
-    stack: error.stack,
-    path: request.path,
-    method: request.method,
-    timestamp: new Date().toISOString(),
-  });
+  // [REMOVED_CONSOLE]
   
   // Send to error tracking service if configured
   if (process.env.ERROR_TRACKING_ENDPOINT) {
@@ -51,7 +44,7 @@ export function onRequestError(
         timestamp: new Date().toISOString(),
       }),
     }).catch((err) => {
-      console.error('[Error Tracking] Failed to send error:', err);
+      // [REMOVED_CONSOLE]
     });
   }
 }

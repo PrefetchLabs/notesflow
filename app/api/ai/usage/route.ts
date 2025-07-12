@@ -9,7 +9,7 @@ export async function GET() {
     if (error instanceof Error && error.message === 'User not authenticated') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    console.error('Error fetching AI usage:', error);
+    // [REMOVED_CONSOLE]
     return NextResponse.json(
       { error: 'Failed to fetch AI usage' },
       { status: 500 }

@@ -39,7 +39,7 @@ export default function SettingsPage() {
       const data = await response.json();
       setSettings(data);
     } catch (error) {
-      console.error('Error loading settings:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to load system settings');
     } finally {
       setLoading(false);
@@ -65,7 +65,7 @@ export default function SettingsPage() {
       toast.success('Settings saved successfully');
       setHasChanges(false);
     } catch (error) {
-      console.error('Error saving settings:', error);
+      // [REMOVED_CONSOLE]
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);

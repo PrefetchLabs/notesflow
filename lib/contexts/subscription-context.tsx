@@ -92,7 +92,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     }
 
     try {
-      console.log('[SubscriptionContext] Fetching subscription for user:', user.email);
+      // [REMOVED_CONSOLE]
       const response = await fetch('/api/subscription', {
         cache: 'no-store',
         headers: {
@@ -101,16 +101,11 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('[SubscriptionContext] Subscription loaded:', {
-          plan: data.subscription?.plan,
-          status: data.subscription?.status,
-          metadata: data.subscription?.metadata,
-          usage: data.subscription?.usage,
-        });
+        // [REMOVED_CONSOLE]
         setSubscription(data.subscription);
       }
     } catch (error) {
-      console.error('Error fetching subscription:', error);
+      // [REMOVED_CONSOLE]
     } finally {
       setIsLoading(false);
     }
@@ -127,14 +122,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const isFreeTier = !isAdmin && !isPro && !isBeta;
 
   // Debug logging for plan detection
-  console.log('[SubscriptionContext] Plan detection:', {
-    isAdmin,
-    isBeta,
-    isPro,
-    isFreeTier,
-    subscriptionPlan: subscription?.plan,
-    user: user?.email,
-  });
+  // [REMOVED_CONSOLE]
   
   const limits = subscription?.limits || (isBeta ? betaLimits : defaultLimits);
   const usage = subscription?.usage || defaultUsage;
