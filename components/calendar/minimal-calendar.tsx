@@ -73,6 +73,8 @@ export function MinimalCalendar({
   const [currentTime, setCurrentTime] = useState(new Date());
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const lastInteractionRef = useRef<number>(Date.now());
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get current event
   const getCurrentEvent = useCallback(() => {
@@ -121,6 +123,59 @@ export function MinimalCalendar({
     return () => clearInterval(timer);
   }, []);
 
+  // Track user interactions
+  const updateLastInteraction = useCallback(() => {
+    lastInteractionRef.current = Date.now();
+    
+    // Clear existing idle timer
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+    
+    // Set new idle timer (30 seconds)
+    idleTimerRef.current = setTimeout(() => {
+      // Check if we're viewing today and should auto-center
+      const now = new Date();
+      const isToday = 
+        currentDate.getFullYear() === now.getFullYear() &&
+        currentDate.getMonth() === now.getMonth() &&
+        currentDate.getDate() === now.getDate();
+      
+      if (isToday && scrollRef.current) {
+        const currentHour = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const containerHeight = scrollRef.current.clientHeight;
+        const currentTimePosition = currentHour * HOUR_HEIGHT + (currentMinutes / 60) * HOUR_HEIGHT;
+        const currentScroll = scrollRef.current.scrollTop;
+        
+        // Check if current time is more than 2 hours away from center
+        const centerPosition = currentScroll + (containerHeight / 2);
+        const hoursDiff = Math.abs(currentTimePosition - centerPosition) / HOUR_HEIGHT;
+        
+        if (hoursDiff > 2) {
+          // Gentle re-center with slower animation
+          const idealScrollPosition = currentTimePosition - (containerHeight / 2) + (HOUR_HEIGHT / 2);
+          const maxScroll = scrollRef.current.scrollHeight - containerHeight;
+          const targetScroll = Math.max(0, Math.min(idealScrollPosition, maxScroll));
+          
+          scrollRef.current.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth'
+          });
+        }
+      }
+    }, 30000); // 30 seconds idle time
+  }, [currentDate]);
+
+  // Clean up idle timer on unmount
+  useEffect(() => {
+    return () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+    };
+  }, []);
+
   // Check if a time range overlaps with existing blocks
   const hasOverlap = useCallback((startTime: Date, endTime: Date, excludeId?: string) => {
     return blocks.some(block => {
@@ -167,6 +222,8 @@ export function MinimalCalendar({
     if ((e.target as HTMLElement).closest('.calendar-block')) return;
     if (!gridRef.current) return;
     
+    updateLastInteraction();
+    
     const rect = gridRef.current.getBoundingClientRect();
     const scrollTop = scrollRef.current?.scrollTop || 0;
     const y = e.clientY - rect.top + scrollTop;
@@ -183,7 +240,7 @@ export function MinimalCalendar({
       startTime,
       endTime: startTime
     });
-  }, [yToTime, timeToY, onInteractionStart]);
+  }, [yToTime, timeToY, onInteractionStart, updateLastInteraction]);
 
   // Handle mouse move during drag
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -404,47 +461,43 @@ export function MinimalCalendar({
 
   // Scroll to current time on mount and when date changes
   useEffect(() => {
-    if (scrollRef.current) {
-      const now = new Date();
-      
-      // Check if we're viewing today
-      const isToday = 
-        currentDate.getFullYear() === now.getFullYear() &&
-        currentDate.getMonth() === now.getMonth() &&
-        currentDate.getDate() === now.getDate();
-      
-      if (isToday) {
+    if (!scrollRef.current) return;
+    
+    const now = new Date();
+    
+    // Check if we're viewing today
+    const isToday = 
+      currentDate.getFullYear() === now.getFullYear() &&
+      currentDate.getMonth() === now.getMonth() &&
+      currentDate.getDate() === now.getDate();
+    
+    if (isToday) {
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        if (!scrollRef.current) return;
+        
         const currentHour = now.getHours();
         const currentMinutes = now.getMinutes();
         
         // Get the scroll container height
         const containerHeight = scrollRef.current.clientHeight;
         
-        // Calculate the position of current time
+        // Calculate the exact position of current time
         const currentTimePosition = currentHour * HOUR_HEIGHT + (currentMinutes / 60) * HOUR_HEIGHT;
         
-        // Calculate scroll position to center current time in view
-        const scrollPosition = currentTimePosition - (containerHeight / 2);
+        // Calculate scroll position to perfectly center current time
+        // Add half hour height to center the line itself, not just the hour block
+        const idealScrollPosition = currentTimePosition - (containerHeight / 2) + (HOUR_HEIGHT / 2);
         
-        // Add a slight delay for smoother initial load
-        setTimeout(() => {
-          if (scrollRef.current) {
-            // Check if current time is already visible
-            const currentScrollTop = scrollRef.current.scrollTop;
-            const isVisible = 
-              currentTimePosition >= currentScrollTop && 
-              currentTimePosition <= currentScrollTop + containerHeight;
-            
-            // Only scroll if current time is not already nicely visible
-            if (!isVisible || Math.abs(currentScrollTop - scrollPosition) > 100) {
-              scrollRef.current.scrollTo({
-                top: Math.max(0, Math.min(scrollPosition, scrollRef.current.scrollHeight - containerHeight)),
-                behavior: 'smooth'
-              });
-            }
-          }
-        }, 150);
-      }
+        // Ensure we don't scroll past bounds
+        const maxScroll = scrollRef.current.scrollHeight - containerHeight;
+        const targetScroll = Math.max(0, Math.min(idealScrollPosition, maxScroll));
+        
+        scrollRef.current.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        });
+      });
     }
   }, [currentDate]);
 
@@ -586,7 +639,11 @@ export function MinimalCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <ScrollArea className="flex-1 overflow-hidden" ref={scrollRef}>
+      <ScrollArea 
+        className="flex-1 overflow-hidden" 
+        ref={scrollRef}
+        onScroll={updateLastInteraction}
+      >
         <div 
           ref={gridRef}
           className="relative select-none cursor-crosshair"
@@ -853,8 +910,8 @@ export function MinimalCalendar({
                 }}
               >
                 <div className="w-16" />
-                <div className="h-0.5 bg-red-500 flex-1" />
-                <div className="w-2 h-2 bg-red-500 rounded-full -ml-1" />
+                <div className="h-[3px] bg-red-500 flex-1 shadow-sm" />
+                <div className="w-3 h-3 bg-red-500 rounded-full -ml-1.5 shadow-sm animate-pulse" />
               </div>
             );
           })()}
