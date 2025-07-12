@@ -47,10 +47,7 @@ export function useRealtimeTimeBlocks({
 
   // Handle real-time update
   const handleRealtimeUpdate = (payload: RealtimePostgresChangesPayload<any>) => {
-    // Skip if this change is from the current user's action (handled optimistically)
-    if (payload.new?.updatedAt && Date.now() - new Date(payload.new.updatedAt).getTime() < 1000) {
-      return;
-    }
+    console.log('Realtime event received:', payload.eventType, payload);
 
     if (isInteracting) {
       // Queue the update for later
@@ -58,9 +55,11 @@ export function useRealtimeTimeBlocks({
         type: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
         payload,
       });
+      console.log('Update queued due to interaction');
     } else {
       // Process immediately
       processChange(payload);
+      console.log('Update processed immediately');
     }
   };
 
@@ -80,6 +79,8 @@ export function useRealtimeTimeBlocks({
   useEffect(() => {
     if (!userId) return;
 
+    console.log('Setting up realtime subscription for user:', userId);
+
     // Subscribe to real-time changes
     const channel = supabase
       .channel(`time-blocks-${userId}`)
@@ -93,10 +94,13 @@ export function useRealtimeTimeBlocks({
         },
         handleRealtimeUpdate
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
-  }, [userId, isInteracting]);
+  }, [userId]); // Remove isInteracting from dependencies to prevent resubscription
 }

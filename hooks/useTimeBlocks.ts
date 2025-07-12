@@ -78,28 +78,36 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
 
   // Real-time sync handlers
   const handleRealtimeInsert = useCallback((newBlock: TimeBlock) => {
+    console.log('Handling realtime insert:', newBlock);
     setBlocks((prev) => {
       // Check if block already exists (optimistic update)
       if (prev.some(b => b.id === newBlock.id)) {
+        console.log('Block already exists, skipping insert');
         return prev;
       }
+      console.log('Adding new block from realtime');
       return [...prev, newBlock];
     });
   }, []);
 
   const handleRealtimeUpdate = useCallback((updatedBlock: TimeBlock) => {
+    console.log('Handling realtime update:', updatedBlock);
     setBlocks((prev) => 
       prev.map((b) => (b.id === updatedBlock.id ? updatedBlock : b))
     );
   }, []);
 
   const handleRealtimeDelete = useCallback((deletedId: string) => {
+    console.log('Handling realtime delete:', deletedId);
     setBlocks((prev) => prev.filter((b) => b.id !== deletedId));
   }, []);
 
   // Set up real-time subscription
+  const userId = session?.user?.id || '';
+  console.log('useTimeBlocks - userId:', userId, 'session:', session);
+  
   useRealtimeTimeBlocks({
-    userId: session?.user?.id || '',
+    userId,
     onInsert: handleRealtimeInsert,
     onUpdate: handleRealtimeUpdate,
     onDelete: handleRealtimeDelete,
