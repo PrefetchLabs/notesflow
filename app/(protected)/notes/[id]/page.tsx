@@ -418,20 +418,6 @@ export default function NotePage() {
                 <Save className="h-4 w-4" />
               </Button>
 
-              <div className="h-5 w-px bg-border" />
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => window.dispatchEvent(new CustomEvent('toggle-calendar'))}
-                title="Toggle calendar (Cmd/Ctrl + T)"
-                className="h-8 w-8"
-              >
-                <Calendar className="h-4 w-4" />
-              </Button>
-              
-              <ThemeToggle />
-
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -475,6 +461,20 @@ export default function NotePage() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              
+              <div className="h-5 w-px bg-border" />
+              
+              <ThemeToggle />
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => window.dispatchEvent(new CustomEvent('toggle-calendar'))}
+                title="Toggle calendar (Cmd/Ctrl + T)"
+                className="h-8 w-8"
+              >
+                <Calendar className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
