@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, startTime, endTime, color, noteId, type } = body;
+    const { title, startTime, endTime, color, icon, noteId, type } = body;
 
     if (!title || !startTime || !endTime) {
       return NextResponse.json(
@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
         startTime: start,
         endTime: end,
         color: color || '#3B82F6',
+        icon: icon || null,
         noteId: noteId || null,
         isCompleted: false,
         type: type || 'event',

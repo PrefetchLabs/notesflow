@@ -10,6 +10,7 @@ export interface TimeBlock {
   startTime: Date;
   endTime: Date;
   color?: string;
+  icon?: string;
   isCompleted: boolean;
   noteId?: string | null;
   type?: 'event' | 'task';
@@ -20,6 +21,7 @@ interface CreateTimeBlockInput {
   startTime: Date;
   endTime: Date;
   color?: string;
+  icon?: string;
   noteId?: string | null;
   type?: 'event' | 'task';
 }
@@ -114,6 +116,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
         startTime: input.startTime,
         endTime: input.endTime,
         color: input.color || '#3B82F6',
+        icon: input.icon,
         isCompleted: false,
         noteId: input.noteId,
         type: input.type || 'event',
@@ -132,6 +135,7 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
             startTime: input.startTime.toISOString(),
             endTime: input.endTime.toISOString(),
             color: input.color,
+            icon: input.icon,
             noteId: input.noteId,
             type: input.type,
           }),

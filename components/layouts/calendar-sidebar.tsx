@@ -34,13 +34,14 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   };
 
   // Handle creating tasks from the calendar
-  const handleCreateTask = async (startTime: Date, endTime: Date, title?: string, color?: string) => {
+  const handleCreateTask = async (startTime: Date, endTime: Date, title?: string, color?: string, icon?: string) => {
     try {
       await createBlock({
         title: title || 'New Task',
         startTime,
         endTime,
         color: color || '#10B981', // Green for tasks by default
+        icon: icon || null,
         type: 'task',
       });
       toast.success('Task created');

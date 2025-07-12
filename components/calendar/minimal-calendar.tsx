@@ -16,7 +16,7 @@ interface MinimalCalendarProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
   onCreateEvent?: (startTime: Date, endTime: Date) => void;
-  onCreateTask?: (startTime: Date, endTime: Date, title?: string, color?: string) => void;
+  onCreateTask?: (startTime: Date, endTime: Date, title?: string, color?: string, icon?: string) => void;
   onUpdateBlock?: (id: string, startTime: Date, endTime: Date) => void;
   onDeleteBlock?: (id: string) => void;
   onToggleComplete?: (id: string) => void;
@@ -31,6 +31,7 @@ interface MinimalCalendarProps {
     startTime: Date;
     endTime: Date;
     color?: string;
+    icon?: string;
     isCompleted: boolean;
     type?: 'event' | 'task';
   }>;
@@ -384,10 +385,10 @@ export function MinimalCalendar({
     setDragSelection(null);
   };
 
-  const handleCreateTask = (title?: string, color?: string) => {
+  const handleCreateTask = (title?: string, color?: string, icon?: string) => {
     if (!menuSelectionData || !onCreateTask) return;
     
-    onCreateTask(menuSelectionData.startTime, menuSelectionData.endTime, title, color);
+    onCreateTask(menuSelectionData.startTime, menuSelectionData.endTime, title, color, icon);
     setShowMenu(false);
     setMenuSelectionData(null);
     setDragSelection(null);
@@ -884,12 +885,13 @@ export function MinimalCalendar({
                       ) : (
                         <div 
                           className={cn(
-                            "font-medium truncate cursor-text",
+                            "font-medium truncate cursor-text flex items-center gap-1.5",
                             block.isCompleted && "line-through opacity-75"
                           )}
                           onDoubleClick={(e) => handleBlockDoubleClick(e, block)}
                         >
-                          {block.title}
+                          {block.icon && <span className="text-sm">{block.icon}</span>}
+                          <span>{block.title}</span>
                         </div>
                       )}
                       <div className="text-xs opacity-80">
@@ -971,7 +973,7 @@ export function MinimalCalendar({
                   <button
                     key={preset.title}
                     className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
-                    onClick={() => handleCreateTask(preset.title, preset.color)}
+                    onClick={() => handleCreateTask(preset.title, preset.color, preset.emoji)}
                   >
                     <span className="text-lg">{preset.emoji}</span>
                     <span>{preset.title}</span>

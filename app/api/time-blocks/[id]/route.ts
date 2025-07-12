@@ -25,6 +25,7 @@ export async function PATCH(
     if (body.startTime !== undefined) updates.startTime = new Date(body.startTime);
     if (body.endTime !== undefined) updates.endTime = new Date(body.endTime);
     if (body.color !== undefined) updates.color = body.color;
+    if (body.icon !== undefined) updates.icon = body.icon;
     if (body.isCompleted !== undefined) {
       updates.isCompleted = body.isCompleted;
       if (body.isCompleted) {

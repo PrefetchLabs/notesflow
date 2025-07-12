@@ -27,6 +27,7 @@ export const timeBlocks = pgTable(
     startTime: timestamp('start_time', { withTimezone: true }).notNull(),
     endTime: timestamp('end_time', { withTimezone: true }).notNull(),
     color: text('color').default('#3B82F6'), // Default blue color
+    icon: text('icon'), // Emoji or icon identifier
     type: text('type', { enum: ['event', 'task'] }).default('event').notNull(),
     recurrenceRule: jsonb('recurrence_rule'), // RRULE format for recurring events
     recurrenceId: text('recurrence_id'), // Parent ID for recurring instances
