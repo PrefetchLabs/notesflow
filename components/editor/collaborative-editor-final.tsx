@@ -18,6 +18,7 @@ import { SuggestionMenuWithAI } from "./ai/SuggestionMenuWithAI";
 import { CustomAIMenu } from "./ai/CustomAIMenu";
 import { createAIExtension } from "@/lib/editor/ai-extension";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
+import { uploadFile } from "@/lib/editor/upload-handler";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Users, WifiOff, Wifi } from "lucide-react";
@@ -238,6 +239,7 @@ export function CollaborativeEditorFinal({
     blockSpecs: {
       ...defaultBlockSpecs,
     },
+    uploadFile: uploadFile, // Enable image uploads
     collaboration: provider ? {
       provider,
       fragment: ydoc.getXmlFragment("document-store"),

@@ -447,7 +447,7 @@
 
 /* Remove default padding from blocks */
 .bn-editor .bn-block-outer {
-  @apply mb-1;
+  @apply mb-0;
 }
 
 /* Headings */
@@ -614,7 +614,28 @@
 
 /* Image styles */
 .bn-editor img {
-  @apply rounded-lg shadow-sm max-w-full h-auto;
+  @apply rounded-lg shadow-sm max-w-full h-auto my-4 mx-auto block;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bn-editor img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Image block container */
+.bn-editor .bn-image-block {
+  @apply my-4;
+}
+
+/* Image upload states */
+.bn-editor .bn-image-uploading {
+  @apply opacity-50;
+}
+
+.bn-editor .bn-image-upload-error {
+  @apply border-2 border-destructive p-4 rounded-lg;
 }
 
 /* Dark mode overrides */
