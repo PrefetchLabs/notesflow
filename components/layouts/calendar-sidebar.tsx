@@ -54,6 +54,16 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
     }
   };
 
+  // Handle deleting blocks
+  const handleDeleteBlock = async (id: string) => {
+    try {
+      await deleteBlock(id);
+      toast.success('Block deleted');
+    } catch (error) {
+      toast.error('Failed to delete block');
+    }
+  };
+
   return (
     <aside className="calendar-sidebar relative w-[280px] h-full bg-background border-l">
       <MinimalCalendar 
@@ -62,6 +72,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         onCreateEvent={handleCreateEvent}
         onCreateTask={handleCreateTask}
         onUpdateBlock={handleUpdateBlock}
+        onDeleteBlock={handleDeleteBlock}
         blocks={blocks}
       />
     </aside>
