@@ -74,7 +74,7 @@ export default function DashboardPage() {
         <h1 className="text-xl font-semibold sm:text-2xl">Dashboard</h1>
       </header>
       
-      <main className="flex-1 p-4 pb-20 sm:p-6 md:pb-6">
+      <main className="flex-1 overflow-y-auto p-4 pb-20 sm:p-6 md:pb-6">
         <motion.div 
           className="mx-auto max-w-4xl"
           initial={{ opacity: 0, y: 20 }}
@@ -90,7 +90,7 @@ export default function DashboardPage() {
           
           <div className="mt-6 rounded-lg border bg-card p-4 sm:mt-8 sm:p-6">
             <h2 className="text-base font-semibold sm:text-lg">Quick Stats</h2>
-            <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-3">
+            <div className="mt-4 grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 sm:grid-cols-3">
               <motion.div 
                 className="rounded-lg bg-background p-3 sm:p-4"
                 whileHover={{ scale: 1.02 }}
@@ -128,7 +128,7 @@ export default function DashboardPage() {
           {isFreeTier && (
             <div className="mt-6 space-y-4">
               <h2 className="text-base font-semibold sm:text-lg">Usage Limits</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <UsageIndicator
                   label="Notes"
                   used={usage.notesCount}

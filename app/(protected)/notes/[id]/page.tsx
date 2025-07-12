@@ -7,6 +7,7 @@ import { CollaborativeEditorFinal } from '@/components/editor/collaborative-edit
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight, Calendar } from 'lucide-react';
 import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
+import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSubscription } from '@/lib/contexts/subscription-context';
 import { ProBadge } from '@/components/ui/pro-badge';
@@ -28,6 +29,7 @@ import { suggestTitleFromContent } from '@/lib/utils/titleExtraction';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 import { useRecentNotes } from '@/hooks/useRecentNotes';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useResponsive } from '@/hooks/useResponsive';
 
 export default function NotePage() {
   const params = useParams();
@@ -37,6 +39,7 @@ export default function NotePage() {
   const { setHasUnsavedChanges: setGlobalUnsavedChanges, promptToSave } = useUnsavedChanges();
   const { addToRecent } = useRecentNotes();
   const { isPro } = useSubscription();
+  const { isMobile, isTablet } = useResponsive();
 
   const [note, setNote] = useState<any>(null);
   const [content, setContent] = useState<any>(null);
@@ -365,44 +368,57 @@ export default function NotePage() {
     <div className="flex h-full flex-col">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="px-6 py-4">
+        <div className={cn("px-4 py-3", !isMobile && "px-6 py-4")}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
               <Button
                 variant="ghost"
-                size="icon"
+                size={isMobile ? "sm" : "icon"}
                 onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
-                className="h-8 w-8 flex-shrink-0"
+                className={cn(
+                  "flex-shrink-0",
+                  isMobile ? "h-8 w-8" : "h-8 w-8"
+                )}
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div className="flex items-center gap-1.5 text-sm min-w-0 flex-1">
-                <button
-                  onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
-                  className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-                >
-                  Dashboard
-                </button>
-                {getFolderPath() && (
+              <div className={cn(
+                "flex items-center gap-1.5 min-w-0 flex-1",
+                isMobile ? "text-xs" : "text-sm"
+              )}>
+                {!isMobile && (
                   <>
+                    <button
+                      onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
+                      className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                    >
+                      Dashboard
+                    </button>
+                    {getFolderPath() && (
+                      <>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground hover:text-foreground transition-colors truncate">
+                          {getFolderPath()}
+                        </span>
+                      </>
+                    )}
                     <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-muted-foreground hover:text-foreground transition-colors truncate">
-                      {getFolderPath()}
-                    </span>
                   </>
                 )}
-                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <span className="font-medium truncate">{title || 'Untitled Note'}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0 pl-4">
+            <div className={cn(
+              "flex items-center gap-2 flex-shrink-0",
+              isMobile ? "gap-1" : "gap-2 pl-4"
+            )}>
               {lastSaved && (
                 <span className="text-xs text-muted-foreground hidden sm:block">
                   <RelativeTime date={lastSaved} />
                 </span>
               )}
 
-              {isSaving && (
+              {isSaving && !isMobile && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -414,14 +430,24 @@ export default function NotePage() {
                 </motion.div>
               )}
 
-              <Button variant="ghost" size="sm" onClick={handleSave} disabled={isSaving}>
-                <Save className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size={isMobile ? "icon" : "sm"} 
+                onClick={handleSave} 
+                disabled={isSaving}
+                className={isMobile ? "h-8 w-8" : ""}
+              >
+                <Save className={isMobile ? "h-3.5 w-3.5" : "h-4 w-4"} />
               </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-4 w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className={isMobile ? "h-8 w-8" : ""}
+                  >
+                    <MoreVertical className={isMobile ? "h-3.5 w-3.5" : "h-4 w-4"} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -462,19 +488,23 @@ export default function NotePage() {
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              <div className="h-5 w-px bg-border" />
-              
-              <ThemeToggle />
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => window.dispatchEvent(new CustomEvent('toggle-calendar'))}
-                title="Toggle calendar (Cmd/Ctrl + T)"
-                className="h-8 w-8"
-              >
-                <Calendar className="h-4 w-4" />
-              </Button>
+              {!isMobile && (
+                <>
+                  <div className="h-5 w-px bg-border" />
+                  
+                  <ThemeToggle />
+                  
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.dispatchEvent(new CustomEvent('toggle-calendar'))}
+                    title="Toggle calendar (Cmd/Ctrl + T)"
+                    className="h-8 w-8"
+                  >
+                    <Calendar className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -482,8 +512,14 @@ export default function NotePage() {
 
       {/* Editor */}
       <main className="flex-1 overflow-auto">
-        <div className="h-full px-4 py-6 md:px-8 lg:px-12">
-          <div className="mx-auto h-full max-w-4xl">
+        <div className={cn(
+          "h-full",
+          isMobile ? "px-4 py-4" : "px-4 py-6 md:px-8 lg:px-12"
+        )}>
+          <div className={cn(
+            "mx-auto h-full",
+            isMobile ? "max-w-full" : "max-w-4xl"
+          )}>
             {isLoading ? (
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
@@ -495,12 +531,18 @@ export default function NotePage() {
               <>
                 {/* Title Input - Notion Style */}
                 {hasEditPermission && (
-                  <div className="mb-6 pl-4 md:pl-28">
+                  <div className={cn(
+                    "mb-6",
+                    isMobile ? "pl-0" : "pl-4 md:pl-28"
+                  )}>
                     <input
                       type="text"
                       value={title}
                       onChange={handleTitleChange}
-                      className="w-full bg-transparent text-5xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/40 focus:ring-0"
+                      className={cn(
+                        "w-full bg-transparent font-bold tracking-tight outline-none placeholder:text-muted-foreground/40 focus:ring-0",
+                        isMobile ? "text-3xl" : isTablet ? "text-4xl" : "text-5xl"
+                      )}
                       placeholder="Untitled"
                     />
                   </div>
@@ -520,8 +562,14 @@ export default function NotePage() {
                   ) : (
                     // View-only mode for collaborators without edit permission
                     <>
-                      <div className="mb-6 pl-4 md:pl-8">
-                        <h1 className="text-5xl font-bold tracking-tight">{title || 'Untitled'}</h1>
+                      <div className={cn(
+                        "mb-6",
+                        isMobile ? "pl-0" : "pl-4 md:pl-8"
+                      )}>
+                        <h1 className={cn(
+                          "font-bold tracking-tight",
+                          isMobile ? "text-3xl" : isTablet ? "text-4xl" : "text-5xl"
+                        )}>{title || 'Untitled'}</h1>
                       </div>
                       <div className="rounded-lg border bg-muted/10 p-8">
                         <BlockNoteAIEditor

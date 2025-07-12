@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Menu, Calendar, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TimeBlockingCalendar } from '@/components/calendar/time-blocking-calendar';
+import { MobileCalendarSheet } from '@/components/calendar/mobile-calendar-sheet';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -17,7 +18,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isDesktop } = useResponsive();
+  const { isDesktop, isTablet, isMobile } = useResponsive();
 
   useEffect(() => {
     // Restore sidebar state from localStorage
@@ -25,8 +26,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (savedState !== null) {
       setSidebarHidden(JSON.parse(savedState));
     }
+    // Default to hidden sidebar on tablets
+    if (isTablet && savedState === null) {
+      setSidebarHidden(true);
+    }
+    // Default to closed calendar on tablets
+    if (isTablet) {
+      setCalendarOpen(false);
+    }
     setIsLoading(false);
-  }, []);
+  }, [isTablet]);
 
   // Listen for calendar toggle keyboard shortcut
   useEffect(() => {
@@ -93,8 +102,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="h-full w-full">{children}</div>
         </main>
         
-        {/* Calendar sidebar */}
-        <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
+        {/* Mobile Calendar Sheet */}
+        <MobileCalendarSheet 
+          isOpen={calendarOpen} 
+          onOpenChange={setCalendarOpen} 
+        />
       </div>
     );
   }
@@ -140,8 +152,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className={cn(
           'grid',
           sidebarHidden ? 'h-[calc(100vh-3.5rem)]' : 'h-screen',
-          // Grid columns
-          {
+          // Grid columns - adjust for tablets
+          isTablet ? {
+            'grid-cols-1': sidebarHidden || (!sidebarHidden && !calendarOpen),
+            'grid-cols-[240px_1fr]': !sidebarHidden && !calendarOpen,
+          } : {
             'grid-cols-1': sidebarHidden && !calendarOpen,
             'grid-cols-[280px_1fr]': !sidebarHidden && !calendarOpen,
             'grid-cols-[1fr_280px]': sidebarHidden && calendarOpen,
@@ -151,7 +166,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         {/* Left Sidebar */}
         {!sidebarHidden && (
-          <Sidebar onToggle={toggleSidebar} />
+          <div className={isTablet ? "w-[240px]" : ""}>
+            <Sidebar onToggle={toggleSidebar} />
+          </div>
         )}
         
         {/* Main Content */}
@@ -159,9 +176,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="h-full w-full">{children}</div>
         </main>
         
-        {/* Right Calendar Sidebar */}
-        {calendarOpen && (
-          <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
+        {/* Right Calendar - Use Sheet for tablets, sidebar for desktop */}
+        {isTablet ? (
+          <MobileCalendarSheet 
+            isOpen={calendarOpen} 
+            onOpenChange={setCalendarOpen} 
+          />
+        ) : (
+          calendarOpen && (
+            <TimeBlockingCalendar isOpen={calendarOpen} onToggle={() => setCalendarOpen(!calendarOpen)} />
+          )
         )}
       </div>
     </div>

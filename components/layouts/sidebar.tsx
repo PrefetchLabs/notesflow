@@ -14,6 +14,7 @@ import { useFoldersWithNotes } from '@/hooks/useFoldersWithNotes';
 import { useState, useEffect } from 'react';
 import { useSubscription } from '@/lib/contexts/subscription-context';
 import { toast } from 'sonner';
+import { useResponsive } from '@/hooks/useResponsive';
 
 interface SidebarProps {
   onToggle: () => void;
@@ -24,6 +25,7 @@ export function Sidebar({ onToggle }: SidebarProps) {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const { folders, rootNotes, sharedNotes, isLoading, createFolder, updateFolder, deleteFolder, updateFolderPositions, moveNoteToFolder, refresh } = useFoldersWithNotes();
   const { checkLimit, refreshSubscription } = useSubscription();
+  const { isMobile } = useResponsive();
 
   // Force refresh on mount to ensure we have latest shared notes
   useEffect(() => {
@@ -97,7 +99,10 @@ export function Sidebar({ onToggle }: SidebarProps) {
   };
 
   return (
-    <aside className="sidebar relative flex h-screen flex-col border-r bg-sidebar-background w-[280px]">
+    <aside className={cn(
+      "sidebar relative flex h-screen flex-col border-r bg-sidebar-background",
+      isMobile ? "w-full" : "w-[280px]"
+    )}>
       {/* Logo and Version */}
       <div className="border-b p-4">
         <div className="flex items-baseline gap-2">
@@ -141,11 +146,17 @@ export function Sidebar({ onToggle }: SidebarProps) {
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
-                className="w-full justify-start"
+                size={isMobile ? "default" : "sm"}
+                className={cn(
+                  "w-full justify-start",
+                  isMobile && "h-12" // Larger touch target on mobile
+                )}
                 onClick={handleCreateNote}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className={cn(
+                  "mr-2",
+                  isMobile ? "h-5 w-5" : "h-4 w-4"
+                )} />
                 New Note
               </Button>
             </TooltipTrigger>
@@ -202,10 +213,16 @@ export function Sidebar({ onToggle }: SidebarProps) {
                 <Link href="/trash" className="block">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
+                    size={isMobile ? "default" : "sm"}
+                    className={cn(
+                      "w-full justify-start",
+                      isMobile && "h-12" // Larger touch target on mobile
+                    )}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className={cn(
+                      "mr-2",
+                      isMobile ? "h-5 w-5" : "h-4 w-4"
+                    )} />
                     Trash
                   </Button>
                 </Link>

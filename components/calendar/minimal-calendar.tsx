@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { ColorPalette } from './color-palette';
+import { useResponsive } from '@/hooks/useResponsive';
 
 const HOUR_HEIGHT = 60; // Height of each hour row
 const HOURS = Array.from({ length: 24 }, (_, i) => i); // 0-23 hours
@@ -89,6 +90,8 @@ export function MinimalCalendar({
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastInteractionRef = useRef<number>(Date.now());
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const { isMobile, isTablet } = useResponsive();
+  const touchStartXRef = useRef<number | null>(null);
 
   // Get current event
   const getCurrentEvent = useCallback(() => {
@@ -599,6 +602,31 @@ export function MinimalCalendar({
     return () => window.removeEventListener('calendar-today', handleGoToToday);
   }, [onDateChange]);
 
+  // Handle touch events for swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartXRef.current || !isMobile) return;
+    
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartXRef.current - touchEndX;
+    const threshold = 50; // Minimum swipe distance
+    
+    if (Math.abs(diffX) > threshold) {
+      if (diffX > 0) {
+        // Swipe left - next day
+        onDateChange(new Date(currentDate.getTime() + 86400000));
+      } else {
+        // Swipe right - previous day
+        onDateChange(new Date(currentDate.getTime() - 86400000));
+      }
+    }
+    
+    touchStartXRef.current = null;
+  }, [currentDate, onDateChange, isMobile]);
+
   const currentEvent = getCurrentEvent();
   const isToday = 
     currentDate.getFullYear() === currentTime.getFullYear() &&
@@ -739,9 +767,14 @@ export function MinimalCalendar({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Background click area */}
-          <div className="absolute inset-0 left-16" />
+          <div className={cn(
+            "absolute inset-0",
+            isMobile ? "left-12" : "left-16"
+          )} />
           
           {/* Hour rows */}
           {HOURS.map((hour) => (
@@ -750,9 +783,21 @@ export function MinimalCalendar({
               className="absolute w-full flex pointer-events-none"
               style={{ top: `${hour * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
             >
-              <div className="w-16 flex-shrink-0 text-right pr-3 pt-2">
-                <span className="text-xs text-muted-foreground">
-                  {hour === 0 ? '12' : hour > 12 ? hour - 12 : hour} {hour < 12 ? 'AM' : 'PM'}
+              <div className={cn(
+                "flex-shrink-0 text-right pt-2",
+                isMobile ? "w-12 pr-2" : "w-16 pr-3"
+              )}>
+                <span className={cn(
+                  "text-muted-foreground",
+                  isMobile ? "text-[10px]" : "text-xs"
+                )}>
+                  {isMobile ? (
+                    // Show just the hour on mobile
+                    hour === 0 ? '12' : hour > 12 ? hour - 12 : hour
+                  ) : (
+                    // Show full time on desktop
+                    `${hour === 0 ? '12' : hour > 12 ? hour - 12 : hour} ${hour < 12 ? 'AM' : 'PM'}`
+                  )}
                 </span>
               </div>
               <div className="flex-1 border-t border-border" />
@@ -795,7 +840,8 @@ export function MinimalCalendar({
             return (
               <div
                 className={cn(
-                  "absolute left-16 right-4 rounded-lg pointer-events-none transition-colors",
+                  "absolute rounded-lg pointer-events-none transition-colors",
+                  isMobile ? "left-12 right-2" : "left-16 right-4",
                   isOverlapping 
                     ? "bg-red-500/20 border-2 border-red-500" 
                     : "bg-blue-500/30 border-2 border-blue-500 border-dashed"
@@ -845,7 +891,8 @@ export function MinimalCalendar({
             return (
               <div
                 className={cn(
-                  "absolute left-16 right-4 rounded-lg p-2 text-xs pointer-events-none transition-opacity",
+                  "absolute rounded-lg p-2 text-xs pointer-events-none transition-opacity",
+                  isMobile ? "left-12 right-2" : "left-16 right-4",
                   "shadow-lg"
                 )}
                 style={{
@@ -898,7 +945,8 @@ export function MinimalCalendar({
               <div
                 key={block.id}
                 className={cn(
-                  "calendar-block absolute left-16 right-4 rounded-lg p-2 text-xs text-white group",
+                  "calendar-block absolute rounded-lg p-2 text-xs text-white group",
+                  isMobile ? "left-12 right-2" : "left-16 right-4",
                   isDragging ? "opacity-30" : "hover:shadow-lg transition-shadow",
                   isResizing ? "opacity-50" : "",
                   "cursor-grab active:cursor-grabbing"

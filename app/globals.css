@@ -748,6 +748,134 @@ html.light {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ===== Mobile-Specific Styles ===== */
+@layer utilities {
+  /* Touch-friendly tap targets */
+  @media (max-width: 768px) {
+    /* Minimum 44px touch targets */
+    button, 
+    a, 
+    [role="button"], 
+    input[type="checkbox"], 
+    input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Better spacing for mobile */
+    .mobile-spacing {
+      @apply px-4 py-3;
+    }
+    
+    /* Hide scrollbars on mobile for better UX */
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    
+    /* Prevent text selection on interactive elements */
+    button, a, [role="button"] {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Better focus states for mobile */
+    :focus-visible {
+      @apply outline-none ring-2 ring-primary ring-offset-4 ring-offset-background;
+    }
+    
+    /* Optimize font sizes for mobile readability */
+    .text-xs {
+      font-size: 0.8125rem; /* 13px instead of 12px */
+    }
+    
+    .text-sm {
+      font-size: 0.9375rem; /* 15px instead of 14px */
+    }
+    
+    /* Better touch feedback */
+    .touch-feedback {
+      @apply active:scale-95 active:opacity-70 transition-all duration-75;
+    }
+  }
+  
+  /* Tablet-specific adjustments */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    /* Slightly larger touch targets for tablets */
+    button, 
+    a, 
+    [role="button"] {
+      min-height: 40px;
+    }
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  @supports (-webkit-touch-callout: none) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+  
+  /* Safe area insets for devices with notches */
+  @supports (padding: max(0px)) {
+    .safe-top {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+    
+    .safe-bottom {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+    
+    .safe-left {
+      padding-left: max(1rem, env(safe-area-inset-left));
+    }
+    
+    .safe-right {
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+  }
+}
+
+/* ===== Mobile Editor Overrides ===== */
+@media (max-width: 768px) {
+  .bn-editor {
+    @apply px-3 py-4;
+  }
+  
+  .bn-editor h1 {
+    @apply text-2xl;
+  }
+  
+  .bn-editor h2 {
+    @apply text-xl;
+  }
+  
+  .bn-editor h3 {
+    @apply text-lg;
+  }
+  
+  .bn-editor p {
+    @apply text-base leading-relaxed;
+  }
+  
+  /* Larger touch targets for editor buttons */
+  .bn-formatting-toolbar-button {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .bn-slash-menu-item {
+    @apply min-h-[44px] py-3;
+  }
+}
+
 /* ===== Print Styles ===== */
 @media print {
   body {
