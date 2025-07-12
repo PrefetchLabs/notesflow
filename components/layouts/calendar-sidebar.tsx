@@ -70,11 +70,14 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   const handleToggleComplete = async (id: string) => {
     try {
       const block = blocks.find(b => b.id === id);
-      if (block) {
-        await updateBlock(id, { isCompleted: !block.isCompleted });
-        toast.success(block.isCompleted ? 'Task marked as incomplete' : 'Task marked as complete');
+      if (!block) {
+        console.warn('Block not found:', id);
+        return;
       }
+      await updateBlock(id, { isCompleted: !block.isCompleted });
+      toast.success(block.isCompleted ? 'Task marked as incomplete' : 'Task marked as complete');
     } catch (error) {
+      console.error('Failed to update task:', error);
       toast.error('Failed to update task');
     }
   };

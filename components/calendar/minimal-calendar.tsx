@@ -318,6 +318,7 @@ export function MinimalCalendar({
   // Handle checkbox click for tasks
   const handleCheckboxClick = useCallback((e: React.MouseEvent, blockId: string) => {
     e.stopPropagation();
+    e.preventDefault();
     if (onToggleComplete) {
       onToggleComplete(blockId);
     }
@@ -554,7 +555,14 @@ export function MinimalCalendar({
                   backgroundColor: block.color || '#3B82F6',
                   opacity: block.isCompleted ? 0.6 : isDragging ? 0.3 : 1,
                 }}
-                onMouseDown={(e) => handleBlockMouseDown(e, block.id)}
+                onMouseDown={(e) => {
+                  // Don't start drag if clicking on interactive elements
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button') || target.closest('input')) {
+                    return;
+                  }
+                  handleBlockMouseDown(e, block.id);
+                }}
                 onMouseEnter={() => setHoveredBlockId(block.id)}
                 onMouseLeave={() => setHoveredBlockId(null)}
               >
@@ -619,6 +627,7 @@ export function MinimalCalendar({
                       )}
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         onDeleteBlock(block.id);
                       }}
                     >
