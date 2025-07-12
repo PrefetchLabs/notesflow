@@ -59,24 +59,24 @@ export function ColorPalette({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="color-palette fixed z-50 bg-background border rounded-lg shadow-lg p-2"
-          initial={{ opacity: 0, scale: 0.9 }}
+          className="color-palette fixed z-50 bg-background border rounded-md shadow-lg p-1"
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 0.15 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.1 }}
           style={{
             left: position.x,
             top: position.y,
           }}
         >
-          <div className="grid grid-cols-5 gap-1">
+          <div className="grid grid-cols-5 gap-0.5">
             {PRESET_COLORS.map((color) => (
               <button
                 key={color.value}
                 className={cn(
-                  "w-8 h-8 rounded-md transition-all hover:scale-110",
-                  "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
-                  currentColor === color.value && "ring-2 ring-offset-2 ring-offset-background ring-foreground"
+                  "w-5 h-5 rounded transition-all hover:scale-110",
+                  "focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-offset-background",
+                  currentColor === color.value && "ring-1 ring-offset-1 ring-offset-background ring-foreground"
                 )}
                 style={{ 
                   backgroundColor: color.value,
