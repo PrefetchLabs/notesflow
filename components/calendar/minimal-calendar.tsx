@@ -423,7 +423,7 @@ export function MinimalCalendar({
             >
               <div className="w-16 flex-shrink-0 text-right pr-3 pt-2">
                 <span className="text-xs text-muted-foreground">
-                  {hour} {hour < 12 ? 'AM' : 'PM'}
+                  {hour === 0 ? '12' : hour > 12 ? hour - 12 : hour} {hour < 12 ? 'AM' : 'PM'}
                 </span>
               </div>
               <div className="flex-1 border-t border-border" />
@@ -516,7 +516,7 @@ export function MinimalCalendar({
               >
                 <div className="font-medium truncate text-white">{block.title}</div>
                 <div className="text-xs text-white/80">
-                  {format(newStartTime, 'HH:mm')} - {format(newEndTime, 'HH:mm')}
+                  {format(newStartTime, 'h:mm a')} - {format(newEndTime, 'h:mm a')}
                 </div>
                 {!isValidDrop && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -613,7 +613,7 @@ export function MinimalCalendar({
                         </div>
                       )}
                       <div className="text-xs opacity-80">
-                        {format(block.startTime, 'HH:mm')} - {format(block.endTime, 'HH:mm')}
+                        {format(block.startTime, 'h:mm a')} - {format(block.endTime, 'h:mm a')}
                       </div>
                     </div>
                   </div>
