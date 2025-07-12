@@ -23,9 +23,9 @@ const queryClient =
     // Query configuration
     prepare: true, // Use prepared statements for better performance
     
-    // Query timeout configuration
-    timeout: 5, // Default query timeout in seconds
+    // Query timeout configuration (use statement_timeout instead of deprecated timeout)
     idle_timeout: 20, // Close idle connections after 20 seconds
+    statement_timeout: 5000, // Default query timeout in milliseconds
     
     // Connection retry configuration
     max_lifetime: 60 * 30, // 30 minutes

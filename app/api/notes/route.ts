@@ -199,24 +199,29 @@ export async function POST(request: NextRequest) {
           children: [],
         }];
 
+    const noteData = {
+      title,
+      content: validContent,
+      userId: session.user.id,
+      folderId: folderId || null,
+    };
+
     const [newNote] = await withTimeout(
       db
         .insert(notes)
-        .values({
-          title,
-          content: validContent,
-          userId: session.user.id,
-          folderId: folderId || null,
-        })
+        .values(noteData)
         .returning(),
       QUERY_TIMEOUTS.DEFAULT
     );
 
     return NextResponse.json({ note: newNote });
   } catch (error) {
-    // [REMOVED_CONSOLE]
+    // Log error details for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to create note:', error);
+    }
     return NextResponse.json(
-      { error: 'Failed to create note' },
+      { error: 'Failed to create note', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

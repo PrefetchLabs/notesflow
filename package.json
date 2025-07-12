@@ -30,7 +30,10 @@
     "yjs:server:wss": "node server/yjs-server-wss.js",
     "yjs:server:supabase": "node server/yjs-server-supabase.js",
     "dev:full": "concurrently \"bun run dev\" \"bun run yjs:server\"",
-    "dev:wss": "concurrently \"bun run dev\" \"bun run yjs:server:wss\""
+    "dev:wss": "concurrently \"bun run dev\" \"bun run yjs:server:wss\"",
+    "backup:user": "bun run scripts/backup-user-data.ts",
+    "restore:user": "bun run scripts/restore-user-data.ts",
+    "backup:explore": "bun run scripts/explore-backup.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.23",
