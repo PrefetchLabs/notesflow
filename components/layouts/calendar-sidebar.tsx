@@ -22,6 +22,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         startTime,
         endTime,
         color: '#3B82F6', // Blue for events
+        type: 'event',
       });
       toast.success('Event created');
     } catch (error) {
@@ -37,6 +38,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         startTime,
         endTime,
         color: '#10B981', // Green for tasks
+        type: 'task',
       });
       toast.success('Task created');
     } catch (error) {
@@ -64,6 +66,29 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
     }
   };
 
+  // Handle toggling task completion
+  const handleToggleComplete = async (id: string) => {
+    try {
+      const block = blocks.find(b => b.id === id);
+      if (block) {
+        await updateBlock(id, { isCompleted: !block.isCompleted });
+        toast.success(block.isCompleted ? 'Task marked as incomplete' : 'Task marked as complete');
+      }
+    } catch (error) {
+      toast.error('Failed to update task');
+    }
+  };
+
+  // Handle renaming blocks
+  const handleRenameBlock = async (id: string, newTitle: string) => {
+    try {
+      await updateBlock(id, { title: newTitle });
+      toast.success('Title updated');
+    } catch (error) {
+      toast.error('Failed to update title');
+    }
+  };
+
   return (
     <aside className="calendar-sidebar relative w-[280px] h-full bg-background border-l">
       <MinimalCalendar 
@@ -73,6 +98,8 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         onCreateTask={handleCreateTask}
         onUpdateBlock={handleUpdateBlock}
         onDeleteBlock={handleDeleteBlock}
+        onToggleComplete={handleToggleComplete}
+        onRenameBlock={handleRenameBlock}
         blocks={blocks}
       />
     </aside>

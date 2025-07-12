@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, CalendarIcon, CheckSquare, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarIcon, CheckSquare, Trash2, Check, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -18,6 +18,8 @@ interface MinimalCalendarProps {
   onCreateTask?: (startTime: Date, endTime: Date) => void;
   onUpdateBlock?: (id: string, startTime: Date, endTime: Date) => void;
   onDeleteBlock?: (id: string) => void;
+  onToggleComplete?: (id: string) => void;
+  onRenameBlock?: (id: string, newTitle: string) => void;
   blocks?: Array<{
     id: string;
     title: string;
@@ -25,6 +27,7 @@ interface MinimalCalendarProps {
     endTime: Date;
     color?: string;
     isCompleted: boolean;
+    type?: 'event' | 'task';
   }>;
 }
 
@@ -48,6 +51,8 @@ export function MinimalCalendar({
   onCreateTask,
   onUpdateBlock,
   onDeleteBlock,
+  onToggleComplete,
+  onRenameBlock,
   blocks = []
 }: MinimalCalendarProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -59,6 +64,8 @@ export function MinimalCalendar({
   const [mouseOffsetY, setMouseOffsetY] = useState(0);
   const [ghostBlock, setGhostBlock] = useState<GhostBlock | null>(null);
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -211,8 +218,6 @@ export function MinimalCalendar({
           const menuX = Math.min(rect.right + 10, window.innerWidth - 200);
           const menuY = Math.min(Math.max(selectionCenterY - 50, 10), window.innerHeight - 120);
           
-          console.log('Setting menu visible at:', { x: menuX, y: menuY });
-          
           setMenuPosition({ 
             x: menuX,
             y: menuY
@@ -292,6 +297,31 @@ export function MinimalCalendar({
     setMouseOffsetY(offset);
     setGhostBlock({ id: blockId, startY, height });
   }, [blocks]);
+
+  // Handle double click to edit block title
+  const handleBlockDoubleClick = useCallback((e: React.MouseEvent, block: { id: string; title: string }) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setEditingBlockId(block.id);
+    setEditingTitle(block.title);
+  }, []);
+
+  // Handle title edit submit
+  const handleTitleSubmit = useCallback((blockId: string) => {
+    if (onRenameBlock && editingTitle.trim()) {
+      onRenameBlock(blockId, editingTitle.trim());
+    }
+    setEditingBlockId(null);
+    setEditingTitle('');
+  }, [onRenameBlock, editingTitle]);
+
+  // Handle checkbox click for tasks
+  const handleCheckboxClick = useCallback((e: React.MouseEvent, blockId: string) => {
+    e.stopPropagation();
+    if (onToggleComplete) {
+      onToggleComplete(blockId);
+    }
+  }, [onToggleComplete]);
 
   // Close menu on outside click
   useEffect(() => {
@@ -523,17 +553,65 @@ export function MinimalCalendar({
                 onMouseEnter={() => setHoveredBlockId(block.id)}
                 onMouseLeave={() => setHoveredBlockId(null)}
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{block.title}</div>
-                    <div className="text-xs opacity-80">
-                      {format(block.startTime, 'HH:mm')} - {format(block.endTime, 'HH:mm')}
+                <div className="flex justify-between items-start gap-1">
+                  <div className="flex items-start gap-1.5 flex-1 min-w-0">
+                    {/* Checkbox for tasks */}
+                    {block.type === 'task' && onToggleComplete && (
+                      <button
+                        className="mt-0.5 flex-shrink-0 hover:opacity-80 transition-opacity"
+                        onClick={(e) => handleCheckboxClick(e, block.id)}
+                      >
+                        {block.isCompleted ? (
+                          <div className="h-3.5 w-3.5 bg-white/90 rounded flex items-center justify-center">
+                            <Check className="h-2.5 w-2.5 text-green-600" strokeWidth={3} />
+                          </div>
+                        ) : (
+                          <div className="h-3.5 w-3.5 border border-white/90 rounded hover:bg-white/10 transition-colors" />
+                        )}
+                      </button>
+                    )}
+                    
+                    <div className="flex-1 min-w-0">
+                      {editingBlockId === block.id ? (
+                        <input
+                          type="text"
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onBlur={() => handleTitleSubmit(block.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleTitleSubmit(block.id);
+                            } else if (e.key === 'Escape') {
+                              setEditingBlockId(null);
+                              setEditingTitle('');
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-full bg-black/30 rounded px-1 py-0 text-white text-xs font-medium outline-none ring-1 ring-white/30 focus:ring-white/50"
+                          autoFocus
+                        />
+                      ) : (
+                        <div 
+                          className={cn(
+                            "font-medium truncate cursor-text",
+                            block.isCompleted && "line-through opacity-75"
+                          )}
+                          onDoubleClick={(e) => handleBlockDoubleClick(e, block)}
+                        >
+                          {block.title}
+                        </div>
+                      )}
+                      <div className="text-xs opacity-80">
+                        {format(block.startTime, 'HH:mm')} - {format(block.endTime, 'HH:mm')}
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Delete button */}
                   {onDeleteBlock && (
                     <button
                       className={cn(
-                        "ml-2 p-1 rounded hover:bg-white/20 transition-all",
+                        "p-1 rounded hover:bg-white/20 transition-all flex-shrink-0",
                         isHovered ? "opacity-100" : "opacity-0"
                       )}
                       onClick={(e) => {
@@ -564,7 +642,6 @@ export function MinimalCalendar({
       </ScrollArea>
 
       {/* Create menu popup */}
-      {console.log('Rendering menu section, showMenu:', showMenu, 'position:', menuPosition)}
       {showMenu && (
         <div
           className="create-menu fixed z-50 bg-card rounded-lg shadow-2xl border py-1"

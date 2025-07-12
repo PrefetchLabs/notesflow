@@ -10,6 +10,7 @@ export interface TimeBlock {
   color?: string;
   isCompleted: boolean;
   noteId?: string | null;
+  type?: 'event' | 'task';
 }
 
 interface CreateTimeBlockInput {
@@ -18,6 +19,7 @@ interface CreateTimeBlockInput {
   endTime: Date;
   color?: string;
   noteId?: string | null;
+  type?: 'event' | 'task';
 }
 
 interface UpdateTimeBlockInput {
@@ -26,6 +28,7 @@ interface UpdateTimeBlockInput {
   isCompleted?: boolean;
   title?: string;
   color?: string;
+  type?: 'event' | 'task';
 }
 
 export function useTimeBlocks(currentWeek: Date) {

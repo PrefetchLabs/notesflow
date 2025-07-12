@@ -1,0 +1,1 @@
+ALTER TABLE "time_blocks" ADD COLUMN "type" text DEFAULT 'event' NOT NULL;
