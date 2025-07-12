@@ -144,10 +144,10 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   // Only beta users have time-limited access, not regular free users
   const isInBetaPeriod = !isAdmin && isBeta && subscription?.metadata?.betaEndDate && 
     new Date(subscription.metadata.betaEndDate as string) > now;
-  // Grace period only applies to paid users with payment issues, never to free users
-  const isInOverageGracePeriod = !isAdmin && !isFreeTier && subscription?.isInGracePeriod && subscription?.gracePeriodEnd && 
+  // Grace period only applies to paid users with payment issues, never to free users or beta users
+  const isInOverageGracePeriod = !isAdmin && !isFreeTier && !isBeta && subscription?.isInGracePeriod && subscription?.gracePeriodEnd && 
     new Date(subscription.gracePeriodEnd) > now;
-  const isInGracePeriod = !isAdmin && !isFreeTier && (isInOverageGracePeriod);
+  const isInGracePeriod = !isAdmin && !isFreeTier && !isBeta && (isInOverageGracePeriod);
 
   const checkLimit = useCallback((feature: keyof SubscriptionLimits) => {
     // Admins have unlimited access

@@ -163,27 +163,26 @@ function SortableFolderItem({
     >
       <div
         className="flex flex-1 cursor-move items-center gap-1"
-        onClick={onSelect}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect();
+          // Also toggle expansion when clicking on the folder
+          if (folder.children && folder.children.length > 0) {
+            onToggle(folder.id);
+          }
+        }}
         {...attributes}
         {...listeners}
       >
         {folder.children && folder.children.length > 0 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-4 w-4 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle(folder.id);
-            }}
-          >
+          <div className="h-4 w-4 p-0 flex items-center justify-center">
             <ChevronRight
               className={cn(
                 'h-3 w-3 transition-transform',
                 folder.isExpanded && 'rotate-90'
               )}
             />
-          </Button>
+          </div>
         )}
         {(!folder.children || folder.children.length === 0) && (
           <div className="h-4 w-4" />

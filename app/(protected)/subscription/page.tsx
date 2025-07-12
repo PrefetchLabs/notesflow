@@ -129,7 +129,7 @@ export default function SubscriptionPage() {
             </div>
           )}
 
-          {!isAdmin && isInGracePeriod && (
+          {!isAdmin && !isBeta && isInGracePeriod && (
             <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5" />
