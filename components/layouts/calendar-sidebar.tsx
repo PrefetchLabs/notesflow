@@ -90,7 +90,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
   };
 
   return (
-    <aside className="calendar-sidebar relative w-[280px] h-full bg-background border-l">
+    <aside className="calendar-sidebar relative w-[280px] h-full bg-background border-l overflow-hidden">
       <MinimalCalendar 
         currentDate={currentDate} 
         onDateChange={setCurrentDate}

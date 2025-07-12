@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, CalendarIcon, CheckSquare, Trash2, Check, Square } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarIcon, CheckSquare, Trash2, Check, Circle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -343,27 +343,32 @@ export function MinimalCalendar({
     }
   }, [showMenu]);
 
-  // Scroll to current time on mount with smooth behavior
+  // Scroll to current time on mount and when date changes
   useEffect(() => {
     if (scrollRef.current) {
       const now = new Date();
-      const scrollPosition = now.getHours() * HOUR_HEIGHT + (now.getMinutes() / 60) * HOUR_HEIGHT - 200;
+      const currentHour = now.getHours();
+      const currentMinutes = now.getMinutes();
       
-      requestAnimationFrame(() => {
+      // Calculate scroll position to center current time in view
+      const scrollPosition = (currentHour * HOUR_HEIGHT + (currentMinutes / 60) * HOUR_HEIGHT) - (window.innerHeight / 3);
+      
+      // Use setTimeout to ensure the scroll happens after render
+      setTimeout(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({
             top: Math.max(0, scrollPosition),
             behavior: 'smooth'
           });
         }
-      });
+      }, 100);
     }
-  }, []);
+  }, [currentDate]);
 
   return (
-    <div className="h-full flex flex-col bg-background overflow-hidden">
+    <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b">
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b bg-background">
         <div className="flex items-center gap-4">
           <div className="text-xs text-muted-foreground">
             Today<br />
@@ -395,11 +400,11 @@ export function MinimalCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <ScrollArea className="flex-1" ref={scrollRef}>
+      <ScrollArea className="flex-1 overflow-hidden" ref={scrollRef}>
         <div 
           ref={gridRef}
           className="relative select-none cursor-crosshair"
-          style={{ height: `${HOURS.length * HOUR_HEIGHT}px` }}
+          style={{ height: `${HOURS.length * HOUR_HEIGHT}px`, minHeight: '100%' }}
           onMouseDown={handleGridMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -562,11 +567,9 @@ export function MinimalCalendar({
                         onClick={(e) => handleCheckboxClick(e, block.id)}
                       >
                         {block.isCompleted ? (
-                          <div className="h-3.5 w-3.5 bg-white/90 rounded flex items-center justify-center">
-                            <Check className="h-2.5 w-2.5 text-green-600" strokeWidth={3} />
-                          </div>
+                          <CheckCircle2 className="h-4 w-4 text-white fill-green-500" />
                         ) : (
-                          <div className="h-3.5 w-3.5 border border-white/90 rounded hover:bg-white/10 transition-colors" />
+                          <Circle className="h-4 w-4 text-white/80" />
                         )}
                       </button>
                     )}
