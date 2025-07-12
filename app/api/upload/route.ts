@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getCurrentUser } from '@/lib/auth/auth-server';
+import { getUser } from '@/lib/auth/auth-server';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,7 +10,7 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const user = await getCurrentUser();
+    const user = await getUser();
     if (!user) {
       return NextResponse.json(
         { error: 'You must be logged in to upload images' },
