@@ -16,6 +16,12 @@ export async function uploadFile(file: File): Promise<string> {
 
     const supabase = createClient();
     
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('You must be logged in to upload images');
+    }
+    
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
@@ -31,7 +37,11 @@ export async function uploadFile(file: File): Promise<string> {
 
     if (error) {
       console.error('Upload error:', error);
-      throw new Error('Failed to upload image');
+      // Provide more specific error messages
+      if (error.message?.includes('Bucket not found')) {
+        throw new Error('Storage bucket not configured. Please create "notes-assets" bucket in Supabase dashboard.');
+      }
+      throw new Error(`Failed to upload image: ${error.message || 'Unknown error'}`);
     }
 
     // Get public URL
