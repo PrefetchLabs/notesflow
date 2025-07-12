@@ -67,14 +67,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setCalendarOpen(!calendarOpen)}
+                title="Toggle calendar"
               >
                 <Calendar className="h-5 w-5" />
               </Button>
+              <ThemeToggle />
             </div>
           </div>
         </header>
@@ -120,80 +121,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCalendarOpen(!calendarOpen)}
+                title="Toggle calendar"
+              >
+                <Calendar className="h-5 w-5" />
+              </Button>
               <ThemeToggle />
             </div>
           </div>
         </header>
       )}
       
-      {/* Theme toggle and Calendar toggle buttons */}
-      {!sidebarHidden && (
-        <div className={cn(
-          "fixed top-4 z-[60] flex items-center gap-2 transition-all duration-200",
-          calendarOpen ? "right-[300px]" : "right-4"
-        )}>
-          <ThemeToggle />
-          {!calendarOpen && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCalendarOpen(true)}
-              title="Show calendar"
-              className={cn(
-                "h-8 w-8 rounded-full border bg-background shadow-sm",
-                "hover:bg-accent hover:shadow-md",
-                "transition-all duration-200"
-              )}
-            >
-              <Calendar className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      )}
-      
-      {/* Calendar button when sidebar is hidden and calendar is closed */}
-      {sidebarHidden && !calendarOpen && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCalendarOpen(true)}
-          title="Show calendar"
-          className={cn(
-            "fixed top-[88px] right-4 z-[60]",
-            "h-8 w-8 rounded-full border bg-background shadow-sm",
-            "hover:bg-accent hover:shadow-md",
-            "transition-all duration-200"
-          )}
-        >
-          <Calendar className="h-4 w-4" />
-        </Button>
-      )}
-      
-      {/* Calendar hide button - visible when calendar is open */}
-      {calendarOpen && (
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCalendarOpen(false)}
-                className={cn(
-                  'fixed right-[284px] z-50 h-8 w-8 rounded-full border bg-background shadow-sm',
-                  'hover:bg-accent hover:shadow-md',
-                  'transition-shadow duration-200',
-                  sidebarHidden ? 'top-[88px]' : 'top-4'
-                )}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              Hide calendar
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
       
       <div
         className={cn(

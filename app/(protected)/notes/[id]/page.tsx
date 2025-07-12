@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { BlockNoteAIEditor } from '@/components/editor/BlockNoteAIEditor';
 import { CollaborativeEditorFinal } from '@/components/editor/collaborative-editor-final';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight, Calendar } from 'lucide-react';
 import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSubscription } from '@/lib/contexts/subscription-context';
@@ -27,6 +27,7 @@ import { useFolders } from '@/hooks/useFolders';
 import { suggestTitleFromContent } from '@/lib/utils/titleExtraction';
 import { useUnsavedChanges } from '@/contexts/unsaved-changes-context';
 import { useRecentNotes } from '@/hooks/useRecentNotes';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function NotePage() {
   const params = useParams();
@@ -416,9 +417,20 @@ export default function NotePage() {
               <Button variant="ghost" size="sm" onClick={handleSave} disabled={isSaving}>
                 <Save className="h-4 w-4" />
               </Button>
+
+              <div className="h-5 w-px bg-border" />
               
-              {/* Reserve space for floating controls */}
-              <div className="w-24" />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => window.dispatchEvent(new CustomEvent('toggle-calendar'))}
+                title="Toggle calendar (Cmd/Ctrl + T)"
+                className="h-8 w-8"
+              >
+                <Calendar className="h-4 w-4" />
+              </Button>
+              
+              <ThemeToggle />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
