@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, startTime, endTime, color, noteId } = body;
+    const { title, startTime, endTime, color, noteId, type } = body;
 
     if (!title || !startTime || !endTime) {
       return NextResponse.json(
@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
         color: color || '#3B82F6',
         noteId: noteId || null,
         isCompleted: false,
+        type: type || 'event',
       })
       .returning();
 

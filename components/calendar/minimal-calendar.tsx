@@ -366,9 +366,9 @@ export function MinimalCalendar({
   }, [currentDate]);
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b bg-background">
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b bg-background z-10">
         <div className="flex items-center gap-4">
           <div className="text-xs text-muted-foreground">
             Today<br />

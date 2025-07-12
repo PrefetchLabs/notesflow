@@ -87,6 +87,7 @@ export function useTimeBlocks(currentWeek: Date) {
             endTime: input.endTime.toISOString(),
             color: input.color,
             noteId: input.noteId,
+            type: input.type,
           }),
         });
 
