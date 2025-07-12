@@ -67,9 +67,17 @@ export function createAIExtension(options: AIExtensionOptions) {
         // Make the actual LLM call
         const result = await originalCallLLM(opts);
 
-        // Track usage after successful call
+        // Track usage after successful call (but don't let tracking failures break AI)
         if (result) {
-          await trackAIUsage(opts.userPrompt || "unknown", 0);
+          try {
+            console.log('[AI Extension] Tracking AI usage for user');
+            const trackingResult = await trackAIUsage(opts.userPrompt || "unknown", 0);
+            console.log('[AI Extension] AI usage tracked:', trackingResult);
+          } catch (trackingError) {
+            // Log the error but don't fail the AI request
+            console.error('[AI Extension] Failed to track AI usage:', trackingError);
+            // For Beta/Pro users, this shouldn't prevent AI from working
+          }
         }
 
         return result;

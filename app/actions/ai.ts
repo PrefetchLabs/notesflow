@@ -96,15 +96,22 @@ export async function trackAIUsage(commandType: string, tokensUsed: number = 0) 
   }
 
   // Track the usage (even for unlimited users for analytics)
-  await db.insert(aiUsage).values({
+  const newUsage = await db.insert(aiUsage).values({
     userId: session.user.id,
     tokensUsed,
     commandType,
-    resetAt: sql`date_trunc('month', NOW()) + interval '1 month'`,
+    resetAt: sql`date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + interval '1 month'`,
+  }).returning();
+
+  console.log('[trackAIUsage] AI usage recorded:', {
+    id: newUsage[0]?.id,
+    userId: session.user.id,
+    commandType,
   });
 
   return {
     success: true,
     remainingCalls: usageCheck.remainingCalls === Infinity ? Infinity : usageCheck.remainingCalls - 1,
+    usageId: newUsage[0]?.id,
   };
 }

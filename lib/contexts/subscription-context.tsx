@@ -93,13 +93,19 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
     try {
       console.log('[SubscriptionContext] Fetching subscription for user:', user.email);
-      const response = await fetch('/api/subscription');
+      const response = await fetch('/api/subscription', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         console.log('[SubscriptionContext] Subscription loaded:', {
           plan: data.subscription?.plan,
           status: data.subscription?.status,
           metadata: data.subscription?.metadata,
+          usage: data.subscription?.usage,
         });
         setSubscription(data.subscription);
       }

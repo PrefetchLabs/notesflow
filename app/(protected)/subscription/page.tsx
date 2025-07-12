@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSubscription } from '@/lib/contexts/subscription-context';
 import { useAuth } from '@/lib/auth/auth-hooks';
@@ -26,9 +26,15 @@ export default function SubscriptionPage() {
     isInGracePeriod,
     isInBetaPeriod,
     betaDaysRemaining,
+    refreshSubscription,
   } = useSubscription();
   
   const isAdmin = user?.role === 'admin';
+
+  // Refresh subscription data when page loads
+  useEffect(() => {
+    refreshSubscription();
+  }, [refreshSubscription]);
 
   const handleManageSubscription = async () => {
     setIsLoading(true);

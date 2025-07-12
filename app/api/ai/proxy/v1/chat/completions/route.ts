@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { headers } from 'next/headers';
 import { db } from '@/lib/db';
-import { subscriptions, aiUsage } from '@/lib/db/schema';
+import { subscriptions } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
@@ -63,13 +63,9 @@ export async function POST(req: Request) {
       }
     }
 
-    // Track AI usage
-    await db.insert(aiUsage).values({
-      id: crypto.randomUUID(),
-      userId: session.user.id,
-      tokensUsed: 0, // Will be updated after response
-      commandType,
-    });
+    // AI usage tracking is handled by the AI extension in the client
+    // This prevents duplicate tracking
+    console.log('[AI Proxy] Processing request for user:', session.user.email, 'Command type:', commandType);
 
     // Check if OpenAI API key is configured
     if (!process.env.OPENAI_API_KEY) {

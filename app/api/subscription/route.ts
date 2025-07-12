@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/auth-server';
 import { db } from '@/lib/db';
-import { subscriptions, folders, notes, collaborators } from '@/lib/db/schema';
-import { eq, and, isNull, count } from 'drizzle-orm';
+import { subscriptions, folders, notes, collaborators, aiUsage } from '@/lib/db/schema';
+import { eq, and, isNull, count, gte, sql } from 'drizzle-orm';
 import { addDays } from 'date-fns';
 
 export async function GET(request: NextRequest) {
@@ -61,11 +61,26 @@ export async function GET(request: NextRequest) {
       .from(collaborators)
       .where(eq(collaborators.userId, session.user.id));
 
+    // Count AI usage for the current month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const [aiUsageCountResult] = await db
+      .select({ count: count() })
+      .from(aiUsage)
+      .where(
+        and(
+          eq(aiUsage.userId, session.user.id),
+          gte(aiUsage.createdAt, startOfMonth)
+        )
+      );
+
     // Update usage in database
     const updatedUsage = {
       notesCount: notesCountResult?.count || 0,
       foldersCount: foldersCountResult?.count || 0,
-      aiCallsCount: subscription.usage?.aiCallsCount || 0, // Keep existing AI calls count
+      aiCallsCount: aiUsageCountResult?.count || 0, // Get actual AI usage from aiUsage table
       collaboratorsCount: collaboratorsCountResult?.count || 0,
       storageUsed: subscription.usage?.storageUsed || 0, // Keep existing storage count
     };
@@ -82,6 +97,12 @@ export async function GET(request: NextRequest) {
       subscription: {
         ...subscription,
         usage: updatedUsage,
+      },
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
   } catch (error) {
