@@ -164,15 +164,15 @@ async function restoreUserData() {
       process.exit(0);
     }
     
-    // Restore without transaction to avoid segfault
-    try {
+    // Start transaction for atomic restore
+    await db.transaction(async (tx) => {
       // Restore folders first (to maintain hierarchy)
       if (foldersToRestore.length > 0) {
         progress.setPhase('Restoring folders');
         progress.setTotal(foldersToRestore.length);
         
         // Get existing folders for conflict detection
-        const existingFolders = await db
+        const existingFolders = await tx
           .select()
           .from(folders)
           .where(eq(folders.userId, targetUser.id));
@@ -201,7 +201,7 @@ async function restoreUserData() {
                 folder.name = generateUniqueName(folder.name, existingFolderNames);
                 break;
               case 'replace':
-                await db.delete(folders).where(eq(folders.id, existingFolder.id));
+                await tx.delete(folders).where(eq(folders.id, existingFolder.id));
                 break;
               case 'keepBoth':
                 folder.name = generateUniqueName(folder.name, existingFolderNames);
@@ -215,33 +215,21 @@ async function restoreUserData() {
           result.idMappings[oldId] = newId;
           
           // Update parent ID if needed
-          let newParentId = folder.parentId;
           if (folder.parentId && result.idMappings[folder.parentId]) {
-            newParentId = result.idMappings[folder.parentId];
-          } else if (folder.parentId) {
-            // Parent not in restore set, set to null
-            newParentId = null;
+            folder.parentId = result.idMappings[folder.parentId];
           }
           
           // Insert folder
-          try {
-            await db.insert(folders).values({
-              id: newId,
-              name: folder.name,
-              userId: targetUser.id,
-              parentId: newParentId,
-              path: folder.path,
-              position: folder.position,
-              createdAt: restoreOptions.preserveTimestamps ? new Date(folder.createdAt) : new Date(),
-              updatedAt: new Date()
-            });
-            
-            result.restored.folders++;
-            existingFolderNames.push(folder.name);
-          } catch (error) {
-            console.error(`Failed to restore folder ${folder.name}:`, error);
-            result.errors.push(`Failed to restore folder ${folder.name}`);
-          }
+          await tx.insert(folders).values({
+            ...folder,
+            id: newId,
+            userId: targetUser.id,
+            createdAt: restoreOptions.preserveTimestamps ? folder.createdAt : new Date(),
+            updatedAt: new Date()
+          });
+          
+          result.restored.folders++;
+          existingFolderNames.push(folder.name);
         }
       }
       
@@ -251,7 +239,7 @@ async function restoreUserData() {
         progress.setTotal(notesToRestore.length);
         
         // Get existing notes for conflict detection
-        const existingNotes = await db
+        const existingNotes = await tx
           .select()
           .from(notes)
           .where(eq(notes.userId, targetUser.id));
@@ -283,7 +271,7 @@ async function restoreUserData() {
                 note.title = generateUniqueName(note.title, existingNoteTitles);
                 break;
               case 'replace':
-                await db.delete(notes).where(eq(notes.id, existingNote.id));
+                await tx.delete(notes).where(eq(notes.id, existingNote.id));
                 break;
               case 'keepBoth':
                 note.title = generateUniqueName(note.title, existingNoteTitles);
@@ -292,12 +280,8 @@ async function restoreUserData() {
           }
           
           // Map folder ID if needed
-          let newFolderId = note.folderId;
           if (note.folderId && result.idMappings[note.folderId]) {
-            newFolderId = result.idMappings[note.folderId];
-          } else if (note.folderId && restoreOptions.mode !== 'full') {
-            // Folder not in restore set, set to null
-            newFolderId = null;
+            note.folderId = result.idMappings[note.folderId];
           }
           
           // Generate new ID
@@ -305,30 +289,19 @@ async function restoreUserData() {
           result.idMappings[note.id] = newNoteId;
           
           // Insert note
-          try {
-            await db.insert(notes).values({
-              id: newNoteId,
-              title: note.title,
-              content: note.content,
-              userId: targetUser.id,
-              folderId: newFolderId,
-              tags: note.tags || [],
-              isPinned: note.isPinned || false,
-              isArchived: note.isArchived || false,
-              isTrashed: false,
-              deletedAt: restoreOptions.restoreDeleted ? null : note.deletedAt,
-              lastEditedBy: targetUser.id,
-              lastAccessedAt: new Date(),
-              createdAt: restoreOptions.preserveTimestamps ? new Date(note.createdAt) : new Date(),
-              updatedAt: new Date()
-            });
-            
-            result.restored.notes++;
-            existingNoteTitles.push(note.title);
-          } catch (error) {
-            console.error(`Failed to restore note ${note.title}:`, error);
-            result.errors.push(`Failed to restore note ${note.title}`);
-          }
+          await tx.insert(notes).values({
+            ...note,
+            id: newNoteId,
+            userId: targetUser.id,
+            lastEditedBy: targetUser.id,
+            createdAt: restoreOptions.preserveTimestamps ? note.createdAt : new Date(),
+            updatedAt: new Date(),
+            deletedAt: restoreOptions.restoreDeleted ? null : note.deletedAt,
+            metadata: undefined // Don't store backup metadata in the note
+          });
+          
+          result.restored.notes++;
+          existingNoteTitles.push(note.title);
         }
       }
       
@@ -341,48 +314,25 @@ async function restoreUserData() {
           progress.increment(block.title);
           
           // Map note ID if needed
-          let newNoteId = block.noteId;
           if (block.noteId && result.idMappings[block.noteId]) {
-            newNoteId = result.idMappings[block.noteId];
-          } else if (block.noteId) {
-            // Note not in restore set, skip note reference
-            newNoteId = null;
+            block.noteId = result.idMappings[block.noteId];
           }
           
           // Insert time block with new ID
-          try {
-            await db.insert(timeBlocks).values({
-              id: crypto.randomUUID(),
-              title: block.title,
-              userId: targetUser.id,
-              noteId: newNoteId,
-              startTime: new Date(block.startTime),
-              endTime: new Date(block.endTime),
-              color: block.color,
-              icon: block.icon,
-              type: block.type,
-              recurrenceRule: block.recurrenceRule,
-              recurrenceId: block.recurrenceId,
-              reminderMinutes: block.reminderMinutes,
-              isCompleted: block.isCompleted,
-              completedAt: block.completedAt ? new Date(block.completedAt) : null,
-              createdAt: restoreOptions.preserveTimestamps ? new Date(block.createdAt) : new Date(),
-              updatedAt: new Date()
-            });
-            
-            result.restored.timeBlocks++;
-          } catch (error) {
-            console.error(`Failed to restore time block ${block.title}:`, error);
-            result.errors.push(`Failed to restore time block ${block.title}`);
-          }
+          await tx.insert(timeBlocks).values({
+            ...block,
+            id: crypto.randomUUID(),
+            userId: targetUser.id,
+            createdAt: restoreOptions.preserveTimestamps ? block.createdAt : new Date(),
+            updatedAt: new Date()
+          });
+          
+          result.restored.timeBlocks++;
         }
       }
-      
-      result.success = true;
-    } catch (error) {
-      console.error('Restore operation failed:', error);
-      result.errors.push(error instanceof Error ? error.message : String(error));
-    }
+    });
+    
+    result.success = true;
     
     // Print summary
     console.log('\n=== Restore Summary ===');
