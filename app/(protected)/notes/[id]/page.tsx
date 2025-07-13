@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { BlockNoteAIEditor } from '@/components/editor/BlockNoteAIEditor';
 import { CollaborativeEditorFinal } from '@/components/editor/collaborative-editor-final';
 import { Button } from '@/components/ui/button';
-import { Save, MoreVertical, Trash2, Share2, Folder, ChevronRight, Calendar } from 'lucide-react';
+import { Save, MoreVertical, Trash2, Share2, Folder, ChevronRight, Calendar, Home, FileText } from 'lucide-react';
 import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -390,14 +390,16 @@ export default function NotePage() {
                   <>
                     <button
                       onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
-                      className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                      className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 flex items-center gap-1"
                     >
+                      <Home className="h-3.5 w-3.5" />
                       Dashboard
                     </button>
                     {getFolderPath() && (
                       <>
                         <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-muted-foreground hover:text-foreground transition-colors truncate">
+                        <span className="text-muted-foreground hover:text-foreground transition-colors truncate flex items-center gap-1">
+                          <Folder className="h-3.5 w-3.5" />
                           {getFolderPath()}
                         </span>
                       </>
@@ -405,7 +407,10 @@ export default function NotePage() {
                     <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   </>
                 )}
-                <span className="font-medium truncate">{title || 'Untitled Note'}</span>
+                <span className="font-medium truncate flex items-center gap-1">
+                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                  {title || 'Untitled Note'}
+                </span>
               </div>
             </div>
             <div
