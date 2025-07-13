@@ -369,7 +369,7 @@
 
   /* Notion-like editor container */
   .editor-container {
-    @apply max-w-3xl mx-auto px-4 py-8 md:px-8;
+    @apply max-w-4xl mx-auto px-4 py-8 md:px-8 lg:max-w-5xl xl:max-w-6xl;
   }
 
   .editor-container h1 {
@@ -516,7 +516,7 @@
 
 /* Editor container */
 .bn-editor {
-  @apply text-foreground max-w-3xl mx-auto px-4 py-8;
+  @apply text-foreground max-w-4xl mx-auto px-4 py-8;
   font-family: var(--font-sans);
   font-size: 15px;
 }
@@ -524,6 +524,18 @@
 @media (min-width: 768px) {
   .bn-editor {
     @apply px-12 py-10;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bn-editor {
+    @apply max-w-5xl;
+  }
+}
+
+@media (min-width: 1280px) {
+  .bn-editor {
+    @apply max-w-6xl px-16;
   }
 }
 
