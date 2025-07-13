@@ -86,7 +86,7 @@ export function enhanceBlocksFormatting(blocks: Block[]): Block[] {
         // For separator blocks, we'll use a specific styling approach
         // Since we preprocessed the HTML to mark separators, we can identify them here
         if (textContent === '\u00A0' || textContent === ' ') {
-          // Create a visual separator using styling
+          // Create a visual separator using a custom data attribute
           return {
             ...block,
             content: [{
@@ -96,7 +96,9 @@ export function enhanceBlocksFormatting(blocks: Block[]): Block[] {
             }],
             props: {
               ...block.props,
-              backgroundColor: 'gray', // This will create a gray line effect
+              // Use a custom data attribute instead of backgroundColor
+              // This will be styled via CSS to be almost invisible
+              backgroundColor: 'separator', // Custom identifier for CSS styling
               textAlignment: 'center'
             }
           };

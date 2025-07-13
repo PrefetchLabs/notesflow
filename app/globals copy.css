@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Custom Font Definition */
 @font-face {
@@ -42,12 +42,9 @@
   --color-chart-3: hsl(var(--chart-3));
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
-
-  --font-family-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif;
-  --font-family-mono:
-    var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
+  
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family-mono: var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
   --font-family-notes-flow: 'NotesFlow', var(--font-family-sans);
 }
 
@@ -57,37 +54,37 @@
     /* Core Colors - Light Mode */
     --background: 0 0% 99%; /* Soft off-white */
     --foreground: 0 0% 20%; /* Soft black */
-
+    
     --card: 0 0% 100%;
     --card-foreground: 0 0% 20%;
-
+    
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 20%;
-
+    
     --primary: 220 14% 46%; /* Muted slate blue */
     --primary-foreground: 0 0% 100%;
-
+    
     --secondary: 0 0% 97%; /* Very subtle gray */
     --secondary-foreground: 0 0% 30%;
-
+    
     --muted: 0 0% 97%;
     --muted-foreground: 0 0% 45%;
-
+    
     --accent: 0 0% 96%;
     --accent-foreground: 0 0% 30%;
-
+    
     --destructive: 0 50% 50%; /* Muted red */
     --destructive-foreground: 0 0% 100%;
-
+    
     --border: 0 0% 94%; /* Very subtle borders */
     --input: 0 0% 94%;
     --ring: 220 14% 70%; /* Lighter focus ring */
-
+    
     /* Semantic Colors */
     --success: 142 40% 45%; /* Muted green */
     --warning: 38 60% 50%; /* Muted amber */
     --info: 199 50% 50%; /* Muted blue */
-
+    
     /* Subtle Folder Colors */
     --folder-blue: 210 40% 55%;
     --folder-green: 140 35% 50%;
@@ -97,23 +94,21 @@
     --folder-yellow: 45 45% 50%;
     --folder-red: 0 40% 55%;
     --folder-indigo: 240 35% 55%;
-
+    
     /* Shadows - Very subtle */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
     --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.04);
     --shadow-md: 0 4px 8px 0 rgb(0 0 0 / 0.05);
     --shadow-lg: 0 8px 16px 0 rgb(0 0 0 / 0.06);
     --shadow-xl: 0 12px 24px 0 rgb(0 0 0 / 0.08);
-
+    
     /* Spacing */
     --radius: 0.375rem;
-
+    
     /* Typography */
-    --font-sans:
-      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-      'Droid Sans', 'Helvetica Neue', sans-serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
-
+    
     /* Sidebar */
     --sidebar-background: 0 0% 98.5%;
     --sidebar-foreground: 0 0% 20%;
@@ -123,56 +118,54 @@
     --sidebar-accent-foreground: 0 0% 30%;
     --sidebar-border: 0 0% 94%;
     --sidebar-ring: 220 14% 70%;
-
+    
     /* Chart colors */
     --chart-1: 220 14% 46%;
     --chart-2: 140 35% 50%;
     --chart-3: 25 45% 55%;
     --chart-4: 270 35% 55%;
     --chart-5: 0 40% 55%;
-
+    
     /* BlockNote Font Override */
-    --bn-font-family:
-      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-      'Droid Sans', 'Helvetica Neue', sans-serif;
+    --bn-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   }
-
+  
   /* Dark Mode */
   .dark {
     /* Core Colors - Dark Mode */
     --background: 222 15% 15%; /* Soft dark blue-gray */
     --foreground: 210 20% 90%; /* Soft white */
-
+    
     --card: 222 15% 17%;
     --card-foreground: 210 20% 90%;
-
+    
     --popover: 222 15% 17%;
     --popover-foreground: 210 20% 90%;
-
+    
     --primary: 220 14% 60%; /* Muted blue */
     --primary-foreground: 222 15% 15%;
-
+    
     --secondary: 222 15% 20%;
     --secondary-foreground: 210 20% 90%;
-
+    
     --muted: 222 15% 20%;
     --muted-foreground: 215 15% 65%;
-
+    
     --accent: 222 15% 22%;
     --accent-foreground: 210 20% 90%;
-
+    
     --destructive: 0 40% 40%; /* Muted dark red */
     --destructive-foreground: 210 20% 90%;
-
+    
     --border: 222 15% 25%;
     --input: 222 15% 25%;
     --ring: 220 14% 50%;
-
+    
     /* Semantic Colors */
     --success: 142 35% 50%;
     --warning: 38 55% 55%;
     --info: 199 45% 55%;
-
+    
     /* Subtle Folder Colors - Dark Mode */
     --folder-blue: 210 35% 60%;
     --folder-green: 140 30% 55%;
@@ -182,14 +175,14 @@
     --folder-yellow: 45 40% 55%;
     --folder-red: 0 35% 55%;
     --folder-indigo: 240 30% 60%;
-
+    
     /* Shadows - Subtle for dark mode */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.1);
     --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.15);
     --shadow-md: 0 4px 8px 0 rgb(0 0 0 / 0.2);
     --shadow-lg: 0 8px 16px 0 rgb(0 0 0 / 0.25);
     --shadow-xl: 0 12px 24px 0 rgb(0 0 0 / 0.3);
-
+    
     /* Sidebar */
     --sidebar-background: 222 15% 13%;
     --sidebar-foreground: 210 20% 90%;
@@ -199,18 +192,16 @@
     --sidebar-accent-foreground: 210 20% 90%;
     --sidebar-border: 222 15% 25%;
     --sidebar-ring: 220 14% 50%;
-
+    
     /* Chart colors */
     --chart-1: 220 14% 60%;
     --chart-2: 140 30% 55%;
     --chart-3: 25 40% 60%;
     --chart-4: 270 30% 60%;
     --chart-5: 0 35% 55%;
-
+    
     /* BlockNote Font Override */
-    --bn-font-family:
-      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-      'Droid Sans', 'Helvetica Neue', sans-serif;
+    --bn-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   }
 }
 
@@ -218,90 +209,81 @@
   * {
     border-color: hsl(var(--border));
   }
-
+  
   html {
     @apply antialiased;
   }
-
+  
   body {
     @apply bg-background text-foreground;
-    font-family:
-      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-      'Droid Sans', 'Helvetica Neue', sans-serif;
-    font-feature-settings:
-      'rlig' 1,
-      'calt' 1,
-      'ss01' 1,
-      'ss02' 1,
-      'ss03' 1,
-      'cv01' 1,
-      'cv02' 1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-feature-settings: 'rlig' 1, 'calt' 1, 'ss01' 1, 'ss02' 1, 'ss03' 1, 'cv01' 1, 'cv02' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
   }
-
+  
   /* Typography - Elegant and Light */
-  h1 {
+  h1 { 
     @apply text-4xl font-light tracking-tight leading-tight;
     letter-spacing: -0.02em;
   }
-
-  h2 {
+  
+  h2 { 
     @apply text-3xl font-light tracking-tight leading-tight;
     letter-spacing: -0.01em;
   }
-
-  h3 {
+  
+  h3 { 
     @apply text-2xl font-normal tracking-tight;
   }
-
-  h4 {
+  
+  h4 { 
     @apply text-xl font-normal tracking-tight;
   }
-
-  h5 {
+  
+  h5 { 
     @apply text-lg font-medium;
   }
-
-  h6 {
+  
+  h6 { 
     @apply text-base font-medium;
   }
-
+  
   p {
     @apply leading-relaxed text-foreground/80;
   }
-
+  
   /* Focus styles */
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
-
+  
   /* Selection styles */
   ::selection {
     @apply bg-primary/20 text-foreground;
   }
-
+  
   /* Scrollbar styles - Subtle */
   ::-webkit-scrollbar {
     @apply w-3 h-3;
   }
-
+  
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
-
+  
   ::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/20 rounded-full;
     border: 3px solid transparent;
     background-clip: content-box;
   }
-
+  
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/30;
   }
-
+  
   /* Smooth transitions */
   * {
     @apply transition-colors duration-200;
@@ -314,89 +296,89 @@
   .container {
     @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
   }
-
+  
   /* Buttons */
   .btn-primary {
     @apply bg-foreground/90 text-background hover:bg-foreground px-4 py-2 rounded-md font-normal transition-all duration-200;
   }
-
+  
   .btn-secondary {
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-md font-normal transition-all duration-200;
   }
-
+  
   .btn-ghost {
     @apply hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md font-normal transition-all duration-200;
   }
-
+  
   .btn-destructive {
     @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 px-4 py-2 rounded-md font-normal transition-all duration-200;
   }
-
+  
   /* Cards */
   .card-base {
     @apply bg-card text-card-foreground rounded-lg border;
   }
-
+  
   .card-interactive {
     @apply bg-card text-card-foreground rounded-lg border p-6 transition-all duration-200 hover:shadow-md;
   }
-
+  
   .card-interactive:hover {
     transform: translateY(-0.125rem);
   }
-
+  
   /* Sidebar items */
   .sidebar-item {
     @apply flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 cursor-pointer text-sm;
   }
-
+  
   .sidebar-item:hover {
     @apply bg-sidebar-accent text-sidebar-accent-foreground;
   }
-
+  
   .sidebar-item.active {
     @apply bg-primary/10 text-primary font-medium;
   }
-
+  
   /* Inputs */
   .input-base {
     @apply w-full px-3 py-2 bg-background border rounded-md text-sm transition-all duration-200;
   }
-
+  
   .input-base:focus {
     @apply outline-none ring-2 ring-ring/50 border-ring;
   }
-
+  
   /* Notion-like editor container */
   .editor-container {
     @apply max-w-3xl mx-auto px-4 py-8 md:px-8;
   }
-
+  
   .editor-container h1 {
     @apply mt-8 mb-4;
   }
-
+  
   .editor-container h2 {
     @apply mt-6 mb-3;
   }
-
+  
   .editor-container h3 {
     @apply mt-4 mb-2;
   }
-
+  
   .editor-container p {
     @apply mb-4;
   }
-
+  
   .editor-container ul,
   .editor-container ol {
     @apply mb-4 pl-6;
   }
-
+  
   .editor-container li {
     @apply mb-1 text-foreground/95;
   }
-
+  
   /* Code blocks */
   .code-block {
     @apply bg-secondary p-4 rounded-md font-mono text-sm overflow-x-auto;
@@ -409,64 +391,34 @@
   .text-subtle {
     @apply text-muted-foreground;
   }
-
+  
   .text-light {
     @apply font-light;
   }
-
+  
   /* Folder colors */
-  .folder-blue {
-    color: hsl(var(--folder-blue));
-  }
-  .folder-green {
-    color: hsl(var(--folder-green));
-  }
-  .folder-purple {
-    color: hsl(var(--folder-purple));
-  }
-  .folder-pink {
-    color: hsl(var(--folder-pink));
-  }
-  .folder-orange {
-    color: hsl(var(--folder-orange));
-  }
-  .folder-yellow {
-    color: hsl(var(--folder-yellow));
-  }
-  .folder-red {
-    color: hsl(var(--folder-red));
-  }
-  .folder-indigo {
-    color: hsl(var(--folder-indigo));
-  }
-
+  .folder-blue { color: hsl(var(--folder-blue)); }
+  .folder-green { color: hsl(var(--folder-green)); }
+  .folder-purple { color: hsl(var(--folder-purple)); }
+  .folder-pink { color: hsl(var(--folder-pink)); }
+  .folder-orange { color: hsl(var(--folder-orange)); }
+  .folder-yellow { color: hsl(var(--folder-yellow)); }
+  .folder-red { color: hsl(var(--folder-red)); }
+  .folder-indigo { color: hsl(var(--folder-indigo)); }
+  
   /* Shadows */
-  .shadow-xs {
-    box-shadow: var(--shadow-xs);
-  }
-  .shadow-sm {
-    box-shadow: var(--shadow-sm);
-  }
-  .shadow-md {
-    box-shadow: var(--shadow-md);
-  }
-  .shadow-lg {
-    box-shadow: var(--shadow-lg);
-  }
-  .shadow-xl {
-    box-shadow: var(--shadow-xl);
-  }
-
+  .shadow-xs { box-shadow: var(--shadow-xs); }
+  .shadow-sm { box-shadow: var(--shadow-sm); }
+  .shadow-md { box-shadow: var(--shadow-md); }
+  .shadow-lg { box-shadow: var(--shadow-lg); }
+  .shadow-xl { box-shadow: var(--shadow-xl); }
+  
   /* Animations */
   @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-
+  
   @keyframes fade-in-up {
     from {
       opacity: 0;
@@ -477,19 +429,19 @@
       transform: translateY(0);
     }
   }
-
+  
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
   }
-
+  
   .animate-fade-in-up {
     animation: fade-in-up 0.5s ease-out;
   }
-
+  
   .animation-delay-200 {
     animation-delay: 200ms;
   }
-
+  
   .animation-delay-400 {
     animation-delay: 400ms;
   }
@@ -499,17 +451,13 @@
 
 /* Override BlockNote default font */
 .bn-container {
-  --bn-font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif !important;
+  --bn-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
 }
 
 /* Override BlockNote default styles */
 .bn-default-styles,
 .bn-container .bn-default-styles {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -518,12 +466,11 @@
 .bn-editor {
   @apply text-foreground max-w-3xl mx-auto px-4 py-8;
   font-family: var(--font-sans);
-  font-size: 15px;
 }
 
 @media (min-width: 768px) {
   .bn-editor {
-    @apply px-12 py-10;
+    @apply px-16 py-12;
   }
 }
 
@@ -538,42 +485,40 @@
 }
 
 /* Spacing after headings before different content */
-.bn-editor
-  .bn-block-outer[data-block-type='heading']
-  + .bn-block-outer[data-block-type='paragraph'] {
+.bn-editor .bn-block-outer[data-block-type="heading"] + .bn-block-outer[data-block-type="paragraph"] {
   @apply mt-0;
 }
 
-.bn-editor .bn-block-outer[data-block-type='heading'] + .bn-block-outer[data-block-type='heading'] {
+.bn-editor .bn-block-outer[data-block-type="heading"] + .bn-block-outer[data-block-type="heading"] {
   @apply mt-2;
 }
 
 /* Spacing around lists */
-.bn-editor .bn-block-outer[data-block-type='bulletListItem']:first-child,
-.bn-editor .bn-block-outer[data-block-type='numberedListItem']:first-child {
+.bn-editor .bn-block-outer[data-block-type="bulletListItem"]:first-child,
+.bn-editor .bn-block-outer[data-block-type="numberedListItem"]:first-child {
   @apply mt-2;
 }
 
-.bn-editor .bn-block-outer[data-block-type='bulletListItem']:last-child,
-.bn-editor .bn-block-outer[data-block-type='numberedListItem']:last-child {
+.bn-editor .bn-block-outer[data-block-type="bulletListItem"]:last-child,
+.bn-editor .bn-block-outer[data-block-type="numberedListItem"]:last-child {
   @apply mb-2;
 }
 
 /* Headings */
 .bn-editor h1 {
-  @apply text-4xl font-semibold tracking-tight mt-10 mb-3;
+  @apply text-4xl font-semibold tracking-tight mt-10 mb-4;
   letter-spacing: -0.02em;
   line-height: 1.25;
 }
 
 .bn-editor h2 {
-  @apply text-3xl font-semibold tracking-tight mt-8 mb-2.5;
+  @apply text-3xl font-semibold tracking-tight mt-8 mb-3;
   letter-spacing: -0.01em;
   line-height: 1.35;
 }
 
 .bn-editor h3 {
-  @apply text-2xl font-semibold tracking-tight mt-6 mb-1.5;
+  @apply text-2xl font-semibold tracking-tight mt-6 mb-2;
   line-height: 1.45;
 }
 
@@ -581,14 +526,14 @@
 .bn-editor h1 img.emoji,
 .bn-editor h2 img.emoji,
 .bn-editor h3 img.emoji {
-  width: 0.8em;
-  height: 0.8em;
+  width: 0.85em;
+  height: 0.85em;
   vertical-align: text-bottom;
 }
 
 /* Paragraphs */
 .bn-editor p {
-  @apply mb-2.5;
+  @apply mb-3;
   color: hsl(var(--foreground) / 0.95);
   line-height: 1.6;
 }
@@ -654,38 +599,29 @@
 }
 
 /* Separators - ChatGPT style horizontal rule */
-.bn-editor
-  .bn-block-outer[data-block-type='paragraph']
-  .bn-block-content
-  p[data-text-alignment='center'] {
+.bn-editor .bn-block-outer[data-block-type="paragraph"] .bn-block-content p[data-text-alignment="center"] {
   @apply my-6;
 }
 
-/* Create a proper separator style for blocks with separator background */
-.bn-editor .bn-block-outer[data-background-color='separator'] {
+/* Create a proper separator style for blocks with gray background */
+.bn-editor .bn-block-outer[data-background-color="gray"] {
   @apply my-6 h-px overflow-hidden;
   background-color: transparent !important;
   position: relative;
 }
 
-.bn-editor .bn-block-outer[data-background-color='separator'] .bn-inline-content {
+.bn-editor .bn-block-outer[data-background-color="gray"] .bn-inline-content {
   @apply hidden;
 }
 
-.bn-editor .bn-block-outer[data-background-color='separator']::after {
+.bn-editor .bn-block-outer[data-background-color="gray"]::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
   top: 50%;
   height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    hsl(var(--muted-foreground) / 0.02) 30%,
-    hsl(var(--muted-foreground) / 0.02) 70%,
-    transparent
-  );
+  background: linear-gradient(to right, transparent, hsl(var(--muted-foreground) / 0.05) 30%, hsl(var(--muted-foreground) / 0.05) 70%, transparent);
 }
 
 /* Links */
@@ -704,7 +640,7 @@
 }
 
 /* Placeholder */
-.bn-editor .bn-inline-content[data-is-empty='true']:before {
+.bn-editor .bn-inline-content[data-is-empty="true"]:before {
   color: hsl(var(--muted-foreground) / 0.5);
   content: attr(data-placeholder);
   position: absolute;
@@ -800,9 +736,7 @@
 .bn-editor img {
   @apply rounded-lg shadow-sm max-w-full h-auto my-4 mx-auto block;
   cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .bn-editor img:hover {
@@ -865,15 +799,15 @@
   .bn-editor {
     @apply px-4;
   }
-
+  
   .bn-editor h1 {
     @apply text-3xl mt-6 mb-3;
   }
-
+  
   .bn-editor h2 {
     @apply text-2xl mt-4 mb-2;
   }
-
+  
   .bn-editor h3 {
     @apply text-xl mt-3 mb-1.5;
   }
@@ -901,9 +835,7 @@
 
 /* Calendar block enhancements */
 .calendar-block {
-  transition:
-    transform 0.1s ease,
-    box-shadow 0.15s ease;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .calendar-block:active {
@@ -918,8 +850,7 @@
 
 /* Current time indicator pulse */
 @keyframes time-pulse {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
   50% {
@@ -934,9 +865,7 @@
 /* ===== Theme Transitions ===== */
 html.dark,
 html.light {
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ===== Mobile-Specific Styles ===== */
@@ -944,93 +873,91 @@ html.light {
   /* Touch-friendly tap targets */
   @media (max-width: 768px) {
     /* Minimum 44px touch targets */
-    button,
-    a,
-    [role='button'],
-    input[type='checkbox'],
-    input[type='radio'] {
+    button, 
+    a, 
+    [role="button"], 
+    input[type="checkbox"], 
+    input[type="radio"] {
       min-height: 44px;
       min-width: 44px;
     }
-
+    
     /* Better spacing for mobile */
     .mobile-spacing {
       @apply px-4 py-3;
     }
-
+    
     /* Hide scrollbars on mobile for better UX */
     .hide-scrollbar {
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-
+    
     .hide-scrollbar::-webkit-scrollbar {
       display: none;
     }
-
+    
     /* Prevent text selection on interactive elements */
-    button,
-    a,
-    [role='button'] {
+    button, a, [role="button"] {
       -webkit-user-select: none;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-
+    
     /* Better focus states for mobile */
     :focus-visible {
       @apply outline-none ring-2 ring-primary ring-offset-4 ring-offset-background;
     }
-
+    
     /* Optimize font sizes for mobile readability */
     .text-xs {
       font-size: 0.8125rem; /* 13px instead of 12px */
     }
-
+    
     .text-sm {
       font-size: 0.9375rem; /* 15px instead of 14px */
     }
-
+    
     /* Better touch feedback */
     .touch-feedback {
       @apply active:scale-95 active:opacity-70 transition-all duration-75;
     }
   }
-
+  
   /* Tablet-specific adjustments */
   @media (min-width: 768px) and (max-width: 1024px) {
     /* Slightly larger touch targets for tablets */
-    button,
-    a,
-    [role='button'] {
+    button, 
+    a, 
+    [role="button"] {
       min-height: 40px;
     }
   }
-
+  
   /* Prevent zoom on input focus on iOS */
   @supports (-webkit-touch-callout: none) {
-    input[type='text'],
-    input[type='email'],
-    input[type='password'],
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
     textarea {
       font-size: 16px !important;
     }
   }
-
+  
   /* Safe area insets for devices with notches */
   @supports (padding: max(0px)) {
     .safe-top {
       padding-top: max(1rem, env(safe-area-inset-top));
     }
-
+    
     .safe-bottom {
       padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
-
+    
     .safe-left {
       padding-left: max(1rem, env(safe-area-inset-left));
     }
-
+    
     .safe-right {
       padding-right: max(1rem, env(safe-area-inset-right));
     }
@@ -1042,29 +969,29 @@ html.light {
   .bn-editor {
     @apply px-3 py-6;
   }
-
+  
   .bn-editor h1 {
     @apply text-2xl;
   }
-
+  
   .bn-editor h2 {
     @apply text-xl;
   }
-
+  
   .bn-editor h3 {
     @apply text-lg;
   }
-
+  
   .bn-editor p {
     @apply text-base mb-3;
     line-height: 1.65;
   }
-
+  
   /* Larger touch targets for editor buttons */
   .bn-formatting-toolbar-button {
     @apply min-h-[44px] min-w-[44px];
   }
-
+  
   .bn-slash-menu-item {
     @apply min-h-[44px] py-3;
   }
@@ -1075,7 +1002,7 @@ html.light {
   body {
     @apply bg-white text-black;
   }
-
+  
   .no-print {
     display: none !important;
   }
