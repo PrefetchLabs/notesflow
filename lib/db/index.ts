@@ -16,23 +16,23 @@ const queryClient =
     max: 10, // Maximum number of connections in pool
     idle_timeout: 20, // Close idle connections after 20 seconds
     connect_timeout: 10, // Connection timeout in seconds
-    
+
     // SSL configuration for production
-    ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
-    
+    ssl: false,
+
     // Query configuration
     prepare: true, // Use prepared statements for better performance
-    
+
     // Query timeout configuration (use statement_timeout instead of deprecated timeout)
     idle_timeout: 20, // Close idle connections after 20 seconds
     statement_timeout: 5000, // Default query timeout in milliseconds
-    
+
     // Connection retry configuration
     max_lifetime: 60 * 30, // 30 minutes
-    
+
     // Error handling
     onnotice: () => {}, // Suppress notices in production
-    
+
     // Transform configuration
     transform: {
       undefined: null, // Transform undefined to null
@@ -50,9 +50,9 @@ export const db = drizzle(queryClient, {
 });
 
 // For migrations (single connection)
-export const migrationClient = postgres(connectionString, { 
+export const migrationClient = postgres(connectionString, {
   max: 1,
-  ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+  ssl: false,
 });
 
 // Health check function

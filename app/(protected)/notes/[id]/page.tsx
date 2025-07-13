@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { BlockNoteAIEditor } from '@/components/editor/BlockNoteAIEditor';
 import { CollaborativeEditorFinal } from '@/components/editor/collaborative-editor-final';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, MoreVertical, Trash2, Share2, Folder, ChevronRight, Calendar } from 'lucide-react';
+import { Save, MoreVertical, Trash2, Share2, Folder, ChevronRight, Calendar } from 'lucide-react';
 import { ShareDialogV2 } from '@/components/editor/share-dialog-v2';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -371,17 +371,6 @@ export default function NotePage() {
         <div className={cn("px-4 py-3", !isMobile && "px-6 py-4")}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-              <Button
-                variant="ghost"
-                size={isMobile ? "sm" : "icon"}
-                onClick={() => promptToSave(handleSave, () => router.push('/dashboard'))}
-                className={cn(
-                  "flex-shrink-0",
-                  isMobile ? "h-8 w-8" : "h-8 w-8"
-                )}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
               <div className={cn(
                 "flex items-center gap-1.5 min-w-0 flex-1",
                 isMobile ? "text-xs" : "text-sm"
