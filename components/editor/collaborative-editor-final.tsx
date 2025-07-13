@@ -19,6 +19,8 @@ import { CustomAIMenu } from "./ai/CustomAIMenu";
 import { createAIExtension } from "@/lib/editor/ai-extension";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import { uploadFile } from "@/lib/editor/upload-handler";
+import { preprocessPastedHTML, enhanceBlocksFormatting } from "@/lib/editor/paste-utils";
+import { codeBlock } from "@blocknote/code-block";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Users, WifiOff, Wifi } from "lucide-react";
@@ -252,7 +254,49 @@ export function CollaborativeEditorFinal({
     blockSpecs: {
       ...defaultBlockSpecs,
     },
+    codeBlock: {
+      ...codeBlock,
+      defaultLanguage: "javascript",
+      indentLineWithTab: true,
+    },
     uploadFile: authenticatedUploadFile, // Enable image uploads with auth check
+    pasteHandler: async ({ event, editor, defaultPasteHandler }) => {
+      // Check if clipboard contains HTML
+      const html = event.clipboardData?.getData('text/html');
+      
+      if (html) {
+        try {
+          // First preprocess the HTML to handle separators
+          const processedHTML = preprocessPastedHTML(html);
+          
+          // Parse HTML into BlockNote blocks
+          const blocks = await editor.tryParseHTMLToBlocks(processedHTML);
+          
+          // Enhance blocks with proper formatting
+          const processedBlocks = enhanceBlocksFormatting(blocks);
+          
+          // Get current block position
+          const currentBlock = editor.getTextCursorPosition().block;
+          
+          // Insert the parsed blocks
+          editor.insertBlocks(processedBlocks, currentBlock, "after");
+          
+          // Remove the current block if it's empty
+          if (!currentBlock.content || currentBlock.content.length === 0) {
+            editor.removeBlocks([currentBlock]);
+          }
+          
+          return true;
+        } catch (error) {
+          console.error('Error parsing pasted HTML:', error);
+          // Fall back to default handler on error
+          return defaultPasteHandler();
+        }
+      }
+      
+      // Fall back to default paste handler for non-HTML content
+      return defaultPasteHandler();
+    },
     collaboration: provider ? {
       provider,
       fragment: ydoc.getXmlFragment("document-store"),

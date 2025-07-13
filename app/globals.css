@@ -493,9 +493,11 @@
   color: hsl(var(--foreground) / 0.8);
 }
 
-/* Code blocks */
+/* Code blocks - ChatGPT style */
 .bn-editor pre {
-  @apply bg-secondary p-4 rounded-md overflow-x-auto mb-3;
+  @apply bg-secondary p-4 rounded-lg overflow-x-auto mb-3 border;
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--secondary) / 0.5);
 }
 
 .bn-editor code {
@@ -503,15 +505,65 @@
   font-family: var(--font-mono);
 }
 
-/* Inline code */
+/* Inline code - ChatGPT style */
 .bn-editor :not(pre) > code {
-  @apply bg-secondary px-1.5 py-0.5 rounded text-sm;
+  @apply px-1.5 py-0.5 rounded text-sm font-mono;
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
 }
 
-/* Blockquotes */
+/* Code block with syntax highlighting */
+.bn-code-block {
+  @apply rounded-lg overflow-hidden mb-4 border;
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--secondary) / 0.3);
+}
+
+.bn-code-block pre {
+  @apply p-4 m-0 overflow-x-auto;
+  background: transparent !important;
+  border: none !important;
+}
+
+.bn-code-block-header {
+  @apply px-4 py-2 text-xs font-medium border-b;
+  background-color: hsl(var(--secondary) / 0.5);
+  border-color: hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+}
+
+/* Blockquotes - ChatGPT style */
 .bn-editor blockquote {
-  @apply border-l-4 pl-4 italic text-muted-foreground my-4;
-  border-color: hsl(var(--primary) / 0.3);
+  @apply border-l-4 pl-4 my-4;
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground) / 0.9);
+  font-style: normal;
+}
+
+/* Separators - ChatGPT style horizontal rule */
+.bn-editor .bn-block-outer[data-block-type="paragraph"] .bn-block-content p[data-text-alignment="center"] {
+  @apply my-6;
+}
+
+/* Create a proper separator style for blocks with gray background */
+.bn-editor .bn-block-outer[data-background-color="gray"] {
+  @apply my-6 h-px overflow-hidden;
+  background-color: transparent !important;
+  position: relative;
+}
+
+.bn-editor .bn-block-outer[data-background-color="gray"] .bn-inline-content {
+  @apply hidden;
+}
+
+.bn-editor .bn-block-outer[data-background-color="gray"]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background-color: hsl(var(--border));
 }
 
 /* Links */
