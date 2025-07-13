@@ -663,29 +663,50 @@
 
 /* Create a proper separator style for blocks with gray background */
 .bn-editor .bn-block-outer[data-background-color='gray'] {
-  @apply my-6 h-px overflow-hidden;
+  @apply my-6;
+  height: 1px !important;
+  min-height: 1px !important;
+  overflow: hidden !important;
   background-color: transparent !important;
-  position: relative;
+  position: relative !important;
+}
+
+/* Hide the actual gray background */
+.bn-editor .bn-block-outer[data-background-color='gray'] > div {
+  background-color: transparent !important;
 }
 
 .bn-editor .bn-block-outer[data-background-color='gray'] .bn-inline-content {
-  @apply hidden;
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
 }
 
 .bn-editor .bn-block-outer[data-background-color='gray']::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 1px !important;
   background: linear-gradient(
     to right,
     transparent,
-    hsl(var(--muted-foreground) / 0.02) 30%,
-    hsl(var(--muted-foreground) / 0.02) 70%,
+    rgba(128, 128, 128, 0.15) 25%,
+    rgba(128, 128, 128, 0.15) 75%,
     transparent
-  );
+  ) !important;
+}
+
+/* Slightly more visible in dark mode */
+.dark .bn-editor .bn-block-outer[data-background-color='gray']::after {
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.08) 75%,
+    transparent
+  ) !important;
 }
 
 /* Links */
