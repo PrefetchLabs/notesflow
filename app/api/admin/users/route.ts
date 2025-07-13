@@ -188,3 +188,96 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+
+// Delete user endpoint
+export async function DELETE(request: NextRequest) {
+  const authResult = await authMiddleware(request);
+  if (!authResult.success || !authResult.user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  // Only system admins can delete users
+  const hasPermission = await AdminService.checkPermission(
+    authResult.user.id,
+    ADMIN_PERMISSIONS.USER_DELETE
+  );
+
+  if (!hasPermission) {
+    return NextResponse.json(
+      { error: 'Insufficient permissions' },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const { userId } = body;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID required' },
+        { status: 400 }
+      );
+    }
+
+    // Prevent self-deletion
+    if (userId === authResult.user.id) {
+      return NextResponse.json(
+        { error: 'Cannot delete your own account' },
+        { status: 400 }
+      );
+    }
+
+    // Get target user to check their role
+    const [targetUser] = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, userId));
+
+    if (!targetUser) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Only system admins can delete other admins
+    if ((targetUser.role === 'admin' || targetUser.role === 'system_admin') && !authResult.user.isSystemAdmin) {
+      return NextResponse.json(
+        { error: 'Only system admins can delete other admin accounts' },
+        { status: 403 }
+      );
+    }
+
+    // Execute the delete script
+    const { execSync } = await import('child_process');
+    try {
+      // Run the delete script with force flag (yes to all prompts)
+      const result = execSync(`echo "yes" | bun run scripts/delete-user-data.ts --email ${targetUser.email} --force`, {
+        encoding: 'utf8',
+        stdio: 'pipe',
+        shell: true
+      });
+
+      return NextResponse.json({ 
+        success: true,
+        message: 'User and all associated data deleted successfully'
+      });
+    } catch (scriptError) {
+      console.error('Delete script error:', scriptError);
+      return NextResponse.json(
+        { error: 'Failed to delete user data' },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error('Delete user error:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete user' },
+      { status: 500 }
+    );
+  }
+}

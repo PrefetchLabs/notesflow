@@ -43,7 +43,7 @@
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
   
-  --font-family-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   --font-family-mono: var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
   --font-family-notes-flow: 'NotesFlow', var(--font-family-sans);
 }
@@ -106,7 +106,7 @@
     --radius: 0.375rem;
     
     /* Typography */
-    --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
     
     /* Sidebar */
@@ -210,7 +210,7 @@
   
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     font-feature-settings: 'rlig' 1, 'calt' 1, 'ss01' 1, 'ss02' 1, 'ss03' 1, 'cv01' 1, 'cv02' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -349,28 +349,28 @@
   }
   
   .editor-container h1 {
-    @apply mt-8 mb-4;
+    @apply mt-8 mb-2;
   }
   
   .editor-container h2 {
-    @apply mt-6 mb-3;
+    @apply mt-6 mb-1.5;
   }
   
   .editor-container h3 {
-    @apply mt-5 mb-2;
+    @apply mt-4 mb-1;
   }
   
   .editor-container p {
-    @apply mb-3;
+    @apply mb-1;
   }
   
   .editor-container ul,
   .editor-container ol {
-    @apply mb-3 pl-6;
+    @apply mb-1 pl-6;
   }
   
   .editor-container li {
-    @apply mb-1 text-foreground/80;
+    @apply mb-0.5 text-foreground/90;
   }
   
   /* Code blocks */
@@ -445,13 +445,13 @@
 
 /* Editor container */
 .bn-editor {
-  @apply text-foreground max-w-3xl mx-auto px-4 py-8;
-  font-family: var(--font-sans);
+  @apply text-foreground max-w-3xl mx-auto px-4 py-6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
 
 @media (min-width: 768px) {
   .bn-editor {
-    @apply px-8;
+    @apply px-20;
   }
 }
 
@@ -460,42 +460,71 @@
   @apply mb-0;
 }
 
+/* Add spacing between different block types (Notion-style) */
+.bn-editor .bn-block-outer + .bn-block-outer {
+  @apply mt-0.5;
+}
+
+/* Spacing after headings before different content */
+.bn-editor .bn-block-outer[data-block-type="heading"] + .bn-block-outer[data-block-type="paragraph"] {
+  @apply mt-0;
+}
+
+.bn-editor .bn-block-outer[data-block-type="heading"] + .bn-block-outer[data-block-type="heading"] {
+  @apply mt-2;
+}
+
+/* Spacing around lists */
+.bn-editor .bn-block-outer[data-block-type="bulletListItem"]:first-child,
+.bn-editor .bn-block-outer[data-block-type="numberedListItem"]:first-child {
+  @apply mt-1;
+}
+
+.bn-editor .bn-block-outer[data-block-type="bulletListItem"]:last-child,
+.bn-editor .bn-block-outer[data-block-type="numberedListItem"]:last-child {
+  @apply mb-1;
+}
+
 /* Headings */
 .bn-editor h1 {
-  @apply text-4xl font-light tracking-tight leading-tight mt-8 mb-4;
+  @apply text-4xl font-semibold tracking-tight mt-8 mb-2;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .bn-editor h2 {
-  @apply text-3xl font-light tracking-tight leading-tight mt-6 mb-3;
+  @apply text-3xl font-semibold tracking-tight mt-6 mb-1.5;
   letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 .bn-editor h3 {
-  @apply text-2xl font-normal tracking-tight mt-5 mb-2;
+  @apply text-2xl font-semibold tracking-tight mt-4 mb-1;
+  line-height: 1.4;
 }
 
 /* Paragraphs */
 .bn-editor p {
-  @apply mb-3 leading-relaxed;
-  color: hsl(var(--foreground) / 0.8);
-  line-height: 1.75;
+  @apply mb-1;
+  color: hsl(var(--foreground) / 0.9);
+  line-height: 1.5;
 }
 
 /* Lists */
 .bn-editor ul,
 .bn-editor ol {
-  @apply mb-3 pl-6;
+  @apply mb-1 pl-6;
 }
 
 .bn-editor li {
-  @apply mb-1;
-  color: hsl(var(--foreground) / 0.8);
+  @apply mb-0.5;
+  color: hsl(var(--foreground) / 0.9);
+  line-height: 1.5;
 }
 
 /* Code blocks - ChatGPT style */
 .bn-editor pre {
-  @apply bg-secondary p-4 rounded-lg overflow-x-auto mb-3 border;
+  @apply bg-secondary p-4 rounded-lg overflow-x-auto mb-1 mt-1 border;
   border-color: hsl(var(--border));
   background-color: hsl(var(--secondary) / 0.5);
 }
@@ -514,7 +543,7 @@
 
 /* Code block with syntax highlighting */
 .bn-code-block {
-  @apply rounded-lg overflow-hidden mb-4 border;
+  @apply rounded-lg overflow-hidden mb-1 mt-1 border;
   border-color: hsl(var(--border));
   background-color: hsl(var(--secondary) / 0.3);
 }
@@ -534,10 +563,11 @@
 
 /* Blockquotes - ChatGPT style */
 .bn-editor blockquote {
-  @apply border-l-4 pl-4 my-4;
+  @apply border-l-4 pl-4 my-2;
   border-color: hsl(var(--border));
   color: hsl(var(--foreground) / 0.9);
   font-style: normal;
+  line-height: 1.5;
 }
 
 /* Separators - ChatGPT style horizontal rule */
@@ -661,7 +691,7 @@
 
 /* Table styles */
 .bn-editor table {
-  @apply border-collapse w-full mb-4;
+  @apply border-collapse w-full mb-1 mt-1;
 }
 
 .bn-editor th,
@@ -676,7 +706,7 @@
 
 /* Image styles */
 .bn-editor img {
-  @apply rounded-lg shadow-sm max-w-full h-auto my-4 mx-auto block;
+  @apply rounded-lg shadow-sm max-w-full h-auto my-2 mx-auto block;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -688,7 +718,7 @@
 
 /* Image block container */
 .bn-editor .bn-image-block {
-  @apply my-4;
+  @apply my-2;
 }
 
 /* Image upload states */
@@ -743,15 +773,15 @@
   }
   
   .bn-editor h1 {
-    @apply text-3xl;
+    @apply text-3xl mt-6 mb-1.5;
   }
   
   .bn-editor h2 {
-    @apply text-2xl;
+    @apply text-2xl mt-4 mb-1;
   }
   
   .bn-editor h3 {
-    @apply text-xl;
+    @apply text-xl mt-3 mb-0.5;
   }
 }
 
@@ -925,7 +955,8 @@ html.light {
   }
   
   .bn-editor p {
-    @apply text-base leading-relaxed;
+    @apply text-base;
+    line-height: 1.5;
   }
   
   /* Larger touch targets for editor buttons */

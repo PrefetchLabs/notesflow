@@ -139,10 +139,26 @@ export default function UsersPage() {
   };
 
   // Delete user
-  const handleDeleteUser = async () => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
 
-    toast.error('Delete functionality not implemented yet');
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete user');
+      }
+
+      toast.success('User deleted successfully');
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete user');
+    }
   };
 
   // Reset filters
