@@ -65,7 +65,7 @@ describe('Admin Dashboard Page', () => {
     } as Response);
 
     const Page = await AdminDashboard();
-    const { container } = render(Page);
+    render(Page);
 
     // Check page title
     expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();

@@ -52,7 +52,7 @@ export default function DashboardPage() {
         const { note } = await response.json();
         router.push(`/notes/${note.id}`);
       }
-    } catch (error) {
+    } catch {
       // [REMOVED_CONSOLE]
     }
   };

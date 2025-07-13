@@ -24,7 +24,7 @@ export default function PaymentCancelPage() {
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground text-center">
             You can upgrade anytime to unlock pro features. If you have any questions, 
-            please don't hesitate to contact our support team.
+            please don&apos;t hesitate to contact our support team.
           </p>
 
           <div className="space-y-3">

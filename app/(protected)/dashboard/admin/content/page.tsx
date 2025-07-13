@@ -16,7 +16,7 @@ interface ContentItem {
   id: string;
   type: 'note' | 'folder';
   title: string;
-  content: any;
+  content: unknown;
   userId: string;
   userName: string | null;
   userEmail: string;
@@ -60,8 +60,7 @@ export default function ContentPage() {
       setContent(data.content);
       setTotalContent(data.pagination.total);
       setTotalPages(data.pagination.pages);
-    } catch (error) {
-      // [REMOVED_CONSOLE]
+    } catch {
       toast.error('Failed to load content');
     } finally {
       setLoading(false);
@@ -70,6 +69,7 @@ export default function ContentPage() {
 
   useEffect(() => {
     fetchContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, search, typeFilter, flaggedFilter, dateRange]);
 
   // View content
@@ -79,13 +79,13 @@ export default function ContentPage() {
   };
 
   // Flag content
-  const handleFlagContent = async (item: ContentItem) => {
+  const handleFlagContent = async () => {
     toast.info('Flag functionality coming soon');
     // TODO: Implement flagging system
   };
 
   // Approve content
-  const handleApproveContent = async (item: ContentItem) => {
+  const handleApproveContent = async () => {
     toast.info('Approve functionality coming soon');
     // TODO: Implement approval system
   };
@@ -108,8 +108,7 @@ export default function ContentPage() {
 
       toast.success('Content deleted successfully');
       fetchContent(); // Refresh the list
-    } catch (error) {
-      // [REMOVED_CONSOLE]
+    } catch {
       toast.error('Failed to delete content');
     }
   };

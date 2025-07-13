@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Settings, 
-  Bell, 
   Shield, 
   Database, 
   Zap,
@@ -26,7 +24,7 @@ import { SystemMaintenance } from '@/components/admin/settings/system-maintenanc
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<any>({});
+  const [settings, setSettings] = useState<Record<string, unknown>>({});
   const [hasChanges, setHasChanges] = useState(false);
 
   // Load settings
@@ -38,8 +36,7 @@ export default function SettingsPage() {
       
       const data = await response.json();
       setSettings(data);
-    } catch (error) {
-      // [REMOVED_CONSOLE]
+    } catch {
       toast.error('Failed to load system settings');
     } finally {
       setLoading(false);
@@ -64,8 +61,7 @@ export default function SettingsPage() {
 
       toast.success('Settings saved successfully');
       setHasChanges(false);
-    } catch (error) {
-      // [REMOVED_CONSOLE]
+    } catch {
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);
@@ -73,8 +69,8 @@ export default function SettingsPage() {
   };
 
   // Update settings
-  const updateSettings = (section: string, updates: any) => {
-    setSettings((prev: any) => ({
+  const updateSettings = (section: string, updates: unknown) => {
+    setSettings((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
@@ -111,7 +107,7 @@ export default function SettingsPage() {
         setSettings(imported);
         setHasChanges(true);
         toast.success('Configuration imported successfully');
-      } catch (error) {
+      } catch {
         toast.error('Invalid configuration file');
       }
     };
@@ -181,7 +177,7 @@ export default function SettingsPage() {
           <CardContent className="flex items-center gap-2 pt-6">
             <RefreshCw className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             <p className="text-sm text-yellow-600 dark:text-yellow-400">
-              You have unsaved changes. Don't forget to save before leaving this page.
+              You have unsaved changes. Don&apos;t forget to save before leaving this page.
             </p>
           </CardContent>
         </Card>

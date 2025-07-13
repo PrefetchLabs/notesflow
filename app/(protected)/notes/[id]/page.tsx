@@ -41,8 +41,8 @@ export default function NotePage() {
   const { isPro } = useSubscription();
   const { isMobile, isTablet } = useResponsive();
 
-  const [note, setNote] = useState<any>(null);
-  const [content, setContent] = useState<any>(null);
+  const [note, setNote] = useState<{ id: string; title: string; content: any; updatedAt: string; userId: string; folderId?: string | null } | null>(null);
+  const [content, setContent] = useState<any[] | null>(null);
   const [title, setTitle] = useState('Untitled Note');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,7 +125,7 @@ export default function NotePage() {
               ];
         setContent(noteContent);
         setLastSaved(new Date(note.updatedAt));
-      } catch (error) {
+      } catch {
         toast.error('Failed to load note');
         router.push('/notes');
       } finally {
@@ -184,7 +184,7 @@ export default function NotePage() {
             setIsSharedNote(hasCollaborators);
           }
         }
-      } catch (error) {
+      } catch {
         // [REMOVED_CONSOLE]
       }
     };
@@ -201,7 +201,7 @@ export default function NotePage() {
         folderId: note.folderId,
       });
     }
-  }, [note?.id, addToRecent]);
+  }, [note, noteId, addToRecent]);
 
   // Define handleSave first
   const handleSave = useCallback(async () => {
@@ -232,7 +232,7 @@ export default function NotePage() {
 
   // Track changes
   const handleContentChange = useCallback(
-    (newContent: any) => {
+    (newContent: any[]) => {
       setContent(newContent);
       setHasUnsavedChanges(true);
       setGlobalUnsavedChanges(true);
@@ -319,7 +319,7 @@ export default function NotePage() {
       toast.success(`Note moved to ${folderName || 'folder'}`);
       // Trigger refresh event to update the sidebar
       window.dispatchEvent(new Event('refresh-notes'));
-    } catch (error) {
+    } catch {
       toast.error('Failed to move note');
     }
   };
@@ -328,7 +328,7 @@ export default function NotePage() {
   const getFolderPath = () => {
     if (!note?.folderId || !folders.length) return null;
 
-    const findFolder = (folders: any[], id: string): any => {
+    const findFolder = (folders: { id: string; name: string; children?: any[] }[], id: string): { id: string; name: string; children?: any[] } | null => {
       for (const folder of folders) {
         if (folder.id === id) return folder;
         if (folder.children) {

@@ -22,8 +22,7 @@ export function usePerformance(componentName: string) {
 
     // Log performance metrics in development
     if (process.env.NODE_ENV === 'development') {
-      // [REMOVED_CONSOLE]}ms`
-      );
+      // [REMOVED_CONSOLE]
     }
 
     // Mark performance in browser timeline

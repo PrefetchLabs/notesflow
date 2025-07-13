@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
@@ -14,7 +14,7 @@ const authClient = createAuthClient({
   baseURL: process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
 });
 
-export default function LoginPage() {
+function LoginPageContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,19 +33,19 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const { error } = await authClient.signIn.social({
+      const { error: signInError } = await authClient.signIn.social({
         provider: 'google',
         callbackURL: '/dashboard',
       });
 
-      if (error) {
+      if (signInError) {
         toast({
           title: 'Error',
-          description: error.message || 'Failed to sign in with Google',
+          description: signInError.message || 'Failed to sign in with Google',
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'An unexpected error occurred. Please try again.',
@@ -95,5 +95,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -268,9 +268,7 @@ async function seed() {
       .execute();
 
     // [REMOVED_CONSOLE]
-    // [REMOVED_CONSOLE]- 3 notes with rich content
-- 2 time blocks (1 recurring)
-    `);
+    // [REMOVED_CONSOLE]
 
   } catch (error) {
     // [REMOVED_CONSOLE]

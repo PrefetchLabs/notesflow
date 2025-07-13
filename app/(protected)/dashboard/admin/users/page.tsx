@@ -17,9 +17,9 @@ interface Subscription {
   status: string | null;
   currentPeriodEnd: Date | null;
   cancelAtPeriodEnd: boolean | null;
-  usage?: any;
-  limits?: any;
-  metadata?: any;
+  usage?: unknown;
+  limits?: unknown;
+  metadata?: unknown;
 }
 
 interface User {
@@ -68,8 +68,7 @@ export default function UsersPage() {
       setUsers(data.users);
       setTotalUsers(data.pagination.total);
       setTotalPages(data.pagination.pages);
-    } catch (error) {
-      // [REMOVED_CONSOLE]
+    } catch {
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
@@ -78,6 +77,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, search, roleFilter]);
 
   // Update user
@@ -115,9 +115,8 @@ export default function UsersPage() {
         toast.success('User updated successfully');
         fetchUsers(); // Refresh the list
       }
-    } catch (error: any) {
-      // [REMOVED_CONSOLE]
-      toast.error(error.message || 'Failed to update user');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update user');
     }
   };
 
@@ -134,14 +133,13 @@ export default function UsersPage() {
 
       toast.success('Subscription updated successfully');
       fetchUsers(); // Refresh the list
-    } catch (error) {
-      // [REMOVED_CONSOLE]
+    } catch {
       toast.error('Failed to update subscription');
     }
   };
 
   // Delete user
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async () => {
     if (!confirm('Are you sure you want to delete this user?')) return;
 
     toast.error('Delete functionality not implemented yet');

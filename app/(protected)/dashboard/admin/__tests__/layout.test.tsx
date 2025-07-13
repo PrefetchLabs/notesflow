@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { redirect } from 'next/navigation';
 import AdminLayout from '../layout';
 import { requireAdmin } from '@/lib/auth/admin-auth';
 
@@ -39,7 +38,7 @@ describe('Admin Layout', () => {
       permissions: [],
     });
 
-    const { container } = render(
+    render(
       await AdminLayout({ children: <div>Admin Content</div> })
     );
 
@@ -54,7 +53,7 @@ describe('Admin Layout', () => {
 
     try {
       await AdminLayout({ children: <div>Admin Content</div> });
-    } catch (error) {
+    } catch {
       // Expected to throw
     }
 

@@ -71,8 +71,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Menu className="h-5 w-5" />
               </Button>
               <div className="ml-2 flex items-baseline gap-1">
-                <span className="text-lg font-light tracking-tight">NotesFlow</span>
-                <span className="text-xs text-muted-foreground">v0.1</span>
+                <h1 className="text-xl font-bold text-foreground font-notes-flow whitespace-nowrap">NotesFlow</h1>
+                <span className="text-sm font-normal text-muted-foreground ml-1 hidden sm:inline">{process.env['NEXT_PUBLIC_APP_VERSION'] || 'v0.1'}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -128,8 +128,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Menu className="h-5 w-5" />
               </Button>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-light tracking-tight">NotesFlow</span>
-                <span className="text-xs text-muted-foreground">v0.1</span>
+                <h1 className="text-xl font-bold text-foreground font-notes-flow whitespace-nowrap">NotesFlow</h1>
+                <span className="text-sm font-normal text-muted-foreground ml-1 hidden sm:inline">{process.env['NEXT_PUBLIC_APP_VERSION'] || 'v0.1'}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
