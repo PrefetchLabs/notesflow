@@ -661,18 +661,18 @@
   @apply my-6;
 }
 
-/* Create a proper separator style for blocks with separator background */
-.bn-editor .bn-block-outer[data-background-color='separator'] {
+/* Create a proper separator style for blocks with gray background */
+.bn-editor .bn-block-outer[data-background-color='gray'] {
   @apply my-6 h-px overflow-hidden;
   background-color: transparent !important;
   position: relative;
 }
 
-.bn-editor .bn-block-outer[data-background-color='separator'] .bn-inline-content {
+.bn-editor .bn-block-outer[data-background-color='gray'] .bn-inline-content {
   @apply hidden;
 }
 
-.bn-editor .bn-block-outer[data-background-color='separator']::after {
+.bn-editor .bn-block-outer[data-background-color='gray']::after {
   content: '';
   position: absolute;
   left: 0;

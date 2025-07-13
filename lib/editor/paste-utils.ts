@@ -98,7 +98,7 @@ export function enhanceBlocksFormatting(blocks: Block[]): Block[] {
               ...block.props,
               // Use a custom data attribute instead of backgroundColor
               // This will be styled via CSS to be almost invisible
-              backgroundColor: 'separator', // Custom identifier for CSS styling
+              backgroundColor: 'gray', // Gray background for separator styling
               textAlignment: 'center'
             }
           };
