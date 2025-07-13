@@ -41,7 +41,14 @@ export default function NotePage() {
   const { isPro } = useSubscription();
   const { isMobile, isTablet } = useResponsive();
 
-  const [note, setNote] = useState<{ id: string; title: string; content: any; updatedAt: string; userId: string; folderId?: string | null } | null>(null);
+  const [note, setNote] = useState<{
+    id: string;
+    title: string;
+    content: any;
+    updatedAt: string;
+    userId: string;
+    folderId?: string | null;
+  } | null>(null);
   const [content, setContent] = useState<any[] | null>(null);
   const [title, setTitle] = useState('Untitled Note');
   const [isSaving, setIsSaving] = useState(false);
@@ -66,7 +73,6 @@ export default function NotePage() {
 
   // Load note data
   useEffect(() => {
-
     const loadNote = async () => {
       setIsLoading(true);
       try {
@@ -328,7 +334,10 @@ export default function NotePage() {
   const getFolderPath = () => {
     if (!note?.folderId || !folders.length) return null;
 
-    const findFolder = (folders: { id: string; name: string; children?: any[] }[], id: string): { id: string; name: string; children?: any[] } | null => {
+    const findFolder = (
+      folders: { id: string; name: string; children?: any[] }[],
+      id: string
+    ): { id: string; name: string; children?: any[] } | null => {
       for (const folder of folders) {
         if (folder.id === id) return folder;
         if (folder.children) {
@@ -368,13 +377,15 @@ export default function NotePage() {
     <div className="flex h-full flex-col">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className={cn("px-4 py-3", !isMobile && "px-6 py-4")}>
+        <div className={cn('px-4 py-3', !isMobile && 'px-6 py-4')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-              <div className={cn(
-                "flex items-center gap-1.5 min-w-0 flex-1",
-                isMobile ? "text-xs" : "text-sm"
-              )}>
+              <div
+                className={cn(
+                  'flex items-center gap-1.5 min-w-0 flex-1',
+                  isMobile ? 'text-xs' : 'text-sm'
+                )}
+              >
                 {!isMobile && (
                   <>
                     <button
@@ -397,10 +408,12 @@ export default function NotePage() {
                 <span className="font-medium truncate">{title || 'Untitled Note'}</span>
               </div>
             </div>
-            <div className={cn(
-              "flex items-center gap-2 flex-shrink-0",
-              isMobile ? "gap-1" : "gap-2 pl-4"
-            )}>
+            <div
+              className={cn(
+                'flex items-center gap-2 flex-shrink-0',
+                isMobile ? 'gap-1' : 'gap-2 pl-4'
+              )}
+            >
               {lastSaved && (
                 <span className="text-xs text-muted-foreground hidden sm:block">
                   <RelativeTime date={lastSaved} />
@@ -419,24 +432,20 @@ export default function NotePage() {
                 </motion.div>
               )}
 
-              <Button 
-                variant="ghost" 
-                size={isMobile ? "icon" : "sm"} 
-                onClick={handleSave} 
+              <Button
+                variant="ghost"
+                size={isMobile ? 'icon' : 'sm'}
+                onClick={handleSave}
                 disabled={isSaving}
-                className={isMobile ? "h-8 w-8" : ""}
+                className={isMobile ? 'h-8 w-8' : ''}
               >
-                <Save className={isMobile ? "h-3.5 w-3.5" : "h-4 w-4"} />
+                <Save className={isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
               </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className={isMobile ? "h-8 w-8" : ""}
-                  >
-                    <MoreVertical className={isMobile ? "h-3.5 w-3.5" : "h-4 w-4"} />
+                  <Button variant="ghost" size="icon" className={isMobile ? 'h-8 w-8' : ''}>
+                    <MoreVertical className={isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -476,13 +485,13 @@ export default function NotePage() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
+
               {!isMobile && (
                 <>
                   <div className="h-5 w-px bg-border" />
-                  
+
                   <ThemeToggle />
-                  
+
                   <Button
                     variant="ghost"
                     size="icon"
@@ -501,14 +510,8 @@ export default function NotePage() {
 
       {/* Editor */}
       <main className="flex-1 overflow-auto">
-        <div className={cn(
-          "h-full",
-          isMobile ? "px-4 py-4" : "px-4 py-6 md:px-8 lg:px-12"
-        )}>
-          <div className={cn(
-            "mx-auto h-full",
-            isMobile ? "max-w-full" : "max-w-4xl"
-          )}>
+        <div className={cn('h-full', isMobile ? 'px-4 py-4' : 'px-4 py-6 md:px-8 lg:px-12')}>
+          <div className={cn('mx-auto h-full', isMobile ? 'max-w-full' : 'max-w-4xl')}>
             {isLoading ? (
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
@@ -520,17 +523,14 @@ export default function NotePage() {
               <>
                 {/* Title Input - Notion Style */}
                 {hasEditPermission && (
-                  <div className={cn(
-                    "mb-6",
-                    isMobile ? "pl-0" : "pl-4 md:pl-28"
-                  )}>
+                  <div className="mb-6 pl-[52px]">
                     <input
                       type="text"
                       value={title}
                       onChange={handleTitleChange}
                       className={cn(
-                        "w-full bg-transparent font-bold tracking-tight outline-none placeholder:text-muted-foreground/40 focus:ring-0",
-                        isMobile ? "text-3xl" : isTablet ? "text-4xl" : "text-5xl"
+                        'w-full bg-transparent font-bold tracking-tight outline-none placeholder:text-muted-foreground/40 focus:ring-0',
+                        isMobile ? 'text-3xl' : isTablet ? 'text-4xl' : 'text-5xl'
                       )}
                       placeholder="Untitled"
                     />
@@ -551,14 +551,15 @@ export default function NotePage() {
                   ) : (
                     // View-only mode for collaborators without edit permission
                     <>
-                      <div className={cn(
-                        "mb-6",
-                        isMobile ? "pl-0" : "pl-4 md:pl-8"
-                      )}>
-                        <h1 className={cn(
-                          "font-bold tracking-tight",
-                          isMobile ? "text-3xl" : isTablet ? "text-4xl" : "text-5xl"
-                        )}>{title || 'Untitled'}</h1>
+                      <div className="mb-6 pl-[15px]">
+                        <h1
+                          className={cn(
+                            'font-bold tracking-tight',
+                            isMobile ? 'text-3xl' : isTablet ? 'text-4xl' : 'text-5xl'
+                          )}
+                        >
+                          {title || 'Untitled'}
+                        </h1>
                       </div>
                       <div className="rounded-lg border bg-muted/10 p-8">
                         <BlockNoteAIEditor
