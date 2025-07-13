@@ -61,7 +61,7 @@ export const subscriptions = pgTable('subscriptions', {
   }>().default({
     maxNotes: 10,
     maxFolders: 3,
-    maxAiCalls: 0,
+    maxAiCalls: 10,
     maxCollaborators: 0,
     maxStorage: 100
   }),

@@ -29,11 +29,11 @@ export async function POST(req: Request) {
         .from(subscriptions)
         .where(eq(subscriptions.userId, session.user.id));
 
-      const allowedPlans = ['beta', 'pro_monthly', 'pro_yearly', 'early_bird'];
+      const allowedPlans = ['free', 'beta', 'pro_monthly', 'pro_yearly', 'early_bird'];
       if (!subscription || !allowedPlans.includes(subscription.plan || '')) {
         return NextResponse.json(
           { 
-            error: 'AI features are only available for Beta and Pro users',
+            error: 'AI features are only available for registered users',
             requiresUpgrade: true,
             feature: 'ai_assistant'
           },

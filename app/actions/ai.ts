@@ -48,8 +48,19 @@ export async function checkAIUsageLimit() {
     };
   }
 
-  // Beta users have 100 AI calls per month
-  const isBeta = subscription?.plan === 'beta';
+  // Beta users have 100 AI calls for their trial period
+  let isBeta = subscription?.plan === 'beta';
+  
+  // Check if beta period has expired
+  if (isBeta && subscription.currentPeriodEnd) {
+    const now = new Date();
+    const betaEndDate = new Date(subscription.currentPeriodEnd);
+    if (now > betaEndDate) {
+      // Beta period expired, treat as free user
+      isBeta = false;
+    }
+  }
+  
   const limit = isBeta ? BETA_TIER_LIMIT : FREE_TIER_LIMIT;
 
   // For free and beta tier users, check usage
