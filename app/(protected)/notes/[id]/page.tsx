@@ -545,7 +545,7 @@ export default function NotePage() {
                   </div>
                 )}
 
-                {content &&
+                {(content || isSharedNote) &&
                   (hasEditPermission ? (
                     <CollaborativeEditorFinal
                       key={noteId} // Stable key based on noteId only
