@@ -73,7 +73,12 @@ export function CollaborativeEditorFinal({
   const { hasAIAccess, isLoading: isAIAccessLoading } = useAIAccess();
   
   // Create Y.Doc - stable reference
-  const ydoc = useMemo(() => new Y.Doc(), [noteId]); // Only recreate if note changes
+  const ydoc = useMemo(() => {
+    const doc = new Y.Doc();
+    // Set a unique GUID for this document to ensure proper syncing
+    doc.guid = `notesflow-${noteId}`;
+    return doc;
+  }, [noteId]); // Only recreate if note changes
   
   // Generate consistent user color
   const userColor = useMemo(() => {
@@ -103,7 +108,7 @@ export function CollaborativeEditorFinal({
     
     // Ensure proper cleanup on unmount
     return wsProvider;
-  }, [isShared, user?.id, noteId]); // Remove ydoc dependency
+  }, [isShared, user?.id, noteId, ydoc]);
   
   // Get connection status from provider
   const [connectionStatus, setConnectionStatus] = useState({
@@ -170,7 +175,7 @@ export function CollaborativeEditorFinal({
   // Create IndexedDB persistence
   const persistence = useMemo(() => {
     return new IndexeddbPersistence(`notesflow-${noteId}`, ydoc);
-  }, [noteId]); // Remove ydoc dependency
+  }, [noteId, ydoc]);
   
   // Set awareness state when provider is connected
   useEffect(() => {
@@ -235,7 +240,7 @@ export function CollaborativeEditorFinal({
 
   // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
-    initialContent: provider ? undefined : safeInitialContent,
+    initialContent: !provider ? safeInitialContent : undefined, // Only set initial content in non-collaborative mode
     dictionary: {
       ...en,
       ai: aiEn
@@ -318,15 +323,56 @@ export function CollaborativeEditorFinal({
     onTextDragStart?.(text);
   }, [onTextDragStart]);
   
-  // Initialize content for non-collaborative mode
+  // For collaborative mode, ensure initial content is synchronized
   useEffect(() => {
-    if (provider || !editor || !safeInitialContent) return;
+    if (!provider || !editor || !safeInitialContent) return;
     
-    // For non-collaborative mode, set content directly
-    if (editor.document.length === 0) {
-      editor.replaceBlocks(editor.document, safeInitialContent);
+    let isInitialized = false;
+    
+    const initializeContent = () => {
+      if (isInitialized) return;
+      
+      // Check if the Y.Doc fragment is empty
+      const fragment = ydoc.getXmlFragment("document-store");
+      
+      // If we're the first collaborator and the document is empty
+      if (fragment.length === 0) {
+        // Set the initial content
+        editor.replaceBlocks(editor.document, safeInitialContent);
+        isInitialized = true;
+      } else {
+        // Document already has content from other collaborators
+        isInitialized = true;
+      }
+    };
+    
+    // Try to initialize immediately if provider is connected
+    if (provider.wsconnected) {
+      // Give a small delay for initial sync
+      setTimeout(initializeContent, 100);
     }
-  }, [provider, editor, safeInitialContent]);
+    
+    // Also listen for provider connection
+    const handleStatus = (event: any) => {
+      if (event.status === 'connected' && !isInitialized) {
+        setTimeout(initializeContent, 100);
+      }
+    };
+    
+    provider.on('status', handleStatus);
+    
+    // Also try after a longer delay as fallback
+    const fallbackTimeout = setTimeout(() => {
+      if (!isInitialized) {
+        initializeContent();
+      }
+    }, 1000);
+    
+    return () => {
+      provider.off('status', handleStatus);
+      clearTimeout(fallbackTimeout);
+    };
+  }, [provider, editor, safeInitialContent, ydoc]);
   
   // Handle content changes
   useEffect(() => {

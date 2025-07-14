@@ -38,9 +38,16 @@ export function Sidebar({ onToggle }: SidebarProps) {
   const { checkLimit, refreshSubscription } = useSubscription();
   const { isMobile } = useResponsive();
 
-  // Force refresh on mount to ensure we have latest shared notes
+  // Force refresh on mount and periodically to ensure we have latest shared notes
   useEffect(() => {
     refresh();
+    
+    // Set up periodic refresh every 30 seconds as a fallback
+    const interval = setInterval(() => {
+      refresh();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, [refresh]);
 
   const handleCreateNote = async () => {

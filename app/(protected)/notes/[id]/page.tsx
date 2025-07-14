@@ -38,7 +38,7 @@ export default function NotePage() {
   const { folders } = useFolders();
   const { setHasUnsavedChanges: setGlobalUnsavedChanges, promptToSave } = useUnsavedChanges();
   const { addToRecent } = useRecentNotes();
-  const { isPro } = useSubscription();
+  const { canShare, isBeta } = useSubscription();
   const { isMobile, isTablet } = useResponsive();
 
   const [note, setNote] = useState<{
@@ -295,8 +295,11 @@ export default function NotePage() {
   }, [noteId, router]);
 
   const handleShare = () => {
-    if (!isPro) {
-      toast.error('Sharing is only available for Pro users', {
+    if (!canShare) {
+      const message = isBeta 
+        ? 'You have reached your collaborator limit. Upgrade to Pro for unlimited sharing.'
+        : 'Sharing is only available for Beta and Pro users';
+      toast.error(message, {
         action: {
           label: 'Upgrade to Pro',
           onClick: () => router.push('/upgrade'),
@@ -479,7 +482,7 @@ export default function NotePage() {
                       <Share2 className="mr-2 h-4 w-4" />
                       <span className="flex items-center gap-2">
                         Share
-                        {!isPro && <ProBadge size="sm" showIcon={false} />}
+                        {!canShare && <ProBadge size="sm" showIcon={false} />}
                       </span>
                     </DropdownMenuItem>
                   )}

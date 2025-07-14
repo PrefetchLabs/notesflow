@@ -78,6 +78,11 @@ export async function POST(
         });
       }
 
+      // Update the note to trigger real-time updates
+      await db.update(notes)
+        .set({ updatedAt: new Date() })
+        .where(eq(notes.id, noteId));
+
       return NextResponse.json({
         success: true,
         enabled: true,

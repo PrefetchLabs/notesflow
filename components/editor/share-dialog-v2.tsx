@@ -50,16 +50,19 @@ interface Collaborator {
 
 export function ShareDialogV2({ noteId, noteTitle, open, onOpenChange, onSharingEnabled }: ShareDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const { isPro } = useSubscription();
+  const { canShare, isBeta } = useSubscription();
   const router = useRouter();
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
   
   // Check subscription before opening
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen && !isPro) {
+    if (newOpen && !canShare) {
+      const message = isBeta 
+        ? 'You have reached your collaborator limit. Upgrade to Pro for unlimited sharing.'
+        : 'Sharing is only available for Beta and Pro users';
       toast.error(
-        'Sharing is only available for Pro users',
+        message,
         {
           action: {
             label: 'Upgrade to Pro',
@@ -108,6 +111,11 @@ export function ShareDialogV2({ noteId, noteTitle, open, onOpenChange, onSharing
       toast.success('User invited successfully');
       setEmail('');
       queryClient.invalidateQueries({ queryKey: ['note-sharing', noteId] });
+      // Trigger refresh event for sidebar
+      window.dispatchEvent(new Event('refresh-notes'));
+      if (onSharingEnabled) {
+        onSharingEnabled();
+      }
     },
     onError: (error) => {
       toast.error(error.message);
@@ -167,10 +175,15 @@ export function ShareDialogV2({ noteId, noteTitle, open, onOpenChange, onSharing
     onSuccess: (data) => {
       if (data.enabled) {
         toast.success('Public view link enabled');
+        if (onSharingEnabled) {
+          onSharingEnabled();
+        }
       } else {
         toast.success('Public view link disabled');
       }
       queryClient.invalidateQueries({ queryKey: ['note-sharing', noteId] });
+      // Trigger refresh event for sidebar
+      window.dispatchEvent(new Event('refresh-notes'));
     },
     onError: () => {
       toast.error('Failed to update public access');

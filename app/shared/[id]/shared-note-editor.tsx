@@ -201,6 +201,7 @@ function CollaborativeEditorWithMockAuth({
         initialContent={initialContent}
         onContentChange={onContentChange}
         editable={true}
+        isShared={true}
       />
     </AnonymousAuthProvider>
   );

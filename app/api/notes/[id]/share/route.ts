@@ -63,6 +63,11 @@ export async function POST(
         });
       }
 
+      // Update the note to mark it as shared (this will trigger real-time updates)
+      await db.update(notes)
+        .set({ updatedAt: new Date() })
+        .where(eq(notes.id, noteId));
+
       return NextResponse.json({
         success: true,
         message: 'Sharing enabled',
