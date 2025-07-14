@@ -559,7 +559,7 @@ export default function NotePage() {
                     <CollaborativeEditorFinal
                       key={noteId} // Keep it stable
                       noteId={noteId}
-                      initialContent={content}
+                      initialContent={content} // Always pass content, let editor handle it
                       onContentChange={handleContentChange}
                       isShared={isSharedNote}
                       enableDragToCalendar={true}

@@ -235,6 +235,7 @@ export function CollaborativeEditorFinal({
 
   // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
+    // Don't set initial content here if we have a provider - we'll handle it after
     initialContent: provider ? undefined : safeInitialContent,
     dictionary: {
       ...en,
@@ -318,31 +319,55 @@ export function CollaborativeEditorFinal({
     onTextDragStart?.(text);
   }, [onTextDragStart]);
   
-  // Initialize content for non-collaborative mode
+  // Initialize content for both collaborative and non-collaborative modes
   useEffect(() => {
-    if (provider || !editor || !safeInitialContent) return;
+    if (!editor || !safeInitialContent) return;
     
     // For non-collaborative mode, set content directly
-    if (editor.document.length === 0) {
+    if (!provider && editor.document.length === 0) {
       editor.replaceBlocks(editor.document, safeInitialContent);
     }
   }, [provider, editor, safeInitialContent]);
   
-  // Initialize content for the first collaborator
+  // Initialize Y.js document with initial content when collaboration starts
   useEffect(() => {
-    if (!provider || !editor || !safeInitialContent) return;
+    if (!provider || !editor || !safeInitialContent || !isShared) return;
     
-    // Small delay to let provider connect
-    const timeout = setTimeout(() => {
-      // Check if document is empty (first collaborator)
-      if (editor.document.length === 0 || 
-          (editor.document.length === 1 && !editor.document[0].content?.length)) {
-        editor.replaceBlocks(editor.document, safeInitialContent);
+    let mounted = true;
+    
+    // Check if this is the first time Y.js is being initialized
+    const initializeYDoc = async () => {
+      // Wait a bit for provider to connect
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (!mounted) return;
+      
+      // Wait for persistence to be ready
+      await persistence.whenSynced;
+      
+      if (!mounted) return;
+      
+      // Get the Y.js fragment
+      const fragment = ydoc.getXmlFragment("document-store");
+      
+      // Check if we need to initialize content
+      // Fragment length 0 means no collaborative content exists yet
+      if (fragment.length === 0 && safeInitialContent.length > 0 && editor.document.length === 0) {
+        // This means we're the author initializing collaboration for the first time
+        // Use a transaction to ensure atomic update
+        ydoc.transact(() => {
+          editor.replaceBlocks(editor.document, safeInitialContent);
+        });
       }
-    }, 100);
+    };
     
-    return () => clearTimeout(timeout);
-  }, [provider, editor, safeInitialContent]);
+    initializeYDoc();
+    
+    return () => {
+      mounted = false;
+    };
+  }, [provider, editor, safeInitialContent, isShared, ydoc, persistence]);
+  
   
   
   // Handle content changes

@@ -35,11 +35,29 @@ export function useRealtimeCollaborations(onNewCollaboration?: () => void) {
       onNewCollaboration();
     }
   }, [queryClient, onNewCollaboration]);
+  
+  const handleRemovedCollaboration = useCallback((payload: any) => {
+    // Show notification
+    const noteTitle = payload.old.note_title || 'a note';
+    
+    toast.info(`You no longer have access to "${noteTitle}"`, {
+      duration: 5000,
+    });
+
+    // Invalidate notes query to refresh the list
+    queryClient.invalidateQueries({ queryKey: ['notes'] });
+    queryClient.invalidateQueries({ queryKey: ['folders-with-notes'] });
+    
+    // If user is currently viewing the removed note, redirect them
+    if (window.location.pathname.includes(`/notes/${payload.old.note_id}`)) {
+      window.location.href = '/dashboard';
+    }
+  }, [queryClient]);
 
   useEffect(() => {
     if (!user?.id) return;
 
-    // Subscribe to new collaborations for the current user
+    // Subscribe to collaboration changes for the current user
     const channel = supabase
       .channel(`collaborations:${user.id}`)
       .on(
@@ -52,12 +70,22 @@ export function useRealtimeCollaborations(onNewCollaboration?: () => void) {
         },
         handleNewCollaboration
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'collaborators',
+          filter: `user_id=eq.${user.id}`,
+        },
+        handleRemovedCollaboration
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, supabase, handleNewCollaboration]);
+  }, [user?.id, supabase, handleNewCollaboration, handleRemovedCollaboration]);
 
   return null;
 }
