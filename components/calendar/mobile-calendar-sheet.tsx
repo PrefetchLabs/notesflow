@@ -20,38 +20,6 @@ export function MobileCalendarSheet({ isOpen, onOpenChange }: MobileCalendarShee
   const { blocks, isLoading, error, createBlock, updateBlock, deleteBlock } = useTimeBlocks(currentDate, isInteracting);
   const { user } = useAuth();
 
-  // Handle creating events from the calendar
-  const handleCreateEvent = async (startTime: Date, endTime: Date) => {
-    try {
-      await createBlock({
-        title: 'New Event',
-        startTime,
-        endTime,
-        color: '#3B82F6', // Blue for events
-        type: 'event',
-      });
-      toast.success('Event created');
-    } catch (error) {
-      toast.error('Failed to create event');
-    }
-  };
-
-  // Handle creating tasks from the calendar
-  const handleCreateTask = async (startTime: Date, endTime: Date, title?: string, color?: string, icon?: string) => {
-    try {
-      await createBlock({
-        title: title || 'New Task',
-        startTime,
-        endTime,
-        color: color || '#10B981', // Green for tasks by default
-        icon: icon || null,
-        type: 'task',
-      });
-      toast.success('Task created');
-    } catch (error) {
-      toast.error('Failed to create task');
-    }
-  };
 
   // Handle updating block times
   const handleUpdateBlock = async (id: string, startTime: Date, endTime: Date) => {
@@ -130,8 +98,6 @@ export function MobileCalendarSheet({ isOpen, onOpenChange }: MobileCalendarShee
           <MinimalCalendar 
             currentDate={currentDate} 
             onDateChange={setCurrentDate}
-            onCreateEvent={handleCreateEvent}
-            onCreateTask={handleCreateTask}
             onUpdateBlock={handleUpdateBlock}
             onDeleteBlock={handleDeleteBlock}
             onToggleComplete={handleToggleComplete}
