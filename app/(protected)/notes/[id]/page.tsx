@@ -218,7 +218,11 @@ export default function NotePage() {
       const response = await fetch(`/api/notes/${noteId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ 
+          title,
+          // Only include content for non-collaborative notes
+          ...(isSharedNote ? {} : { content })
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to save');
@@ -234,14 +238,18 @@ export default function NotePage() {
     } finally {
       setIsSaving(false);
     }
-  }, [noteId, title, content, setGlobalUnsavedChanges]);
+  }, [noteId, title, content, setGlobalUnsavedChanges, isSharedNote]);
 
   // Track changes
   const handleContentChange = useCallback(
     (newContent: any[]) => {
       setContent(newContent);
-      setHasUnsavedChanges(true);
-      setGlobalUnsavedChanges(true);
+      
+      // Only track changes for non-collaborative notes
+      if (!isSharedNote) {
+        setHasUnsavedChanges(true);
+        setGlobalUnsavedChanges(true);
+      }
 
       // Auto-extract title from content if current title is generic
       const suggestedTitle = suggestTitleFromContent(title, newContent);
@@ -249,7 +257,7 @@ export default function NotePage() {
         setTitle(suggestedTitle);
       }
     },
-    [title, setGlobalUnsavedChanges]
+    [title, setGlobalUnsavedChanges, isSharedNote]
   );
 
   const handleTitleChange = useCallback(
@@ -267,11 +275,12 @@ export default function NotePage() {
       hasUnsavedChanges &&
       noteId &&
       !noteId.startsWith('new-') &&
-      (debouncedContent || debouncedTitle)
+      (debouncedContent || debouncedTitle) &&
+      !isSharedNote  // Don't autosave collaborative notes
     ) {
       handleSave();
     }
-  }, [debouncedContent, debouncedTitle, hasUnsavedChanges, handleSave, noteId]);
+  }, [debouncedContent, debouncedTitle, hasUnsavedChanges, handleSave, noteId, isSharedNote]);
 
   const handleDelete = useCallback(async () => {
     if (!noteId || noteId.startsWith('new-')) return;
@@ -548,7 +557,7 @@ export default function NotePage() {
                 {(content || isSharedNote) &&
                   (hasEditPermission ? (
                     <CollaborativeEditorFinal
-                      key={noteId} // Stable key based on noteId only
+                      key={noteId} // Keep it stable
                       noteId={noteId}
                       initialContent={content}
                       onContentChange={handleContentChange}

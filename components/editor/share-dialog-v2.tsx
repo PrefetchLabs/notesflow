@@ -111,6 +111,9 @@ export function ShareDialogV2({ noteId, noteTitle, open, onOpenChange, onSharing
       toast.success('User invited successfully');
       setEmail('');
       queryClient.invalidateQueries({ queryKey: ['note-sharing', noteId] });
+      // Force refresh for the current user too
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      queryClient.invalidateQueries({ queryKey: ['folders-with-notes'] });
       // Trigger refresh event for sidebar
       window.dispatchEvent(new Event('refresh-notes'));
       if (onSharingEnabled) {

@@ -103,7 +103,7 @@ export function CollaborativeEditorFinal({
     
     // Ensure proper cleanup on unmount
     return wsProvider;
-  }, [isShared, user?.id, noteId]); // Remove ydoc dependency
+  }, [isShared, user, noteId, ydoc]);
   
   // Get connection status from provider
   const [connectionStatus, setConnectionStatus] = useState({
@@ -328,6 +328,23 @@ export function CollaborativeEditorFinal({
     }
   }, [provider, editor, safeInitialContent]);
   
+  // Initialize content for the first collaborator
+  useEffect(() => {
+    if (!provider || !editor || !safeInitialContent) return;
+    
+    // Small delay to let provider connect
+    const timeout = setTimeout(() => {
+      // Check if document is empty (first collaborator)
+      if (editor.document.length === 0 || 
+          (editor.document.length === 1 && !editor.document[0].content?.length)) {
+        editor.replaceBlocks(editor.document, safeInitialContent);
+      }
+    }, 100);
+    
+    return () => clearTimeout(timeout);
+  }, [provider, editor, safeInitialContent]);
+  
+  
   // Handle content changes
   useEffect(() => {
     if (!editor) return;
@@ -341,7 +358,7 @@ export function CollaborativeEditorFinal({
     return unsubscribe;
   }, [editor, onContentChange]);
   
-  // Cleanup only on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       // Clean up in proper order
@@ -353,7 +370,7 @@ export function CollaborativeEditorFinal({
       persistence?.destroy();
       ydoc.destroy();
     };
-  }, []); // Empty deps - only cleanup on unmount
+  }, []);
   
   // Don't render editor until we know the AI access status
   if (!editor || isAIAccessLoading) {
