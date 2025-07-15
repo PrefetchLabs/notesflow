@@ -41,12 +41,33 @@ export function getAIExtension(editor: BlockNoteEditor): AIExtension | null {
   }
 }
 
-// Cancel all active AI operations
+// Check if any AI operations are active
+export function isAIActive() {
+  return activeAbortControllers.size > 0;
+}
+
+// Cancel all active AI operations and return whether any were cancelled
 export function cancelActiveAIOperations() {
+  const hadActiveOperations = activeAbortControllers.size > 0;
   activeAbortControllers.forEach((controller, id) => {
     controller.abort();
   });
   activeAbortControllers.clear();
+  return hadActiveOperations;
+}
+
+// Global ESC key handler for cancelling AI operations
+if (typeof window !== 'undefined') {
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && isAIActive()) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const cancelled = cancelActiveAIOperations();
+      if (cancelled) {
+        toast.info('AI operation cancelled');
+      }
+    }
+  }, true); // Use capture phase to intercept before any other handlers
 }
 
 // Create a custom AI extension that wraps the BlockNote AI extension
@@ -118,7 +139,7 @@ export function createAIExtension(options: AIExtensionOptions) {
         
         // Check if it was an abort error
         if (error instanceof Error && error.name === 'AbortError') {
-          toast.info('AI operation cancelled');
+          // Toast is already shown by the global ESC handler
           return undefined;
         }
         

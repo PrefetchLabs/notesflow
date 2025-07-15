@@ -19,11 +19,9 @@ interface AIDropdownMenuProps {
   onCommand: (command: string, value?: string) => void;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement>;
-  isAIActive?: boolean;
-  onStopAI?: () => void;
 }
 
-export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = false, onStopAI }: AIDropdownMenuProps) {
+export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -81,7 +79,6 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = fal
   }, [onClose, anchorRef]);
 
   const [inputValue, setInputValue] = useState('');
-  const [isAIWriting, setIsAIWriting] = useState(false);
   
   const languageOptions = [
     { id: 'translate-korean', label: '한국어 (Korean)', flag: '🇰🇷' },
@@ -108,8 +105,6 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = fal
   };
 
   const handleMenuItemClick = (item: any, event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isAIActive) return; // Disable menu clicks while AI is active
-    
     if (item.hasSubmenu) {
       const rect = event.currentTarget.getBoundingClientRect();
       setSubmenuPosition({
@@ -204,23 +199,14 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = fal
         <div className="relative">
           <input
             type="text"
-            placeholder={isAIActive ? "AI is writing..." : "Ask AI anything..."}
+            placeholder="Ask AI anything..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleInputKeyDown}
-            disabled={isAIActive}
-            className="w-full bg-[#3a3a3a] text-white placeholder-gray-400 px-3 py-2 rounded-md text-sm outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+            className="w-full bg-[#3a3a3a] text-white placeholder-gray-400 px-3 py-2 rounded-md text-sm outline-none focus:ring-1 focus:ring-purple-500"
             onClick={(e) => e.stopPropagation()}
             autoFocus
           />
-          {isAIActive && onStopAI && (
-            <button
-              onClick={onStopAI}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded"
-            >
-              Stop
-            </button>
-          )}
         </div>
       </div>
 
@@ -252,9 +238,7 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = fal
                   setActiveSubmenu(null);
                 }
               }}
-              className={`w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 group ${
-                isAIActive ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className="w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 group"
             >
               {item.icon && (
                 <item.icon className={`h-4 w-4 ${item.color || 'text-gray-400'}`} />
@@ -286,10 +270,7 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = fal
         <button
           key={lang.id}
           onClick={() => onCommand(lang.id)}
-          disabled={isAIActive}
-          className={`w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 ${
-            isAIActive ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className="w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3"
         >
           <span className="text-lg">{lang.flag}</span>
           <span>{lang.label}</span>
@@ -299,10 +280,7 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = fal
         <button
           key={tone.id}
           onClick={() => onCommand(tone.id)}
-          disabled={isAIActive}
-          className={`w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 ${
-            isAIActive ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className="w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3"
         >
           <span className="text-lg">{tone.icon}</span>
           <span>{tone.label}</span>

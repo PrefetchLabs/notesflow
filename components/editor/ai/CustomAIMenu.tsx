@@ -53,6 +53,7 @@ export function CustomAIMenu(props: any) {
           }
         }
 
+
         // For other states, return the default items
         return getDefaultAIMenuItems(editor, aiResponseStatus);
       }}

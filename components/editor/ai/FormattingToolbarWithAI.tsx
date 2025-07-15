@@ -15,7 +15,7 @@ import {
 import { Sparkles } from 'lucide-react';
 import { AIDropdownMenu } from './AIDropdownMenu';
 import { toast } from 'sonner';
-import { getAIExtension, cancelActiveAIOperations } from '@/lib/editor/ai-extension';
+import { getAIExtension } from '@/lib/editor/ai-extension';
 
 interface FormattingToolbarWithAIProps {
   editor?: any;
@@ -26,26 +26,10 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
     <FormattingToolbarController
       formattingToolbar={(props) => {
         const [showAIMenu, setShowAIMenu] = useState(false);
-        const [isAIActive, setIsAIActive] = useState(false);
         const aiButtonRef = useRef<HTMLButtonElement>(null);
         const { editor: propsEditor } = props;
         // Use passed editor if available, otherwise fall back to props editor
         const fullEditor = passedEditor || propsEditor;
-
-        // Add ESC key handler for cancelling AI operations
-        useEffect(() => {
-          const handleEscKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isAIActive) {
-              cancelActiveAIOperations();
-              setIsAIActive(false);
-            }
-          };
-
-          document.addEventListener('keydown', handleEscKey);
-          return () => {
-            document.removeEventListener('keydown', handleEscKey);
-          };
-        }, [isAIActive]);
 
         const handleAIClick = (e: React.MouseEvent) => {
           // Prevent default to avoid losing editor focus
@@ -54,21 +38,14 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
           setShowAIMenu(!showAIMenu);
         };
 
-        const handleStopAI = () => {
-          cancelActiveAIOperations();
-          setIsAIActive(false);
-        };
-
         const handleAICommand = async (command: string, value?: string) => {
           setShowAIMenu(false);
-          setIsAIActive(true);
           
           try {
             // Check if editor is available
             if (!fullEditor) {
               console.error('[AI Debug] Editor is not available');
               toast.error('Editor not ready');
-              setIsAIActive(false);
               return;
             }
             
@@ -78,13 +55,11 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
               aiExtension = getAIExtension(fullEditor);
             } catch (error) {
               toast.error('AI extension not available');
-              setIsAIActive(false);
               return;
             }
             
             if (!aiExtension) {
               toast.error('AI extension not available');
-              setIsAIActive(false);
               return;
             }
             
@@ -94,7 +69,6 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
               if (textCursorPosition?.block) {
                 aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
               }
-              setIsAIActive(false);
               return;
             }
             
@@ -249,7 +223,6 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
             // If we need selection but don't have it, show error
             if (needsSelection && !hasSelection && command !== 'custom-prompt') {
               toast.error('Please select some text first');
-              setIsAIActive(false);
               return;
             }
             
@@ -259,9 +232,6 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
               useSelection: config.useSelection,
               defaultStreamTools: config.streamTools,
             });
-            
-            // Reset AI active state after completion
-            setIsAIActive(false);
             
             // Restore editor focus after AI operation completes
             // This ensures the formatting toolbar continues to work properly
@@ -297,7 +267,6 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
           } catch (error) {
             // [REMOVED_CONSOLE]
             toast.error('Failed to execute AI command');
-            setIsAIActive(false);
           }
         };
 
@@ -346,8 +315,6 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
                   }, 50);
                 }}
                 anchorRef={aiButtonRef}
-                isAIActive={isAIActive}
-                onStopAI={handleStopAI}
               />
             )}
           </FormattingToolbar>
