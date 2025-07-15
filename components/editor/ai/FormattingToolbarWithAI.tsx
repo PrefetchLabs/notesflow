@@ -17,7 +17,6 @@ import { AIDropdownMenu } from './AIDropdownMenu';
 import { toast } from 'sonner';
 import { useSubscription } from '@/lib/contexts/subscription-context';
 import { getAIExtension } from '@/lib/editor/ai-extension';
-import { ProBadge } from '@/components/ui/pro-badge';
 
 export function FormattingToolbarWithAI() {
   return (
@@ -26,10 +25,10 @@ export function FormattingToolbarWithAI() {
         const [showAIMenu, setShowAIMenu] = useState(false);
         const aiButtonRef = useRef<HTMLButtonElement>(null);
         const { editor: fullEditor } = props;
-        const { isPro, showUpgradePrompt } = useSubscription();
+        const { isPro, isBeta, showUpgradePrompt } = useSubscription();
 
         const handleAIClick = () => {
-          if (!isPro) {
+          if (!isPro && !isBeta) {
             showUpgradePrompt('AI Assistant', 'Upgrade to Pro to use AI-powered writing assistance');
             return;
           }
@@ -173,22 +172,15 @@ export function FormattingToolbarWithAI() {
             <CreateLinkButton />
             
             {/* AI Button */}
-            <div className="relative inline-flex items-center">
-              <button
-                ref={aiButtonRef}
-                className={`bn-button ${!isPro ? 'opacity-60' : ''}`}
-                onClick={handleAIClick}
-                title={isPro ? "AI Assistant" : "AI Assistant (Pro feature)"}
-                type="button"
-              >
-                <Sparkles className="h-4 w-4" />
-              </button>
-              {!isPro && (
-                <div className="absolute -top-2 -right-2 pointer-events-none">
-                  <ProBadge size="sm" showIcon={false} />
-                </div>
-              )}
-            </div>
+            <button
+              ref={aiButtonRef}
+              className="bn-button"
+              onClick={handleAIClick}
+              title="AI Assistant"
+              type="button"
+            >
+              <Sparkles className="h-4 w-4" />
+            </button>
             
             {showAIMenu && (
               <AIDropdownMenu
