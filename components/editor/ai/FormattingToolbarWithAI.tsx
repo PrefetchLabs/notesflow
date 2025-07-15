@@ -30,11 +30,6 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
         const { editor: propsEditor } = props;
         // Use passed editor if available, otherwise fall back to props editor
         const fullEditor = passedEditor || propsEditor;
-        
-        console.log('[AI Debug] FormattingToolbar props:', props);
-        console.log('[AI Debug] Editor from props:', propsEditor);
-        console.log('[AI Debug] Passed editor:', passedEditor);
-        console.log('[AI Debug] Using editor:', fullEditor);
 
         const handleAIClick = () => {
           setShowAIMenu(!showAIMenu);
@@ -54,18 +49,13 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
             // Use the full editor instance
             let aiExtension;
             try {
-              console.log('[AI Debug] Getting AI extension for command:', command);
-              console.log('[AI Debug] Editor instance:', fullEditor);
               aiExtension = getAIExtension(fullEditor);
-              console.log('[AI Debug] AI extension retrieved:', aiExtension);
             } catch (error) {
-              console.error('[AI Debug] Error getting AI extension:', error);
               toast.error('AI extension not available');
               return;
             }
             
             if (!aiExtension) {
-              console.error('[AI Debug] AI extension is null/undefined');
               toast.error('AI extension not available');
               return;
             }
@@ -80,7 +70,10 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
             }
             
             // Check if we need text selection
-            const needsSelection = ['improve', 'fix-grammar', 'translate', 'shorten', 'simplify', 'change-tone'].includes(command);
+            const needsSelection = [
+              'improve', 'fix-grammar', 'translate', 'shorten', 'simplify', 'change-tone',
+              'translate-korean', 'translate-english', 'translate-chinese', 'translate-japanese'
+            ].includes(command);
             const selection = fullEditor.getSelection();
             const hasSelection = selection && selection.blocks.length > 0;
             
@@ -108,6 +101,34 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
                 prompt: hasSelection
                   ? 'Translate the selected text to Spanish. Keep the tone and style.'
                   : 'Translate the text above to Spanish',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'translate-korean': {
+                prompt: hasSelection
+                  ? 'Translate the selected text to Korean. Keep the tone and style.'
+                  : 'Translate the text above to Korean',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'translate-english': {
+                prompt: hasSelection
+                  ? 'Translate the selected text to English. Keep the tone and style.'
+                  : 'Translate the text above to English',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'translate-chinese': {
+                prompt: hasSelection
+                  ? 'Translate the selected text to Chinese (Simplified). Keep the tone and style.'
+                  : 'Translate the text above to Chinese (Simplified)',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'translate-japanese': {
+                prompt: hasSelection
+                  ? 'Translate the selected text to Japanese. Keep the tone and style.'
+                  : 'Translate the text above to Japanese',
                 useSelection: needsSelection && hasSelection,
                 streamTools: { add: false, update: true, delete: false }
               },
