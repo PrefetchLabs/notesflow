@@ -562,7 +562,7 @@ export default function NotePage() {
                       initialContent={content} // Always pass content, let editor handle it
                       onContentChange={handleContentChange}
                       isShared={isSharedNote}
-                      enableDragToCalendar={true}
+                      enableDragToCalendar={false}
                       onTextDragStart={() => {}}
                     />
                   ) : (
