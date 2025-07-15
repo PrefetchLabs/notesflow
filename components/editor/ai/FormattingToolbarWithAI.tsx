@@ -15,23 +15,28 @@ import {
 import { Sparkles } from 'lucide-react';
 import { AIDropdownMenu } from './AIDropdownMenu';
 import { toast } from 'sonner';
-import { useSubscription } from '@/lib/contexts/subscription-context';
 import { getAIExtension } from '@/lib/editor/ai-extension';
 
-export function FormattingToolbarWithAI() {
+interface FormattingToolbarWithAIProps {
+  editor?: any;
+}
+
+export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingToolbarWithAIProps) {
   return (
     <FormattingToolbarController
       formattingToolbar={(props) => {
         const [showAIMenu, setShowAIMenu] = useState(false);
         const aiButtonRef = useRef<HTMLButtonElement>(null);
-        const { editor: fullEditor } = props;
-        const { isPro, isBeta, showUpgradePrompt } = useSubscription();
+        const { editor: propsEditor } = props;
+        // Use passed editor if available, otherwise fall back to props editor
+        const fullEditor = passedEditor || propsEditor;
+        
+        console.log('[AI Debug] FormattingToolbar props:', props);
+        console.log('[AI Debug] Editor from props:', propsEditor);
+        console.log('[AI Debug] Passed editor:', passedEditor);
+        console.log('[AI Debug] Using editor:', fullEditor);
 
         const handleAIClick = () => {
-          if (!isPro && !isBeta) {
-            showUpgradePrompt('AI Assistant', 'Upgrade to Pro to use AI-powered writing assistance');
-            return;
-          }
           setShowAIMenu(!showAIMenu);
         };
 
@@ -39,17 +44,28 @@ export function FormattingToolbarWithAI() {
           setShowAIMenu(false);
           
           try {
+            // Check if editor is available
+            if (!fullEditor) {
+              console.error('[AI Debug] Editor is not available');
+              toast.error('Editor not ready');
+              return;
+            }
+            
             // Use the full editor instance
             let aiExtension;
             try {
+              console.log('[AI Debug] Getting AI extension for command:', command);
+              console.log('[AI Debug] Editor instance:', fullEditor);
               aiExtension = getAIExtension(fullEditor);
+              console.log('[AI Debug] AI extension retrieved:', aiExtension);
             } catch (error) {
-              // [REMOVED_CONSOLE]
+              console.error('[AI Debug] Error getting AI extension:', error);
               toast.error('AI extension not available');
               return;
             }
             
             if (!aiExtension) {
+              console.error('[AI Debug] AI extension is null/undefined');
               toast.error('AI extension not available');
               return;
             }

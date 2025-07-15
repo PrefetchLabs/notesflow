@@ -241,7 +241,7 @@ export function CollaborativeEditorFinal({
       ...en,
       ai: aiEn
     },
-    extensions: hasAIAccess ? [
+    extensions: [
       createAIExtension({
         model,
         stream: true,
@@ -251,7 +251,7 @@ export function CollaborativeEditorFinal({
           color: "#8bc6ff"
         }
       })
-    ] : [],
+    ],
     blockSpecs: {
       ...defaultBlockSpecs,
     },
@@ -488,8 +488,8 @@ export function CollaborativeEditorFinal({
         formattingToolbar={false}
         slashMenu={false}
       >
-        {hasAIAccess && <AIMenuController aiMenu={CustomAIMenu} />}
-        <FormattingToolbarWithAI showAI={hasAIAccess} />
+        <AIMenuController aiMenu={CustomAIMenu} />
+        <FormattingToolbarWithAI editor={editor} />
         <SuggestionMenuWithAI editor={editor} />
       </BlockNoteView>
       
