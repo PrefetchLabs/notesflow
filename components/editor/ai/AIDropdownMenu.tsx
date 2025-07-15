@@ -9,7 +9,6 @@ import {
   Maximize,
   FileText,
   Lightbulb,
-  Edit3,
   Minimize,
   PenTool,
   ChevronRight
@@ -174,12 +173,6 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
       id: 'extend', 
       label: 'Make longer', 
       icon: Maximize,
-      color: 'text-purple-500'
-    },
-    { 
-      id: 'edit-selection', 
-      label: 'Edit selection...', 
-      icon: Edit3,
       color: 'text-purple-500'
     },
   ];

@@ -63,14 +63,6 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
               return;
             }
             
-            // For edit-selection, open the AI menu for custom input
-            if (command === 'edit-selection') {
-              const textCursorPosition = fullEditor.getTextCursorPosition();
-              if (textCursorPosition?.block) {
-                aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
-              }
-              return;
-            }
             
             // Check if we need text selection
             const needsSelection = [
