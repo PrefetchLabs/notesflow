@@ -8,13 +8,13 @@ type AIExtensionOptions = ConstructorParameters<typeof AIExtension>[1];
 // Store AI extension instances for custom retrieval
 const aiExtensionMap = new WeakMap<BlockNoteEditor, AIExtension>();
 
+// Store active abort controllers for cancellation
+const activeAbortControllers = new Map<string, AbortController>();
+
 // Custom getAIExtension that works with our wrapped extension
 export function getAIExtension(editor: BlockNoteEditor): AIExtension | null {
-  console.log('[AI Extension] Getting AI extension for editor:', editor);
-  
   // First try to get from our map
   const customExtension = aiExtensionMap.get(editor);
-  console.log('[AI Extension] Custom extension from map:', customExtension);
   if (customExtension) {
     return customExtension;
   }
@@ -22,9 +22,7 @@ export function getAIExtension(editor: BlockNoteEditor): AIExtension | null {
   // Try to get the extension directly from the editor
   if (editor && editor._tiptapEditor && editor._tiptapEditor.extensionManager) {
     const extensions = editor._tiptapEditor.extensionManager.extensions;
-    console.log('[AI Extension] All extensions:', extensions);
     const aiExt = extensions.find((ext: any) => ext.name === 'ai' || ext.name === 'aiExtension');
-    console.log('[AI Extension] Found AI extension in editor:', aiExt);
     if (aiExt && aiExt.options && typeof aiExt.options.callLLM === 'function') {
       // Return a compatible object
       return aiExt.options as AIExtension;
@@ -34,43 +32,47 @@ export function getAIExtension(editor: BlockNoteEditor): AIExtension | null {
   // Fallback to BlockNote's default
   try {
     if (!editor) {
-      console.error('[AI Extension] Editor is undefined, cannot get AI extension');
       return null;
     }
     const defaultExt = getBlockNoteAIExtension(editor);
-    console.log('[AI Extension] Default BlockNote extension:', defaultExt);
     return defaultExt;
   } catch (error) {
-    console.error('[AI Extension] Error getting default extension:', error);
     return null;
   }
 }
 
+// Cancel all active AI operations
+export function cancelActiveAIOperations() {
+  activeAbortControllers.forEach((controller, id) => {
+    controller.abort();
+  });
+  activeAbortControllers.clear();
+}
+
 // Create a custom AI extension that wraps the BlockNote AI extension
 export function createAIExtension(options: AIExtensionOptions) {
-  console.log('[AI Extension] Creating AI extension with options:', options);
-  
   // Return the extension directly for BlockNote to use
   const originalExtensionCreator = createBlockNoteAIExtension(options);
   
   return (editor: BlockNoteEditor) => {
-    console.log('[AI Extension] Initializing AI extension for editor');
     const baseExtension = originalExtensionCreator(editor);
     
     // Store the extension in our map
     aiExtensionMap.set(editor, baseExtension);
-    console.log('[AI Extension] Stored extension in WeakMap');
     
     // Store the original callLLM method
     const originalCallLLM = baseExtension.callLLM.bind(baseExtension);
     
     // Override the callLLM method to add usage tracking
     baseExtension.callLLM = async (opts) => {
-      console.log('[AI Extension] callLLM called with options:', opts);
+      // Create abort controller for this operation
+      const operationId = `ai-${Date.now()}`;
+      const abortController = new AbortController();
+      activeAbortControllers.set(operationId, abortController);
+      
       try {
         // Check usage limit first
         const usageCheck = await checkAIUsageLimit();
-        console.log('[AI Extension] Usage check result:', usageCheck);
         
         if (usageCheck.hasReachedLimit) {
           toast.error("AI usage limit reached", {
@@ -91,27 +93,34 @@ export function createAIExtension(options: AIExtensionOptions) {
           toast.warning(`${usageCheck.remainingCalls} AI calls remaining this month`);
         }
 
-        // Make the actual LLM call
-        console.log('[AI Extension] Calling original LLM with opts:', opts);
-        const result = await originalCallLLM(opts);
-        console.log('[AI Extension] LLM call result:', result);
+        // Make the actual LLM call with abort signal
+        const result = await originalCallLLM({
+          ...opts,
+          signal: abortController.signal
+        });
 
         // Track usage after successful call (but don't let tracking failures break AI)
         if (result) {
           try {
-            // [REMOVED_CONSOLE]
             const trackingResult = await trackAIUsage(opts.userPrompt || "unknown", 0);
-            // [REMOVED_CONSOLE]
           } catch (trackingError) {
-            // Log the error but don't fail the AI request
-            // [REMOVED_CONSOLE]
-            // For Beta/Pro users, this shouldn't prevent AI from working
+            // Don't fail the AI request on tracking errors
           }
         }
 
+        // Clean up abort controller after successful completion
+        activeAbortControllers.delete(operationId);
+        
         return result;
       } catch (error) {
-        // [REMOVED_CONSOLE]
+        // Clean up abort controller on error
+        activeAbortControllers.delete(operationId);
+        
+        // Check if it was an abort error
+        if (error instanceof Error && error.name === 'AbortError') {
+          toast.info('AI operation cancelled');
+          return undefined;
+        }
         
         if (error instanceof Error) {
           if (error.message.includes("limit reached")) {

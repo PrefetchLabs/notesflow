@@ -16,12 +16,14 @@ import {
 } from 'lucide-react';
 
 interface AIDropdownMenuProps {
-  onCommand: (command: string) => void;
+  onCommand: (command: string, value?: string) => void;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement>;
+  isAIActive?: boolean;
+  onStopAI?: () => void;
 }
 
-export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenuProps) {
+export function AIDropdownMenu({ onCommand, onClose, anchorRef, isAIActive = false, onStopAI }: AIDropdownMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -52,6 +54,12 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
       }
     };
 
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
     const handleScroll = () => {
       if (anchorRef.current) {
         const rect = anchorRef.current.getBoundingClientRect();
@@ -63,13 +71,18 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscKey);
     window.addEventListener('scroll', handleScroll, true);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscKey);
       window.removeEventListener('scroll', handleScroll, true);
     };
   }, [onClose, anchorRef]);
 
+  const [inputValue, setInputValue] = useState('');
+  const [isAIWriting, setIsAIWriting] = useState(false);
+  
   const languageOptions = [
     { id: 'translate-korean', label: '한국어 (Korean)', flag: '🇰🇷' },
     { id: 'translate-english', label: 'English', flag: '🇺🇸' },
@@ -77,7 +90,26 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
     { id: 'translate-japanese', label: '日本語 (Japanese)', flag: '🇯🇵' },
   ];
 
+  const toneOptions = [
+    { id: 'change-tone-professional', label: 'Professional', icon: '💼' },
+    { id: 'change-tone-casual', label: 'Casual', icon: '😊' },
+    { id: 'change-tone-friendly', label: 'Friendly', icon: '🤝' },
+    { id: 'change-tone-persuasive', label: 'Persuasive', icon: '💡' },
+    { id: 'change-tone-academic', label: 'Academic', icon: '🎓' },
+    { id: 'change-tone-creative', label: 'Creative', icon: '🎨' },
+  ];
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      e.preventDefault();
+      onCommand('custom-prompt', inputValue.trim());
+      setInputValue('');
+    }
+  };
+
   const handleMenuItemClick = (item: any, event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isAIActive) return; // Disable menu clicks while AI is active
+    
     if (item.hasSubmenu) {
       const rect = event.currentTarget.getBoundingClientRect();
       setSubmenuPosition({
@@ -169,12 +201,27 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
       }}
     >
       <div className="px-3 py-2">
-        <input
-          type="text"
-          placeholder="Ask AI anything..."
-          className="w-full bg-[#3a3a3a] text-white placeholder-gray-400 px-3 py-2 rounded-md text-sm outline-none focus:ring-1 focus:ring-purple-500"
-          onClick={(e) => e.stopPropagation()}
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder={isAIActive ? "AI is writing..." : "Ask AI anything..."}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            disabled={isAIActive}
+            className="w-full bg-[#3a3a3a] text-white placeholder-gray-400 px-3 py-2 rounded-md text-sm outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+            onClick={(e) => e.stopPropagation()}
+            autoFocus
+          />
+          {isAIActive && onStopAI && (
+            <button
+              onClick={onStopAI}
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded"
+            >
+              Stop
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="max-h-96 overflow-y-auto">
@@ -205,7 +252,9 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
                   setActiveSubmenu(null);
                 }
               }}
-              className="w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 group"
+              className={`w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 group ${
+                isAIActive ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               {item.icon && (
                 <item.icon className={`h-4 w-4 ${item.color || 'text-gray-400'}`} />
@@ -221,7 +270,7 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
     </div>
   );
 
-  const submenuContent = activeSubmenu === 'translate' && (
+  const submenuContent = (activeSubmenu === 'translate' || activeSubmenu === 'change-tone') && (
     <div
       ref={submenuRef}
       className="fixed z-[101] w-48 bg-[#2a2a2a] text-white rounded-lg shadow-2xl py-1 overflow-hidden"
@@ -233,14 +282,30 @@ export function AIDropdownMenu({ onCommand, onClose, anchorRef }: AIDropdownMenu
       }}
       onMouseLeave={() => setActiveSubmenu(null)}
     >
-      {languageOptions.map((lang) => (
+      {activeSubmenu === 'translate' && languageOptions.map((lang) => (
         <button
           key={lang.id}
           onClick={() => onCommand(lang.id)}
-          className="w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3"
+          disabled={isAIActive}
+          className={`w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 ${
+            isAIActive ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
           <span className="text-lg">{lang.flag}</span>
           <span>{lang.label}</span>
+        </button>
+      ))}
+      {activeSubmenu === 'change-tone' && toneOptions.map((tone) => (
+        <button
+          key={tone.id}
+          onClick={() => onCommand(tone.id)}
+          disabled={isAIActive}
+          className={`w-full px-3 py-2 text-sm text-left hover:bg-[#3a3a3a] flex items-center gap-3 ${
+            isAIActive ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          <span className="text-lg">{tone.icon}</span>
+          <span>{tone.label}</span>
         </button>
       ))}
     </div>

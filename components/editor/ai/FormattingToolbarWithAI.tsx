@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   FormattingToolbarController,
   FormattingToolbar,
@@ -15,7 +15,7 @@ import {
 import { Sparkles } from 'lucide-react';
 import { AIDropdownMenu } from './AIDropdownMenu';
 import { toast } from 'sonner';
-import { getAIExtension } from '@/lib/editor/ai-extension';
+import { getAIExtension, cancelActiveAIOperations } from '@/lib/editor/ai-extension';
 
 interface FormattingToolbarWithAIProps {
   editor?: any;
@@ -26,23 +26,49 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
     <FormattingToolbarController
       formattingToolbar={(props) => {
         const [showAIMenu, setShowAIMenu] = useState(false);
+        const [isAIActive, setIsAIActive] = useState(false);
         const aiButtonRef = useRef<HTMLButtonElement>(null);
         const { editor: propsEditor } = props;
         // Use passed editor if available, otherwise fall back to props editor
         const fullEditor = passedEditor || propsEditor;
 
-        const handleAIClick = () => {
+        // Add ESC key handler for cancelling AI operations
+        useEffect(() => {
+          const handleEscKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isAIActive) {
+              cancelActiveAIOperations();
+              setIsAIActive(false);
+            }
+          };
+
+          document.addEventListener('keydown', handleEscKey);
+          return () => {
+            document.removeEventListener('keydown', handleEscKey);
+          };
+        }, [isAIActive]);
+
+        const handleAIClick = (e: React.MouseEvent) => {
+          // Prevent default to avoid losing editor focus
+          e.preventDefault();
+          e.stopPropagation();
           setShowAIMenu(!showAIMenu);
         };
 
-        const handleAICommand = async (command: string) => {
+        const handleStopAI = () => {
+          cancelActiveAIOperations();
+          setIsAIActive(false);
+        };
+
+        const handleAICommand = async (command: string, value?: string) => {
           setShowAIMenu(false);
+          setIsAIActive(true);
           
           try {
             // Check if editor is available
             if (!fullEditor) {
               console.error('[AI Debug] Editor is not available');
               toast.error('Editor not ready');
+              setIsAIActive(false);
               return;
             }
             
@@ -52,11 +78,13 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
               aiExtension = getAIExtension(fullEditor);
             } catch (error) {
               toast.error('AI extension not available');
+              setIsAIActive(false);
               return;
             }
             
             if (!aiExtension) {
               toast.error('AI extension not available');
+              setIsAIActive(false);
               return;
             }
             
@@ -66,13 +94,16 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
               if (textCursorPosition?.block) {
                 aiExtension.openAIMenuAtBlock(textCursorPosition.block.id);
               }
+              setIsAIActive(false);
               return;
             }
             
             // Check if we need text selection
             const needsSelection = [
               'improve', 'fix-grammar', 'translate', 'shorten', 'simplify', 'change-tone',
-              'translate-korean', 'translate-english', 'translate-chinese', 'translate-japanese'
+              'translate-korean', 'translate-english', 'translate-chinese', 'translate-japanese',
+              'change-tone-professional', 'change-tone-casual', 'change-tone-friendly',
+              'change-tone-persuasive', 'change-tone-academic', 'change-tone-creative'
             ].includes(command);
             const selection = fullEditor.getSelection();
             const hasSelection = selection && selection.blocks.length > 0;
@@ -159,6 +190,53 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
                   : 'Change the tone of the text above to be more professional',
                 useSelection: needsSelection && hasSelection,
                 streamTools: { add: false, update: true, delete: false }
+              },
+              'change-tone-professional': {
+                prompt: hasSelection
+                  ? 'Change the tone of the selected text to be professional and formal for business communication.'
+                  : 'Change the tone to be professional and formal',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'change-tone-casual': {
+                prompt: hasSelection
+                  ? 'Change the tone of the selected text to be casual and relaxed.'
+                  : 'Change the tone to be casual and relaxed',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'change-tone-friendly': {
+                prompt: hasSelection
+                  ? 'Change the tone of the selected text to be friendly, warm, and approachable.'
+                  : 'Change the tone to be friendly and warm',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'change-tone-persuasive': {
+                prompt: hasSelection
+                  ? 'Change the tone of the selected text to be persuasive and convincing.'
+                  : 'Change the tone to be persuasive',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'change-tone-academic': {
+                prompt: hasSelection
+                  ? 'Change the tone of the selected text to be academic and scholarly with formal language.'
+                  : 'Change the tone to be academic and scholarly',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'change-tone-creative': {
+                prompt: hasSelection
+                  ? 'Change the tone of the selected text to be creative, imaginative, and artistic.'
+                  : 'Change the tone to be creative and imaginative',
+                useSelection: needsSelection && hasSelection,
+                streamTools: { add: false, update: true, delete: false }
+              },
+              'custom-prompt': {
+                prompt: value || 'Help me with this text',
+                useSelection: hasSelection,
+                streamTools: { add: !hasSelection, update: hasSelection, delete: false }
               }
             };
             
@@ -169,8 +247,9 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
             }
             
             // If we need selection but don't have it, show error
-            if (needsSelection && !hasSelection) {
+            if (needsSelection && !hasSelection && command !== 'custom-prompt') {
               toast.error('Please select some text first');
+              setIsAIActive(false);
               return;
             }
             
@@ -181,9 +260,44 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
               defaultStreamTools: config.streamTools,
             });
             
+            // Reset AI active state after completion
+            setIsAIActive(false);
+            
+            // Restore editor focus after AI operation completes
+            // This ensures the formatting toolbar continues to work properly
+            setTimeout(() => {
+              if (fullEditor && fullEditor._tiptapEditor) {
+                // Focus the editor
+                fullEditor.focus();
+                
+                // Get current selection
+                const { from, to } = fullEditor._tiptapEditor.state.selection;
+                
+                // Force a selection update to re-trigger formatting toolbar
+                if (from === to) {
+                  // No selection - create a small selection and then collapse it
+                  // This forces the toolbar to re-evaluate
+                  fullEditor._tiptapEditor.commands.setTextSelection({ from, to: from + 1 });
+                  setTimeout(() => {
+                    fullEditor._tiptapEditor.commands.setTextSelection({ from, to: from });
+                  }, 10);
+                } else {
+                  // Re-set the existing selection to trigger formatting toolbar
+                  fullEditor._tiptapEditor.commands.setTextSelection({ from, to });
+                }
+                
+                // Dispatch a selection update event to ensure all listeners are notified
+                fullEditor._tiptapEditor.emit('selectionUpdate', {
+                  editor: fullEditor._tiptapEditor,
+                  transaction: fullEditor._tiptapEditor.state.tr
+                });
+              }
+            }, 100);
+            
           } catch (error) {
             // [REMOVED_CONSOLE]
             toast.error('Failed to execute AI command');
+            setIsAIActive(false);
           }
         };
 
@@ -222,8 +336,18 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
             {showAIMenu && (
               <AIDropdownMenu
                 onCommand={handleAICommand}
-                onClose={() => setShowAIMenu(false)}
+                onClose={() => {
+                  setShowAIMenu(false);
+                  // Restore focus to the editor when menu closes
+                  setTimeout(() => {
+                    if (fullEditor) {
+                      fullEditor.focus();
+                    }
+                  }, 50);
+                }}
                 anchorRef={aiButtonRef}
+                isAIActive={isAIActive}
+                onStopAI={handleStopAI}
               />
             )}
           </FormattingToolbar>

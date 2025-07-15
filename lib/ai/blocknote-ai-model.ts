@@ -5,8 +5,6 @@ export function createCustomAIModel() {
   const baseURL = typeof window !== 'undefined' 
     ? `${window.location.origin}/api/ai/proxy/v1`
     : 'http://localhost:3000/api/ai/proxy/v1';
-    
-  console.log('[AI Model] Creating AI model with baseURL:', baseURL);
   
   const openai = createOpenAI({
     // Use a dummy API key since auth is handled server-side
@@ -15,7 +13,5 @@ export function createCustomAIModel() {
     baseURL,
   });
 
-  const model = openai('gpt-4o-mini');
-  console.log('[AI Model] Created model:', model);
-  return model;
+  return openai('gpt-4o-mini');
 }
