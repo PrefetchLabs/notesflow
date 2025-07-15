@@ -800,6 +800,16 @@
   z-index: 50;
 }
 
+/* AI button specific styling for proper spacing */
+.bn-formatting-toolbar .bn-formatting-toolbar-button:last-child {
+  @apply mr-1;
+}
+
+/* Ensure proper padding for the toolbar container */
+.bn-formatting-toolbar > div {
+  @apply px-1;
+}
+
 /* Slash menu */
 .bn-slash-menu {
   @apply bg-card shadow-lg rounded-lg;

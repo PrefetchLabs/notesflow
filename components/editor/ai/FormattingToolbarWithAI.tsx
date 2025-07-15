@@ -294,7 +294,7 @@ export function FormattingToolbarWithAI({ editor: passedEditor }: FormattingTool
             {/* AI Button */}
             <button
               ref={aiButtonRef}
-              className="bn-button"
+              className="bn-formatting-toolbar-button"
               onClick={handleAIClick}
               title="AI Assistant"
               type="button"
