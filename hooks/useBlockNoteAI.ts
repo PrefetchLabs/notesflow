@@ -38,7 +38,35 @@ export function useBlockNoteAI(initialContent?: Block[]) {
       defaultLanguage: "javascript",
       indentLineWithTab: true,
     },
+    tables: {
+      splitCells: true,
+      cellBackgroundColor: true,
+      cellTextColor: true,
+      headers: true,
+    },
     pasteHandler: async ({ event, editor, defaultPasteHandler }) => {
+      // Check if we're inside a table cell
+      const currentBlock = editor.getTextCursorPosition().block;
+      
+      // Check if current block or any parent is a table
+      let isInTable = false;
+      let checkBlock = currentBlock;
+      while (checkBlock) {
+        if (checkBlock.type === 'table') {
+          isInTable = true;
+          break;
+        }
+        // Check parent blocks (for nested structures)
+        const parentId = (checkBlock as any).parentId;
+        if (!parentId) break;
+        checkBlock = editor.getBlock(parentId);
+      }
+      
+      // If we're in a table, use default paste behavior
+      if (isInTable) {
+        return defaultPasteHandler();
+      }
+      
       // Check if clipboard contains HTML
       const html = event.clipboardData?.getData('text/html');
       

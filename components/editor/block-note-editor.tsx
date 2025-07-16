@@ -25,6 +25,12 @@ export function BlockNoteEditorComponent({
   // Create the editor instance
   const editor = useCreateBlockNote({
     initialContent: initialContent || undefined,
+    tables: {
+      splitCells: true,
+      cellBackgroundColor: true,
+      cellTextColor: true,
+      headers: true,
+    },
   });
 
   // Handle mounting to avoid hydration issues
