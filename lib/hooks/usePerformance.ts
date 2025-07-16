@@ -54,16 +54,14 @@ export function usePerformance(componentName: string) {
         return result.finally(() => {
           const duration = performance.now() - startTime;
           if (process.env.NODE_ENV === 'development') {
-            // [REMOVED_CONSOLE]}ms`
-            );
+            // [REMOVED_CONSOLE]
           }
         });
       }
 
       const duration = performance.now() - startTime;
       if (process.env.NODE_ENV === 'development') {
-        // [REMOVED_CONSOLE]}ms`
-        );
+        // [REMOVED_CONSOLE]
       }
       return result;
     },
