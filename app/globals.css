@@ -887,6 +887,26 @@
   border-color: hsl(var(--border));
 }
 
+/* AI-generated text styling */
+/* Override BlockNote XL-AI default colors for better visibility */
+ins,
+[data-type="modification"] {
+  /* Light mode matches XL-AI defaults */
+  color: #145faa !important;
+  background: #187adc1a !important;
+  border-bottom: 2px solid rgba(24, 122, 220, 0.1) !important;
+  text-decoration: none !important;
+}
+
+/* Dark mode overrides for AI-generated text */
+.dark ins,
+.dark [data-type="modification"] {
+  /* Bright cyan-blue for excellent dark mode contrast */
+  color: #60d5ff !important;
+  background: rgba(96, 213, 255, 0.15) !important;
+  border-bottom: 2px solid rgba(96, 213, 255, 0.25) !important;
+}
+
 /* Animation for new blocks */
 @keyframes bn-fade-in {
   from {

@@ -248,7 +248,7 @@ export function CollaborativeEditorFinal({
         dataFormat: llmFormats.html,
         agentCursor: {
           name: "AI",
-          color: "#8bc6ff"
+          color: resolvedTheme === 'dark' ? "#60d5ff" : "#8bc6ff"
         }
       })
     ],
@@ -335,7 +335,7 @@ export function CollaborativeEditorFinal({
       },
       showCursorLabels: "activity",
     } : undefined,
-  }, [provider, hasAIAccess]); // Recreate when provider or AI access changes
+  }, [provider, hasAIAccess, resolvedTheme]); // Recreate when provider, AI access, or theme changes
 
   // Handle text selection for drag to calendar
   const { selection } = useBlockNoteSelection({

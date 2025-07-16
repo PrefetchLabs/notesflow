@@ -8,10 +8,26 @@ import "@blocknote/xl-ai/style.css";
 import { createCustomAIModel } from "@/lib/ai/blocknote-ai-model";
 import { preprocessPastedHTML, enhanceBlocksFormatting } from "@/lib/editor/paste-utils";
 import { codeBlock } from "@blocknote/code-block";
+import { useTheme } from "next-themes";
+import { useMemo } from "react";
 
 export function useBlockNoteAI(initialContent?: Block[]) {
   // Create model instance inside the function to ensure it's available
-  const model = createCustomAIModel();
+  const model = useMemo(() => createCustomAIModel(), []);
+  const { resolvedTheme } = useTheme();
+  
+  // Create extensions with theme-aware colors
+  const extensions = useMemo(() => [
+    createAIExtension({
+      model,
+      stream: true,
+      dataFormat: llmFormats.html,
+      agentCursor: {
+        name: "AI",
+        color: resolvedTheme === 'dark' ? "#60d5ff" : "#8bc6ff"
+      }
+    })
+  ], [model, resolvedTheme]);
   
   const editor = useCreateBlockNote({
     initialContent,
@@ -19,17 +35,7 @@ export function useBlockNoteAI(initialContent?: Block[]) {
       ...en,
       ai: aiEn // add default translations for the AI extension
     },
-    extensions: [
-      createAIExtension({
-        model,
-        stream: true,
-        dataFormat: llmFormats.html,
-        agentCursor: {
-          name: "AI",
-          color: "#8bc6ff"
-        }
-      })
-    ],
+    extensions,
     blockSpecs: {
       ...defaultBlockSpecs,
     },
