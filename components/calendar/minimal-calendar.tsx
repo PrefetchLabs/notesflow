@@ -98,11 +98,63 @@ export function MinimalCalendar({
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastInteractionRef = useRef<number>(Date.now());
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const { isMobile } = useResponsive();
+  const { isMobile, isTablet, isDesktop } = useResponsive();
   const touchStartXRef = useRef<number | null>(null);
+  const dragStartPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const DRAG_THRESHOLD = 10; // Minimum pixels to move before considering it a drag
 
   // Check if user is special user
   const isSpecialUser = userEmail === 'samid@pockethunter.io';
+  
+  // Calculate smart menu position
+  const calculateMenuPosition = useCallback((mouseX: number, mouseY: number, selectionY: number) => {
+    if (!gridRef.current) return { x: 0, y: 0 };
+    
+    const rect = gridRef.current.getBoundingClientRect();
+    const scrollTop = scrollRef.current?.scrollTop || 0;
+    
+    // Menu dimensions (approximate)
+    const menuWidth = isSpecialUser ? 220 : 180;
+    const menuHeight = isSpecialUser ? 320 : 120;
+    
+    // Calculate position relative to grid
+    let x = mouseX - rect.left;
+    let y = selectionY + 10; // 10px below selection
+    
+    // For mobile/tablet, center horizontally
+    if (isMobile || isTablet) {
+      x = (rect.width - menuWidth) / 2;
+      // Position near bottom of selection but ensure it's visible
+      const viewportBottom = window.innerHeight - rect.top;
+      const maxY = viewportBottom - menuHeight - 20; // 20px padding from bottom
+      y = Math.min(y, maxY);
+    } else {
+      // Desktop: position near cursor but keep within bounds
+      // Check right boundary
+      if (x + menuWidth > rect.width - 10) {
+        x = rect.width - menuWidth - 10;
+      }
+      
+      // Check left boundary
+      if (x < 10) {
+        x = 10;
+      }
+      
+      // Check bottom boundary
+      const viewportBottom = window.innerHeight - rect.top;
+      if (y + menuHeight > viewportBottom - 10) {
+        // Position above selection instead
+        y = selectionY - menuHeight - 10;
+      }
+    }
+    
+    // Ensure menu stays within viewport
+    x = Math.max(10, Math.min(x, rect.width - menuWidth - 10));
+    y = Math.max(10, y);
+    
+    return { x, y };
+  }, [isSpecialUser, isMobile, isTablet]);
 
   // Get current event
   const getCurrentEvent = useCallback(() => {
@@ -253,16 +305,26 @@ export function MinimalCalendar({
     
     updateLastInteraction();
     
+    // Close any open menus when starting new interaction
+    setShowMenu(false);
+    setShowColorPalette(false);
+    
     const rect = gridRef.current.getBoundingClientRect();
     const scrollTop = scrollRef.current?.scrollTop || 0;
     const y = e.clientY - rect.top + scrollTop;
+    
+    // Store initial drag position
+    dragStartPositionRef.current = { x: e.clientX, y: e.clientY };
     
     const time = yToTime(y);
     const snappedY = timeToY(time.hour, time.minutes);
     const startTime = formatTime(time.hour, time.minutes);
     
+    // Set dragging state but don't create selection yet
     setIsDragging(true);
     onInteractionStart?.();
+    
+    // Store initial selection data temporarily
     setDragSelection({
       startY: snappedY,
       endY: snappedY,
@@ -334,6 +396,21 @@ export function MinimalCalendar({
       setIsDragging(false);
       onInteractionEnd?.();
       
+      // Check if user actually dragged (not just clicked)
+      if (dragStartPositionRef.current) {
+        const dragDistance = Math.sqrt(
+          Math.pow(e.clientX - dragStartPositionRef.current.x, 2) +
+          Math.pow(e.clientY - dragStartPositionRef.current.y, 2)
+        );
+        
+        // If didn't drag enough, cancel the selection
+        if (dragDistance < DRAG_THRESHOLD) {
+          setDragSelection(null);
+          dragStartPositionRef.current = null;
+          return;
+        }
+      }
+      
       // Calculate duration
       const minY = Math.min(dragSelection.startY, dragSelection.endY);
       const maxY = Math.max(dragSelection.startY, dragSelection.endY);
@@ -362,15 +439,14 @@ export function MinimalCalendar({
         
         // Check for overlap
         if (!hasOverlap(startTime, endTime)) {
-          // Show context menu
-          const rect = gridRef.current?.getBoundingClientRect();
-          if (rect) {
-            setMenuPosition({
-              x: e.clientX - rect.left,
-              y: Math.min(dragSelection.startY, dragSelection.endY) + 50
-            });
-            setShowMenu(true);
-          }
+          // Show context menu with smart positioning
+          const position = calculateMenuPosition(
+            e.clientX,
+            e.clientY,
+            Math.min(dragSelection.startY, dragSelection.endY)
+          );
+          setMenuPosition(position);
+          setShowMenu(true);
         }
       }
     } else if (draggingBlock && ghostBlock) {
@@ -411,7 +487,10 @@ export function MinimalCalendar({
       setGhostBlock(null);
       onInteractionEnd?.();
     }
-  }, [isDragging, dragSelection, draggingBlock, ghostBlock, resizingBlock, blocks, currentDate, hasOverlap, onUpdateBlock, onInteractionEnd, yToTime]);
+    
+    // Clear drag start position
+    dragStartPositionRef.current = null;
+  }, [isDragging, dragSelection, draggingBlock, ghostBlock, resizingBlock, blocks, currentDate, hasOverlap, onUpdateBlock, onInteractionEnd, yToTime, calculateMenuPosition]);
 
   // Handle touch events for mobile
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -654,6 +733,20 @@ export function MinimalCalendar({
     window.addEventListener('calendar-today', handleGoToToday);
     return () => window.removeEventListener('calendar-today', handleGoToToday);
   }, [onDateChange]);
+  
+  // Handle window resize to reposition menu if needed
+  useEffect(() => {
+    if (!showMenu) return;
+    
+    const handleResize = () => {
+      // Close menu on resize to avoid positioning issues
+      setShowMenu(false);
+      setDragSelection(null);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showMenu]);
 
   // Handle touch events for swipe navigation
   const handleSwipeStart = useCallback((e: React.TouchEvent) => {
@@ -1118,7 +1211,12 @@ export function MinimalCalendar({
       {/* Context menu for creating events/tasks */}
       {showMenu && (
         <div
-          className="absolute z-50 bg-background border rounded-lg shadow-lg p-2 min-w-[150px]"
+          ref={menuRef}
+          className={cn(
+            "absolute z-50 bg-background border rounded-lg shadow-lg p-2",
+            isMobile ? "min-w-[200px] max-w-[90vw]" : "min-w-[150px]",
+            "max-h-[80vh] overflow-y-auto"
+          )}
           style={{
             left: `${menuPosition.x}px`,
             top: `${menuPosition.y}px`,
