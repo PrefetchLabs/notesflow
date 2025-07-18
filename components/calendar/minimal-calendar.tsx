@@ -1,8 +1,18 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, Trash2, Circle, CheckCircle2, Coffee, Clock, CheckSquare } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  Circle,
+  CheckCircle2,
+  Coffee,
+  Clock,
+  CheckSquare,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -26,7 +36,13 @@ interface MinimalCalendarProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
   onCreateEvent?: (startTime: Date, endTime: Date) => void;
-  onCreateTask?: (startTime: Date, endTime: Date, title?: string, color?: string, icon?: string) => void;
+  onCreateTask?: (
+    startTime: Date,
+    endTime: Date,
+    title?: string,
+    color?: string,
+    icon?: string
+  ) => void;
   onUpdateBlock?: (id: string, startTime: Date, endTime: Date) => void;
   onDeleteBlock?: (id: string) => void;
   onToggleComplete?: (id: string) => void;
@@ -60,10 +76,10 @@ interface GhostBlock {
   height: number;
 }
 
-export function MinimalCalendar({ 
-  currentDate, 
-  onDateChange, 
-  onCreateEvent, 
+export function MinimalCalendar({
+  currentDate,
+  onDateChange,
+  onCreateEvent,
   onCreateTask,
   onUpdateBlock,
   onDeleteBlock,
@@ -73,7 +89,7 @@ export function MinimalCalendar({
   onInteractionStart,
   onInteractionEnd,
   userEmail,
-  blocks = []
+  blocks = [],
 }: MinimalCalendarProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragSelection, setDragSelection] = useState<DragSelection | null>(null);
@@ -106,62 +122,57 @@ export function MinimalCalendar({
 
   // Check if user is special user
   const isSpecialUser = userEmail === 'samid@pockethunter.io';
-  
-  // Calculate smart menu position
-  const calculateMenuPosition = useCallback((mouseX: number, mouseY: number, selectionY: number) => {
-    if (!gridRef.current) return { x: 0, y: 0 };
-    
-    const rect = gridRef.current.getBoundingClientRect();
-    const scrollTop = scrollRef.current?.scrollTop || 0;
-    
-    // Menu dimensions (approximate)
-    const menuWidth = isSpecialUser ? 220 : 180;
-    const menuHeight = isSpecialUser ? 320 : 120;
-    
-    // Calculate position relative to grid
-    let x = mouseX - rect.left;
-    let y = selectionY + 10; // 10px below selection
-    
-    // For mobile/tablet, center horizontally
-    if (isMobile || isTablet) {
-      x = (rect.width - menuWidth) / 2;
-      // Position near bottom of selection but ensure it's visible
-      const viewportBottom = window.innerHeight - rect.top;
-      const maxY = viewportBottom - menuHeight - 20; // 20px padding from bottom
-      y = Math.min(y, maxY);
-    } else {
-      // Desktop: position near cursor but keep within bounds
-      // Check right boundary
-      if (x + menuWidth > rect.width - 10) {
-        x = rect.width - menuWidth - 10;
+
+  // Calculate callout menu position (floating to the left of selection)
+  const calculateCalloutPosition = useCallback(
+    (selectionY: number, selectionHeight: number) => {
+      if (!gridRef.current) return { top: 0, left: 0, arrowSide: 'right' as const };
+
+      const rect = gridRef.current.getBoundingClientRect();
+      const scrollTop = scrollRef.current?.scrollTop || 0;
+
+      // Menu dimensions (approximate)
+      const menuWidth = isSpecialUser ? 240 : 200;
+      const menuHeight = isSpecialUser ? 340 : 140;
+
+      // Center menu vertically on selection
+      const centerY = selectionY + scrollTop + selectionHeight / 2;
+      let top = rect.top + centerY - menuHeight / 2;
+
+      // Position to the left of calendar with gap
+      let left = rect.left - menuWidth - 5; // 12px gap for arrow and spacing
+      let arrowSide: 'left' | 'right' = 'right';
+
+      // If would go off left edge, position to the right instead
+      if (left < 10) {
+        left = rect.right + 5;
+        arrowSide = 'left';
       }
-      
-      // Check left boundary
-      if (x < 10) {
-        x = 10;
+
+      // Ensure menu stays within viewport vertically
+      top = Math.max(10, Math.min(top, window.innerHeight - menuHeight - 10));
+
+      // For mobile/tablet, adjust positioning
+      if (isMobile || isTablet) {
+        // Center horizontally on mobile
+        if (isMobile) {
+          left = (window.innerWidth - menuWidth) / 2;
+          top = window.innerHeight / 2 - menuHeight / 2;
+          arrowSide = 'right'; // No arrow on mobile
+        }
       }
-      
-      // Check bottom boundary
-      const viewportBottom = window.innerHeight - rect.top;
-      if (y + menuHeight > viewportBottom - 10) {
-        // Position above selection instead
-        y = selectionY - menuHeight - 10;
-      }
-    }
-    
-    // Ensure menu stays within viewport
-    x = Math.max(10, Math.min(x, rect.width - menuWidth - 10));
-    y = Math.max(10, y);
-    
-    return { x, y };
-  }, [isSpecialUser, isMobile, isTablet]);
+
+      return { top, left, arrowSide };
+    },
+    [isSpecialUser, isMobile, isTablet]
+  );
 
   // Get current event
   const getCurrentEvent = useCallback(() => {
     const now = currentTime.getTime();
-    
+
     // Only check today's blocks
-    const todayBlocks = blocks.filter(block => {
+    const todayBlocks = blocks.filter((block) => {
       const blockDate = new Date(block.startTime);
       return (
         blockDate.getFullYear() === currentDate.getFullYear() &&
@@ -169,8 +180,8 @@ export function MinimalCalendar({
         blockDate.getDate() === currentDate.getDate()
       );
     });
-    
-    return todayBlocks.find(block => {
+
+    return todayBlocks.find((block) => {
       const startTime = block.startTime.getTime();
       const endTime = block.endTime.getTime();
       return now >= startTime && now < endTime;
@@ -178,69 +189,72 @@ export function MinimalCalendar({
   }, [blocks, currentTime, currentDate]);
 
   // Calculate time remaining for current event
-  const getTimeRemaining = useCallback((endTime: Date) => {
-    const now = currentTime.getTime();
-    const end = endTime.getTime();
-    const diff = end - now;
-    
-    if (diff <= 0) return 'Ending now';
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes}m left`;
-    }
-    return `${minutes}m left`;
-  }, [currentTime]);
+  const getTimeRemaining = useCallback(
+    (endTime: Date) => {
+      const now = currentTime.getTime();
+      const end = endTime.getTime();
+      const diff = end - now;
+
+      if (diff <= 0) return 'Ending now';
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m left`;
+      }
+      return `${minutes}m left`;
+    },
+    [currentTime]
+  );
 
   // Update current time every minute
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000); // Update every minute
-    
+
     return () => clearInterval(timer);
   }, []);
 
   // Track user interactions
   const updateLastInteraction = useCallback(() => {
     lastInteractionRef.current = Date.now();
-    
+
     // Clear existing idle timer
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
     }
-    
+
     // Set new idle timer (30 seconds)
     idleTimerRef.current = setTimeout(() => {
       // Check if we're viewing today and should auto-center
       const now = new Date();
-      const isToday = 
+      const isToday =
         currentDate.getFullYear() === now.getFullYear() &&
         currentDate.getMonth() === now.getMonth() &&
         currentDate.getDate() === now.getDate();
-      
+
       if (isToday && scrollRef.current) {
         const currentHour = now.getHours();
         const currentMinutes = now.getMinutes();
         const containerHeight = scrollRef.current.clientHeight;
         const currentTimePosition = currentHour * HOUR_HEIGHT + (currentMinutes / 60) * HOUR_HEIGHT;
         const currentScroll = scrollRef.current.scrollTop;
-        
+
         // Check if current time is more than 2 hours away from center
-        const centerPosition = currentScroll + (containerHeight / 2);
+        const centerPosition = currentScroll + containerHeight / 2;
         const hoursDiff = Math.abs(currentTimePosition - centerPosition) / HOUR_HEIGHT;
-        
+
         if (hoursDiff > 2) {
           // Gentle re-center with slower animation
-          const idealScrollPosition = currentTimePosition - (containerHeight / 2) + (HOUR_HEIGHT / 2);
+          const idealScrollPosition = currentTimePosition - containerHeight / 2 + HOUR_HEIGHT / 2;
           const maxScroll = scrollRef.current.scrollHeight - containerHeight;
           const targetScroll = Math.max(0, Math.min(idealScrollPosition, maxScroll));
-          
+
           scrollRef.current.scrollTo({
             top: targetScroll,
-            behavior: 'smooth'
+            behavior: 'smooth',
           });
         }
       }
@@ -257,18 +271,21 @@ export function MinimalCalendar({
   }, []);
 
   // Check if a time range overlaps with existing blocks
-  const hasOverlap = useCallback((startTime: Date, endTime: Date, excludeId?: string) => {
-    return blocks.some(block => {
-      if (excludeId && block.id === excludeId) return false;
-      
-      const blockStart = block.startTime.getTime();
-      const blockEnd = block.endTime.getTime();
-      const selectionStart = startTime.getTime();
-      const selectionEnd = endTime.getTime();
-      
-      return (selectionStart < blockEnd && selectionEnd > blockStart);
-    });
-  }, [blocks]);
+  const hasOverlap = useCallback(
+    (startTime: Date, endTime: Date, excludeId?: string) => {
+      return blocks.some((block) => {
+        if (excludeId && block.id === excludeId) return false;
+
+        const blockStart = block.startTime.getTime();
+        const blockEnd = block.endTime.getTime();
+        const selectionStart = startTime.getTime();
+        const selectionEnd = endTime.getTime();
+
+        return selectionStart < blockEnd && selectionEnd > blockStart;
+      });
+    },
+    [blocks]
+  );
 
   // Convert Y position to time with grid snapping
   const yToTime = useCallback((y: number): { hour: number; minutes: number } => {
@@ -277,10 +294,10 @@ export function MinimalCalendar({
     const totalMinutes = Math.round(y / pixelsPerMinute / snapInterval) * snapInterval;
     const hour = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    
+
     return {
       hour: Math.min(23, Math.max(0, hour)),
-      minutes: Math.min(45, Math.max(0, minutes))
+      minutes: Math.min(45, Math.max(0, minutes)),
     };
   }, []);
 
@@ -298,426 +315,484 @@ export function MinimalCalendar({
   };
 
   // Handle grid mouse down for drag selection
-  const handleGridMouseDown = useCallback((e: React.MouseEvent) => {
-    // Don't start drag if clicking on a block
-    if ((e.target as HTMLElement).closest('.calendar-block')) return;
-    if (!gridRef.current) return;
-    
-    updateLastInteraction();
-    
-    // Close any open menus when starting new interaction
-    setShowMenu(false);
-    setShowColorPalette(false);
-    
-    const rect = gridRef.current.getBoundingClientRect();
-    const scrollTop = scrollRef.current?.scrollTop || 0;
-    const y = e.clientY - rect.top + scrollTop;
-    
-    // Store initial drag position
-    dragStartPositionRef.current = { x: e.clientX, y: e.clientY };
-    
-    const time = yToTime(y);
-    const snappedY = timeToY(time.hour, time.minutes);
-    const startTime = formatTime(time.hour, time.minutes);
-    
-    // Set dragging state but don't create selection yet
-    setIsDragging(true);
-    onInteractionStart?.();
-    
-    // Store initial selection data temporarily
-    setDragSelection({
-      startY: snappedY,
-      endY: snappedY,
-      startTime,
-      endTime: startTime
-    });
-  }, [yToTime, timeToY, onInteractionStart, updateLastInteraction]);
+  const handleGridMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      // Don't start drag if clicking on a block
+      if ((e.target as HTMLElement).closest('.calendar-block')) return;
+      if (!gridRef.current) return;
 
-  // Handle mouse move during drag
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!gridRef.current) return;
-    
-    const rect = gridRef.current.getBoundingClientRect();
-    const scrollTop = scrollRef.current?.scrollTop || 0;
-    const y = e.clientY - rect.top + scrollTop;
-    
-    if (isDragging && dragSelection) {
+      updateLastInteraction();
+
+      // Close any open menus when starting new interaction
+      setShowMenu(false);
+      setShowColorPalette(false);
+
+      const rect = gridRef.current.getBoundingClientRect();
+      const scrollTop = scrollRef.current?.scrollTop || 0;
+      const y = e.clientY - rect.top + scrollTop;
+
+      // Store initial drag position
+      dragStartPositionRef.current = { x: e.clientX, y: e.clientY };
+
       const time = yToTime(y);
       const snappedY = timeToY(time.hour, time.minutes);
-      const endTime = formatTime(time.hour, time.minutes);
-      
+      const startTime = formatTime(time.hour, time.minutes);
+
+      // Set dragging state but don't create selection yet
+      setIsDragging(true);
+      onInteractionStart?.();
+
+      // Store initial selection data temporarily
       setDragSelection({
-        ...dragSelection,
+        startY: snappedY,
         endY: snappedY,
-        endTime
+        startTime,
+        endTime: startTime,
       });
-    } else if (draggingBlock && ghostBlock) {
-      const block = blocks.find(b => b.id === draggingBlock);
-      if (!block) return;
-      
-      // Calculate new position accounting for mouse offset and snap to grid
-      const newY = y - mouseOffsetY;
-      const time = yToTime(newY);
-      const snappedY = timeToY(time.hour, time.minutes);
-      
-      setGhostBlock({
-        ...ghostBlock,
-        startY: Math.max(0, snappedY)
-      });
-    } else if (resizingBlock) {
-      const block = blocks.find(b => b.id === resizingBlock.id);
-      if (!block) return;
-      
-      // Calculate new end time based on mouse position
-      const deltaY = e.clientY - resizingBlock.initialMouseY;
-      const deltaMinutes = Math.round((deltaY / HOUR_HEIGHT) * 60 / 15) * 15; // Snap to 15 min
-      
-      const newEndTime = new Date(resizingBlock.initialEndTime);
-      newEndTime.setMinutes(newEndTime.getMinutes() + deltaMinutes);
-      
-      // Ensure minimum duration of 15 minutes
-      const minEndTime = new Date(block.startTime);
-      minEndTime.setMinutes(minEndTime.getMinutes() + 15);
-      
-      if (newEndTime > minEndTime) {
-        const height = ((newEndTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
-        setGhostBlock({
-          id: resizingBlock.id,
-          startY: block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT,
-          height: Math.max(HOUR_HEIGHT / 4, height) // Min 15 minutes
+    },
+    [yToTime, timeToY, onInteractionStart, updateLastInteraction]
+  );
+
+  // Handle mouse move during drag
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!gridRef.current) return;
+
+      const rect = gridRef.current.getBoundingClientRect();
+      const scrollTop = scrollRef.current?.scrollTop || 0;
+      const y = e.clientY - rect.top + scrollTop;
+
+      if (isDragging && dragSelection) {
+        const time = yToTime(y);
+        const snappedY = timeToY(time.hour, time.minutes);
+        const endTime = formatTime(time.hour, time.minutes);
+
+        setDragSelection({
+          ...dragSelection,
+          endY: snappedY,
+          endTime,
         });
+      } else if (draggingBlock && ghostBlock) {
+        const block = blocks.find((b) => b.id === draggingBlock);
+        if (!block) return;
+
+        // Calculate new position accounting for mouse offset and snap to grid
+        const newY = y - mouseOffsetY;
+        const time = yToTime(newY);
+        const snappedY = timeToY(time.hour, time.minutes);
+
+        setGhostBlock({
+          ...ghostBlock,
+          startY: Math.max(0, snappedY),
+        });
+      } else if (resizingBlock) {
+        const block = blocks.find((b) => b.id === resizingBlock.id);
+        if (!block) return;
+
+        // Calculate new end time based on mouse position
+        const deltaY = e.clientY - resizingBlock.initialMouseY;
+        const deltaMinutes = Math.round(((deltaY / HOUR_HEIGHT) * 60) / 15) * 15; // Snap to 15 min
+
+        const newEndTime = new Date(resizingBlock.initialEndTime);
+        newEndTime.setMinutes(newEndTime.getMinutes() + deltaMinutes);
+
+        // Ensure minimum duration of 15 minutes
+        const minEndTime = new Date(block.startTime);
+        minEndTime.setMinutes(minEndTime.getMinutes() + 15);
+
+        if (newEndTime > minEndTime) {
+          const height =
+            ((newEndTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
+          setGhostBlock({
+            id: resizingBlock.id,
+            startY:
+              block.startTime.getHours() * HOUR_HEIGHT +
+              (block.startTime.getMinutes() / 60) * HOUR_HEIGHT,
+            height: Math.max(HOUR_HEIGHT / 4, height), // Min 15 minutes
+          });
+        }
       }
-    }
-  }, [isDragging, dragSelection, draggingBlock, ghostBlock, mouseOffsetY, blocks, yToTime, timeToY, resizingBlock]);
+    },
+    [
+      isDragging,
+      dragSelection,
+      draggingBlock,
+      ghostBlock,
+      mouseOffsetY,
+      blocks,
+      yToTime,
+      timeToY,
+      resizingBlock,
+    ]
+  );
 
   // Handle mouse up to end drag
-  const handleMouseUp = useCallback((e: React.MouseEvent) => {
-    if (isDragging && dragSelection) {
-      setIsDragging(false);
-      onInteractionEnd?.();
-      
-      // Check if user actually dragged (not just clicked)
-      if (dragStartPositionRef.current) {
-        const dragDistance = Math.sqrt(
-          Math.pow(e.clientX - dragStartPositionRef.current.x, 2) +
-          Math.pow(e.clientY - dragStartPositionRef.current.y, 2)
-        );
-        
-        // If didn't drag enough, cancel the selection
-        if (dragDistance < DRAG_THRESHOLD) {
-          setDragSelection(null);
-          dragStartPositionRef.current = null;
-          return;
-        }
-      }
-      
-      // Calculate duration
-      const minY = Math.min(dragSelection.startY, dragSelection.endY);
-      const maxY = Math.max(dragSelection.startY, dragSelection.endY);
-      const durationMinutes = ((maxY - minY) / HOUR_HEIGHT) * 60;
-      
-      if (durationMinutes >= 15) { // At least 15 minutes
-        // Calculate times from Y positions instead of parsing formatted strings
-        const startTimeInfo = yToTime(minY);
-        const endTimeInfo = yToTime(maxY);
-        
-        const actualStartHour = startTimeInfo.hour;
-        const actualStartMin = startTimeInfo.minutes;
-        const actualEndHour = endTimeInfo.hour;
-        const actualEndMin = endTimeInfo.minutes;
-        
-        const startTime = new Date(currentDate);
-        startTime.setHours(actualStartHour, actualStartMin, 0, 0);
-        
-        const endTime = new Date(currentDate);
-        endTime.setHours(actualEndHour, actualEndMin, 0, 0);
-        
-        // Handle events that span to next day
-        if (endTime <= startTime) {
-          endTime.setDate(endTime.getDate() + 1);
-        }
-        
-        // Check for overlap
-        if (!hasOverlap(startTime, endTime)) {
-          // Show context menu with smart positioning
-          const position = calculateMenuPosition(
-            e.clientX,
-            e.clientY,
-            Math.min(dragSelection.startY, dragSelection.endY)
+  const handleMouseUp = useCallback(
+    (e: React.MouseEvent) => {
+      if (isDragging && dragSelection) {
+        setIsDragging(false);
+        onInteractionEnd?.();
+
+        // Check if user actually dragged (not just clicked)
+        if (dragStartPositionRef.current) {
+          const dragDistance = Math.sqrt(
+            Math.pow(e.clientX - dragStartPositionRef.current.x, 2) +
+              Math.pow(e.clientY - dragStartPositionRef.current.y, 2)
           );
-          setMenuPosition(position);
-          setShowMenu(true);
+
+          // If didn't drag enough, cancel the selection
+          if (dragDistance < DRAG_THRESHOLD) {
+            setDragSelection(null);
+            dragStartPositionRef.current = null;
+            return;
+          }
         }
-      }
-    } else if (draggingBlock && ghostBlock) {
-      // Handle block drag end
-      const blockToUpdate = blocks.find(b => b.id === draggingBlock);
-      if (blockToUpdate && onUpdateBlock) {
-        const time = yToTime(ghostBlock.startY);
-        const newStartTime = new Date(currentDate);
-        newStartTime.setHours(time.hour, time.minutes, 0, 0);
-        
-        const duration = blockToUpdate.endTime.getTime() - blockToUpdate.startTime.getTime();
-        const newEndTime = new Date(newStartTime.getTime() + duration);
-        
-        // Check if new position overlaps
-        if (!hasOverlap(newStartTime, newEndTime, draggingBlock)) {
-          onUpdateBlock(draggingBlock, newStartTime, newEndTime);
+
+        // Calculate duration
+        const minY = Math.min(dragSelection.startY, dragSelection.endY);
+        const maxY = Math.max(dragSelection.startY, dragSelection.endY);
+        const durationMinutes = ((maxY - minY) / HOUR_HEIGHT) * 60;
+
+        if (durationMinutes >= 15) {
+          // At least 15 minutes
+          // Calculate times from Y positions instead of parsing formatted strings
+          const startTimeInfo = yToTime(minY);
+          const endTimeInfo = yToTime(maxY);
+
+          const actualStartHour = startTimeInfo.hour;
+          const actualStartMin = startTimeInfo.minutes;
+          const actualEndHour = endTimeInfo.hour;
+          const actualEndMin = endTimeInfo.minutes;
+
+          const startTime = new Date(currentDate);
+          startTime.setHours(actualStartHour, actualStartMin, 0, 0);
+
+          const endTime = new Date(currentDate);
+          endTime.setHours(actualEndHour, actualEndMin, 0, 0);
+
+          // Handle events that span to next day
+          if (endTime <= startTime) {
+            endTime.setDate(endTime.getDate() + 1);
+          }
+
+          // Check for overlap
+          if (!hasOverlap(startTime, endTime)) {
+            // Show context menu
+            setShowMenu(true);
+          }
         }
-      }
-      
-      setDraggingBlock(null);
-      setGhostBlock(null);
-      onInteractionEnd?.();
-    } else if (resizingBlock && ghostBlock) {
-      // Handle resize end
-      const blockToUpdate = blocks.find(b => b.id === resizingBlock.id);
-      if (blockToUpdate && onUpdateBlock && ghostBlock.height) {
-        const durationHours = ghostBlock.height / HOUR_HEIGHT;
-        const newEndTime = new Date(blockToUpdate.startTime);
-        newEndTime.setMinutes(newEndTime.getMinutes() + durationHours * 60);
-        
-        // Check if new size overlaps
-        if (!hasOverlap(blockToUpdate.startTime, newEndTime, resizingBlock.id)) {
-          onUpdateBlock(resizingBlock.id, blockToUpdate.startTime, newEndTime);
+      } else if (draggingBlock && ghostBlock) {
+        // Handle block drag end
+        const blockToUpdate = blocks.find((b) => b.id === draggingBlock);
+        if (blockToUpdate && onUpdateBlock) {
+          const time = yToTime(ghostBlock.startY);
+          const newStartTime = new Date(currentDate);
+          newStartTime.setHours(time.hour, time.minutes, 0, 0);
+
+          const duration = blockToUpdate.endTime.getTime() - blockToUpdate.startTime.getTime();
+          const newEndTime = new Date(newStartTime.getTime() + duration);
+
+          // Check if new position overlaps
+          if (!hasOverlap(newStartTime, newEndTime, draggingBlock)) {
+            onUpdateBlock(draggingBlock, newStartTime, newEndTime);
+          }
         }
+
+        setDraggingBlock(null);
+        setGhostBlock(null);
+        onInteractionEnd?.();
+      } else if (resizingBlock && ghostBlock) {
+        // Handle resize end
+        const blockToUpdate = blocks.find((b) => b.id === resizingBlock.id);
+        if (blockToUpdate && onUpdateBlock && ghostBlock.height) {
+          const durationHours = ghostBlock.height / HOUR_HEIGHT;
+          const newEndTime = new Date(blockToUpdate.startTime);
+          newEndTime.setMinutes(newEndTime.getMinutes() + durationHours * 60);
+
+          // Check if new size overlaps
+          if (!hasOverlap(blockToUpdate.startTime, newEndTime, resizingBlock.id)) {
+            onUpdateBlock(resizingBlock.id, blockToUpdate.startTime, newEndTime);
+          }
+        }
+
+        setResizingBlock(null);
+        setGhostBlock(null);
+        onInteractionEnd?.();
       }
-      
-      setResizingBlock(null);
-      setGhostBlock(null);
-      onInteractionEnd?.();
-    }
-    
-    // Clear drag start position
-    dragStartPositionRef.current = null;
-  }, [isDragging, dragSelection, draggingBlock, ghostBlock, resizingBlock, blocks, currentDate, hasOverlap, onUpdateBlock, onInteractionEnd, yToTime, calculateMenuPosition]);
+
+      // Clear drag start position
+      dragStartPositionRef.current = null;
+    },
+    [
+      isDragging,
+      dragSelection,
+      draggingBlock,
+      ghostBlock,
+      resizingBlock,
+      blocks,
+      currentDate,
+      hasOverlap,
+      onUpdateBlock,
+      onInteractionEnd,
+      yToTime,
+    ]
+  );
 
   // Handle touch events for mobile
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 0) return;
-    const touch = e.touches[0];
-    touchStartXRef.current = touch.clientX;
-    
-    // Convert touch to mouse event for drag handling
-    const mouseEvent = {
-      clientX: touch.clientX,
-      clientY: touch.clientY,
-      target: e.target,
-    } as unknown as React.MouseEvent;
-    
-    handleGridMouseDown(mouseEvent);
-  }, [handleGridMouseDown]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 0) return;
+      const touch = e.touches[0];
+      touchStartXRef.current = touch.clientX;
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartXRef.current !== null && e.changedTouches.length > 0) {
-      const touch = e.changedTouches[0];
-      const deltaX = Math.abs(touch.clientX - touchStartXRef.current);
-      
-      // Only handle as tap if minimal horizontal movement
-      if (deltaX < 10) {
-        const mouseEvent = {
-          clientX: touch.clientX,
-          clientY: touch.clientY,
-          target: e.target,
-        } as unknown as React.MouseEvent;
-        
-        handleMouseUp(mouseEvent);
+      // Convert touch to mouse event for drag handling
+      const mouseEvent = {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        target: e.target,
+      } as unknown as React.MouseEvent;
+
+      handleGridMouseDown(mouseEvent);
+    },
+    [handleGridMouseDown]
+  );
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartXRef.current !== null && e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartXRef.current);
+
+        // Only handle as tap if minimal horizontal movement
+        if (deltaX < 10) {
+          const mouseEvent = {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            target: e.target,
+          } as unknown as React.MouseEvent;
+
+          handleMouseUp(mouseEvent);
+        }
       }
-    }
-    
-    touchStartXRef.current = null;
-  }, [handleMouseUp]);
+
+      touchStartXRef.current = null;
+    },
+    [handleMouseUp]
+  );
 
   // Context menu handlers
   const handleCreateEvent = useCallback(() => {
     if (!dragSelection || !onCreateEvent) return;
-    
+
     // Calculate times from Y positions
     const minY = Math.min(dragSelection.startY, dragSelection.endY);
     const maxY = Math.max(dragSelection.startY, dragSelection.endY);
     const startTimeInfo = yToTime(minY);
     const endTimeInfo = yToTime(maxY);
-    
+
     const actualStartHour = startTimeInfo.hour;
     const actualStartMin = startTimeInfo.minutes;
     const actualEndHour = endTimeInfo.hour;
     const actualEndMin = endTimeInfo.minutes;
-    
+
     const startTime = new Date(currentDate);
     startTime.setHours(actualStartHour, actualStartMin, 0, 0);
-    
+
     const endTime = new Date(currentDate);
     endTime.setHours(actualEndHour, actualEndMin, 0, 0);
-    
+
     if (endTime <= startTime) {
       endTime.setDate(endTime.getDate() + 1);
     }
-    
+
     onCreateEvent(startTime, endTime);
     setShowMenu(false);
     setDragSelection(null);
   }, [dragSelection, onCreateEvent, currentDate]);
 
-  const handleCreateTask = useCallback((title?: string, color?: string, icon?: string) => {
-    if (!dragSelection || !onCreateTask) return;
-    
-    // Calculate times from Y positions
-    const minY = Math.min(dragSelection.startY, dragSelection.endY);
-    const maxY = Math.max(dragSelection.startY, dragSelection.endY);
-    const startTimeInfo = yToTime(minY);
-    const endTimeInfo = yToTime(maxY);
-    
-    const actualStartHour = startTimeInfo.hour;
-    const actualStartMin = startTimeInfo.minutes;
-    const actualEndHour = endTimeInfo.hour;
-    const actualEndMin = endTimeInfo.minutes;
-    
-    const startDateTime = new Date(currentDate);
-    startDateTime.setHours(actualStartHour, actualStartMin, 0, 0);
-    
-    const endDateTime = new Date(currentDate);
-    endDateTime.setHours(actualEndHour, actualEndMin, 0, 0);
-    
-    if (endDateTime <= startDateTime) {
-      endDateTime.setDate(endDateTime.getDate() + 1);
-    }
-    
-    onCreateTask(startDateTime, endDateTime, title, color, icon);
-    setShowMenu(false);
-    setDragSelection(null);
-  }, [dragSelection, onCreateTask, currentDate]);
+  const handleCreateTask = useCallback(
+    (title?: string, color?: string, icon?: string) => {
+      if (!dragSelection || !onCreateTask) return;
+
+      // Calculate times from Y positions
+      const minY = Math.min(dragSelection.startY, dragSelection.endY);
+      const maxY = Math.max(dragSelection.startY, dragSelection.endY);
+      const startTimeInfo = yToTime(minY);
+      const endTimeInfo = yToTime(maxY);
+
+      const actualStartHour = startTimeInfo.hour;
+      const actualStartMin = startTimeInfo.minutes;
+      const actualEndHour = endTimeInfo.hour;
+      const actualEndMin = endTimeInfo.minutes;
+
+      const startDateTime = new Date(currentDate);
+      startDateTime.setHours(actualStartHour, actualStartMin, 0, 0);
+
+      const endDateTime = new Date(currentDate);
+      endDateTime.setHours(actualEndHour, actualEndMin, 0, 0);
+
+      if (endDateTime <= startDateTime) {
+        endDateTime.setDate(endDateTime.getDate() + 1);
+      }
+
+      onCreateTask(startDateTime, endDateTime, title, color, icon);
+      setShowMenu(false);
+      setDragSelection(null);
+    },
+    [dragSelection, onCreateTask, currentDate]
+  );
 
   // Handle block drag start
-  const handleBlockMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (!gridRef.current) return;
-    
-    // Close any open menus when starting new interaction
-    setShowMenu(false);
-    setShowColorPalette(false);
-    
-    const rect = gridRef.current.getBoundingClientRect();
-    const scrollTop = scrollRef.current?.scrollTop || 0;
-    
-    const block = blocks.find(b => b.id === blockId);
-    if (!block) return;
-    
-    const startY = block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT;
-    const height = ((block.endTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
-    
-    // Calculate mouse offset from block's top edge
-    const mouseY = e.clientY - rect.top + scrollTop;
-    const offset = mouseY - startY;
-    
-    setDraggingBlock(blockId);
-    setMouseOffsetY(offset);
-    setGhostBlock({
-      id: blockId,
-      startY: startY,
-      height: height
-    });
-    
-    onInteractionStart?.();
-  }, [blocks, onInteractionStart]);
+  const handleBlockMouseDown = useCallback(
+    (e: React.MouseEvent, blockId: string) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (!gridRef.current) return;
+
+      // Close any open menus when starting new interaction
+      setShowMenu(false);
+      setShowColorPalette(false);
+
+      const rect = gridRef.current.getBoundingClientRect();
+      const scrollTop = scrollRef.current?.scrollTop || 0;
+
+      const block = blocks.find((b) => b.id === blockId);
+      if (!block) return;
+
+      const startY =
+        block.startTime.getHours() * HOUR_HEIGHT +
+        (block.startTime.getMinutes() / 60) * HOUR_HEIGHT;
+      const height =
+        ((block.endTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
+
+      // Calculate mouse offset from block's top edge
+      const mouseY = e.clientY - rect.top + scrollTop;
+      const offset = mouseY - startY;
+
+      setDraggingBlock(blockId);
+      setMouseOffsetY(offset);
+      setGhostBlock({
+        id: blockId,
+        startY: startY,
+        height: height,
+      });
+
+      onInteractionStart?.();
+    },
+    [blocks, onInteractionStart]
+  );
 
   // Handle resize start
-  const handleResizeMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    // Close any open menus when starting new interaction
-    setShowMenu(false);
-    setShowColorPalette(false);
-    
-    const block = blocks.find(b => b.id === blockId);
-    if (!block) return;
-    
-    setResizingBlock({
-      id: blockId,
-      initialEndTime: block.endTime,
-      initialMouseY: e.clientY
-    });
-    
-    // Set ghost block to show current size
-    const startY = block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT;
-    const height = ((block.endTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
-    
-    setGhostBlock({
-      id: blockId,
-      startY: startY,
-      height: height
-    });
-    
-    onInteractionStart?.();
-  }, [blocks, onInteractionStart]);
+  const handleResizeMouseDown = useCallback(
+    (e: React.MouseEvent, blockId: string) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      // Close any open menus when starting new interaction
+      setShowMenu(false);
+      setShowColorPalette(false);
+
+      const block = blocks.find((b) => b.id === blockId);
+      if (!block) return;
+
+      setResizingBlock({
+        id: blockId,
+        initialEndTime: block.endTime,
+        initialMouseY: e.clientY,
+      });
+
+      // Set ghost block to show current size
+      const startY =
+        block.startTime.getHours() * HOUR_HEIGHT +
+        (block.startTime.getMinutes() / 60) * HOUR_HEIGHT;
+      const height =
+        ((block.endTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
+
+      setGhostBlock({
+        id: blockId,
+        startY: startY,
+        height: height,
+      });
+
+      onInteractionStart?.();
+    },
+    [blocks, onInteractionStart]
+  );
 
   // Handle double click to edit block title
-  const handleBlockDoubleClick = useCallback((e: React.MouseEvent, block: { id: string; title: string }) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setEditingBlockId(block.id);
-    setEditingTitle(block.title);
-    onInteractionStart?.();
-  }, [onInteractionStart]);
+  const handleBlockDoubleClick = useCallback(
+    (e: React.MouseEvent, block: { id: string; title: string }) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setEditingBlockId(block.id);
+      setEditingTitle(block.title);
+      onInteractionStart?.();
+    },
+    [onInteractionStart]
+  );
 
   // Handle title edit submit
-  const handleTitleSubmit = useCallback((blockId: string) => {
-    if (onRenameBlock && editingTitle.trim()) {
-      onRenameBlock(blockId, editingTitle.trim());
-    }
-    setEditingBlockId(null);
-    setEditingTitle('');
-    onInteractionEnd?.();
-  }, [onRenameBlock, editingTitle, onInteractionEnd]);
+  const handleTitleSubmit = useCallback(
+    (blockId: string) => {
+      if (onRenameBlock && editingTitle.trim()) {
+        onRenameBlock(blockId, editingTitle.trim());
+      }
+      setEditingBlockId(null);
+      setEditingTitle('');
+      onInteractionEnd?.();
+    },
+    [onRenameBlock, editingTitle, onInteractionEnd]
+  );
 
   // Handle checkbox click for tasks
-  const handleCheckboxClick = useCallback((e: React.MouseEvent, blockId: string) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (onToggleComplete) {
-      onToggleComplete(blockId);
-    }
-  }, [onToggleComplete]);
-
+  const handleCheckboxClick = useCallback(
+    (e: React.MouseEvent, blockId: string) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (onToggleComplete) {
+        onToggleComplete(blockId);
+      }
+    },
+    [onToggleComplete]
+  );
 
   // Scroll to current time on mount and when date changes
   useEffect(() => {
     if (!scrollRef.current) return;
-    
+
     const now = new Date();
-    
+
     // Check if we're viewing today
-    const isToday = 
+    const isToday =
       currentDate.getFullYear() === now.getFullYear() &&
       currentDate.getMonth() === now.getMonth() &&
       currentDate.getDate() === now.getDate();
-    
+
     if (isToday) {
       // Use requestAnimationFrame for better performance
       requestAnimationFrame(() => {
         if (!scrollRef.current) return;
-        
+
         const currentHour = now.getHours();
         const currentMinutes = now.getMinutes();
-        
+
         // Get the scroll container height
         const containerHeight = scrollRef.current.clientHeight;
-        
+
         // Calculate the exact position of current time
         const currentTimePosition = currentHour * HOUR_HEIGHT + (currentMinutes / 60) * HOUR_HEIGHT;
-        
+
         // Calculate scroll position to perfectly center current time
         // Add half hour height to center the line itself, not just the hour block
-        const idealScrollPosition = currentTimePosition - (containerHeight / 2) + (HOUR_HEIGHT / 2);
-        
+        const idealScrollPosition = currentTimePosition - containerHeight / 2 + HOUR_HEIGHT / 2;
+
         // Ensure we don't scroll past bounds
         const maxScroll = scrollRef.current.scrollHeight - containerHeight;
         const targetScroll = Math.max(0, Math.min(idealScrollPosition, maxScroll));
-        
+
         scrollRef.current.scrollTo({
           top: targetScroll,
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       });
     }
@@ -733,17 +808,17 @@ export function MinimalCalendar({
     window.addEventListener('calendar-today', handleGoToToday);
     return () => window.removeEventListener('calendar-today', handleGoToToday);
   }, [onDateChange]);
-  
+
   // Handle window resize to reposition menu if needed
   useEffect(() => {
     if (!showMenu) return;
-    
+
     const handleResize = () => {
       // Close menu on resize to avoid positioning issues
       setShowMenu(false);
       setDragSelection(null);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [showMenu]);
@@ -753,28 +828,66 @@ export function MinimalCalendar({
     touchStartXRef.current = e.touches[0].clientX;
   }, []);
 
-  const handleSwipeEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartXRef.current || !isMobile) return;
-    
-    const touchEndX = e.changedTouches[0].clientX;
-    const diffX = touchStartXRef.current - touchEndX;
-    const threshold = 50; // Minimum swipe distance
-    
-    if (Math.abs(diffX) > threshold) {
-      if (diffX > 0) {
-        // Swipe left - next day
-        onDateChange(new Date(currentDate.getTime() + 86400000));
-      } else {
-        // Swipe right - previous day
-        onDateChange(new Date(currentDate.getTime() - 86400000));
+  const handleSwipeEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStartXRef.current || !isMobile) return;
+
+      const touchEndX = e.changedTouches[0].clientX;
+      const diffX = touchStartXRef.current - touchEndX;
+      const threshold = 50; // Minimum swipe distance
+
+      if (Math.abs(diffX) > threshold) {
+        if (diffX > 0) {
+          // Swipe left - next day
+          onDateChange(new Date(currentDate.getTime() + 86400000));
+        } else {
+          // Swipe right - previous day
+          onDateChange(new Date(currentDate.getTime() - 86400000));
+        }
       }
-    }
-    
-    touchStartXRef.current = null;
-  }, [currentDate, onDateChange, isMobile]);
+
+      touchStartXRef.current = null;
+    },
+    [currentDate, onDateChange, isMobile]
+  );
+
+  // Handle escape key and click outside for menu
+  useEffect(() => {
+    if (!showMenu) return;
+
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowMenu(false);
+        setDragSelection(null);
+      }
+    };
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+        setDragSelection(null);
+      }
+    };
+
+    const handleScroll = () => {
+      // Close menu on scroll to avoid positioning issues
+      setShowMenu(false);
+      setDragSelection(null);
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [showMenu]);
 
   const currentEvent = getCurrentEvent();
-  const isToday = 
+  const isToday =
     currentDate.getFullYear() === currentTime.getFullYear() &&
     currentDate.getMonth() === currentTime.getMonth() &&
     currentDate.getDate() === currentTime.getDate();
@@ -796,14 +909,15 @@ export function MinimalCalendar({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-2 h-2 rounded-full animate-pulse"
                       style={{ backgroundColor: currentEvent.color || '#60A5FA' }}
                     />
                     <div>
                       <div className="font-medium text-sm">{currentEvent.title}</div>
                       <div className="text-xs text-muted-foreground">
-                        {format(currentEvent.startTime, 'h:mm a')} - {format(currentEvent.endTime, 'h:mm a')}
+                        {format(currentEvent.startTime, 'h:mm a')} -{' '}
+                        {format(currentEvent.endTime, 'h:mm a')}
                       </div>
                     </div>
                   </div>
@@ -818,11 +932,16 @@ export function MinimalCalendar({
                     className="h-full rounded-full"
                     style={{ backgroundColor: currentEvent.color || '#60A5FA' }}
                     initial={{ width: 0 }}
-                    animate={{ 
-                      width: `${Math.min(100, Math.max(0, 
-                        ((currentTime.getTime() - currentEvent.startTime.getTime()) / 
-                         (currentEvent.endTime.getTime() - currentEvent.startTime.getTime())) * 100
-                      ))}%` 
+                    animate={{
+                      width: `${Math.min(
+                        100,
+                        Math.max(
+                          0,
+                          ((currentTime.getTime() - currentEvent.startTime.getTime()) /
+                            (currentEvent.endTime.getTime() - currentEvent.startTime.getTime())) *
+                            100
+                        )
+                      )}%`,
                     }}
                     transition={{ duration: 0.5 }}
                   />
@@ -851,22 +970,18 @@ export function MinimalCalendar({
       )}
 
       {/* Header */}
-      <div 
+      <div
         className="flex-shrink-0 px-4 py-3 border-b bg-background"
         onTouchStart={handleSwipeStart}
         onTouchEnd={handleSwipeEnd}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="text-xs text-muted-foreground">
-              AEST
-            </div>
+            <div className="text-xs text-muted-foreground">AEST</div>
             <div className="h-8 w-px bg-border" />
-            <div className="text-sm font-medium">
-              {format(currentDate, 'EEE MMM d')}
-            </div>
+            <div className="text-sm font-medium">{format(currentDate, 'EEE MMM d')}</div>
           </div>
-          
+
           <div className="flex items-center gap-1">
             {!isToday && (
               <Button
@@ -904,12 +1019,12 @@ export function MinimalCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <ScrollArea 
-        className="flex-1 overflow-hidden" 
+      <ScrollArea
+        className="flex-1 overflow-hidden"
         ref={scrollRef}
         onScroll={updateLastInteraction}
       >
-        <div 
+        <div
           ref={gridRef}
           className="relative select-none"
           style={{ height: `${HOURS.length * HOUR_HEIGHT}px`, minHeight: '100%' }}
@@ -921,11 +1036,8 @@ export function MinimalCalendar({
           onTouchEnd={handleTouchEnd}
         >
           {/* Background click area */}
-          <div className={cn(
-            "absolute inset-0",
-            isMobile ? "left-12" : "left-16"
-          )} />
-          
+          <div className={cn('absolute inset-0', isMobile ? 'left-12' : 'left-16')} />
+
           {/* Hour rows */}
           {HOURS.map((hour) => (
             <div
@@ -933,28 +1045,27 @@ export function MinimalCalendar({
               className="absolute w-full flex pointer-events-none"
               style={{ top: `${hour * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
             >
-              <div className={cn(
-                "flex-shrink-0 text-right pt-2",
-                isMobile ? "w-12 pr-2" : "w-16 pr-3"
-              )}>
-                <span className={cn(
-                  "text-muted-foreground",
-                  isMobile ? "text-[10px]" : "text-xs"
-                )}>
-                  {isMobile ? (
-                    // Show just the hour on mobile
-                    hour === 0 ? '12' : hour > 12 ? hour - 12 : hour
-                  ) : (
-                    // Show full time on desktop
-                    `${hour === 0 ? '12' : hour > 12 ? hour - 12 : hour} ${hour < 12 ? 'AM' : 'PM'}`
-                  )}
+              <div
+                className={cn(
+                  'flex-shrink-0 text-right pt-2',
+                  isMobile ? 'w-12 pr-2' : 'w-16 pr-3'
+                )}
+              >
+                <span className={cn('text-muted-foreground', isMobile ? 'text-[10px]' : 'text-xs')}>
+                  {isMobile
+                    ? // Show just the hour on mobile
+                      hour === 0
+                      ? '12'
+                      : hour > 12
+                        ? hour - 12
+                        : hour
+                    : // Show full time on desktop
+                      `${hour === 0 ? '12' : hour > 12 ? hour - 12 : hour} ${hour < 12 ? 'AM' : 'PM'}`}
                 </span>
               </div>
               <div className="flex-1 border-t border-border" />
             </div>
           ))}
-
-
 
           {/* Render blocks */}
           {blocks
@@ -968,145 +1079,147 @@ export function MinimalCalendar({
               );
             })
             .map((block) => {
-            const startHour = block.startTime.getHours();
-            const startMinutes = block.startTime.getMinutes();
-            const endHour = block.endTime.getHours();
-            const endMinutes = block.endTime.getMinutes();
-            
-            const top = startHour * HOUR_HEIGHT + (startMinutes / 60) * HOUR_HEIGHT;
-            const height = (endHour - startHour) * HOUR_HEIGHT + ((endMinutes - startMinutes) / 60) * HOUR_HEIGHT;
-            const isHovered = hoveredBlockId === block.id;
-            
-            return (
-              <div
-                key={block.id}
-                className={cn(
-                  "calendar-block absolute rounded-lg p-2 text-xs group cursor-move transition-all",
-                  isMobile ? "left-12 right-2" : "left-16 right-4",
-                  "hover:shadow-lg",
-                  // Light mode: solid background with white text
-                  "bg-opacity-100 text-white border-2 border-transparent",
-                  // Dark mode: semi-transparent background with colored border
-                  "dark:bg-opacity-20 dark:backdrop-blur-sm dark:border-opacity-40 dark:text-white"
-                )}
-                style={{
-                  top: `${top}px`,
-                  height: `${Math.max(30, height)}px`, // Min height for visibility
-                  backgroundColor: block.color || '#93BBFC',
-                  borderColor: block.color || '#93BBFC',
-                  opacity: block.isCompleted ? 0.6 : 1,
-                }}
-                onMouseDown={(e) => handleBlockMouseDown(e, block.id)}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedBlockForColor(block.id);
-                  setColorPalettePosition({ x: e.clientX, y: e.clientY });
-                  setShowColorPalette(true);
-                }}
-                onMouseEnter={() => setHoveredBlockId(block.id)}
-                onMouseLeave={() => setHoveredBlockId(null)}
-              >
-                <div className="flex justify-between items-start gap-1">
-                  <div className="flex items-start gap-1.5 flex-1 min-w-0">
-                    {/* Checkbox for tasks */}
-                    {block.type === 'task' && onToggleComplete && (
-                      <button
-                        className="mt-0.5 flex-shrink-0 hover:opacity-80 transition-opacity"
-                        onClick={(e) => handleCheckboxClick(e, block.id)}
-                      >
-                        {block.isCompleted ? (
-                          <CheckCircle2 className="h-4 w-4 text-white fill-green-500" />
-                        ) : (
-                          <Circle className="h-4 w-4 text-white/80" />
-                        )}
-                      </button>
-                    )}
-                    
-                    <div className="flex-1 min-w-0">
-                      {editingBlockId === block.id ? (
-                        <input
-                          type="text"
-                          value={editingTitle}
-                          onChange={(e) => setEditingTitle(e.target.value)}
-                          onBlur={() => handleTitleSubmit(block.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleTitleSubmit(block.id);
-                            } else if (e.key === 'Escape') {
-                              setEditingBlockId(null);
-                              setEditingTitle('');
-                              onInteractionEnd?.();
-                            }
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          className="w-full bg-black/30 rounded px-1 py-0 text-white text-xs font-medium outline-none ring-1 ring-white/30 focus:ring-white/50"
-                          autoFocus
-                        />
-                      ) : (
-                        <div 
-                          className={cn(
-                            "font-medium truncate cursor-text flex items-center gap-1.5",
-                            block.isCompleted && "line-through opacity-75"
-                          )}
-                          onDoubleClick={(e) => handleBlockDoubleClick(e, block)}
+              const startHour = block.startTime.getHours();
+              const startMinutes = block.startTime.getMinutes();
+              const endHour = block.endTime.getHours();
+              const endMinutes = block.endTime.getMinutes();
+
+              const top = startHour * HOUR_HEIGHT + (startMinutes / 60) * HOUR_HEIGHT;
+              const height =
+                (endHour - startHour) * HOUR_HEIGHT +
+                ((endMinutes - startMinutes) / 60) * HOUR_HEIGHT;
+              const isHovered = hoveredBlockId === block.id;
+
+              return (
+                <div
+                  key={block.id}
+                  className={cn(
+                    'calendar-block absolute rounded-lg p-2 text-xs group cursor-move transition-all',
+                    isMobile ? 'left-12 right-2' : 'left-16 right-4',
+                    'hover:shadow-lg',
+                    // Light mode: solid background with white text
+                    'bg-opacity-100 text-white border-2 border-transparent',
+                    // Dark mode: semi-transparent background with colored border
+                    'dark:bg-opacity-20 dark:backdrop-blur-sm dark:border-opacity-40 dark:text-white'
+                  )}
+                  style={{
+                    top: `${top}px`,
+                    height: `${Math.max(30, height)}px`, // Min height for visibility
+                    backgroundColor: block.color || '#93BBFC',
+                    borderColor: block.color || '#93BBFC',
+                    opacity: block.isCompleted ? 0.6 : 1,
+                  }}
+                  onMouseDown={(e) => handleBlockMouseDown(e, block.id)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedBlockForColor(block.id);
+                    setColorPalettePosition({ x: e.clientX, y: e.clientY });
+                    setShowColorPalette(true);
+                  }}
+                  onMouseEnter={() => setHoveredBlockId(block.id)}
+                  onMouseLeave={() => setHoveredBlockId(null)}
+                >
+                  <div className="flex justify-between items-start gap-1">
+                    <div className="flex items-start gap-1.5 flex-1 min-w-0">
+                      {/* Checkbox for tasks */}
+                      {block.type === 'task' && onToggleComplete && (
+                        <button
+                          className="mt-0.5 flex-shrink-0 hover:opacity-80 transition-opacity"
+                          onClick={(e) => handleCheckboxClick(e, block.id)}
                         >
-                          {block.icon && <span className="text-sm">{block.icon}</span>}
-                          <span>{block.title}</span>
-                        </div>
+                          {block.isCompleted ? (
+                            <CheckCircle2 className="h-4 w-4 text-white fill-green-500" />
+                          ) : (
+                            <Circle className="h-4 w-4 text-white/80" />
+                          )}
+                        </button>
                       )}
-                      <div className="text-xs opacity-80">
-                        {format(block.startTime, 'h:mm a')} - {format(block.endTime, 'h:mm a')}
+
+                      <div className="flex-1 min-w-0">
+                        {editingBlockId === block.id ? (
+                          <input
+                            type="text"
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onBlur={() => handleTitleSubmit(block.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleTitleSubmit(block.id);
+                              } else if (e.key === 'Escape') {
+                                setEditingBlockId(null);
+                                setEditingTitle('');
+                                onInteractionEnd?.();
+                              }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-full bg-black/30 rounded px-1 py-0 text-white text-xs font-medium outline-none ring-1 ring-white/30 focus:ring-white/50"
+                            autoFocus
+                          />
+                        ) : (
+                          <div
+                            className={cn(
+                              'font-medium truncate cursor-text flex items-center gap-1.5',
+                              block.isCompleted && 'line-through opacity-75'
+                            )}
+                            onDoubleClick={(e) => handleBlockDoubleClick(e, block)}
+                          >
+                            {block.icon && <span className="text-sm">{block.icon}</span>}
+                            <span>{block.title}</span>
+                          </div>
+                        )}
+                        <div className="text-xs opacity-80">
+                          {format(block.startTime, 'h:mm a')} - {format(block.endTime, 'h:mm a')}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Delete button */}
+                    {onDeleteBlock && (
+                      <button
+                        className={cn(
+                          'p-1 rounded hover:bg-white/20 transition-all flex-shrink-0',
+                          isHovered ? 'opacity-100' : 'opacity-0'
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onDeleteBlock(block.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
-                  
-                  {/* Delete button */}
-                  {onDeleteBlock && (
-                    <button
-                      className={cn(
-                        "p-1 rounded hover:bg-white/20 transition-all flex-shrink-0",
-                        isHovered ? "opacity-100" : "opacity-0"
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        onDeleteBlock(block.id);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  )}
+
+                  {/* Resize handle at bottom */}
+                  <div
+                    className={cn(
+                      'absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize group/resize',
+                      'hover:bg-white/20 transition-colors',
+                      isHovered ? 'opacity-100' : 'opacity-0'
+                    )}
+                    onMouseDown={(e) => handleResizeMouseDown(e, block.id)}
+                  />
                 </div>
-                
-                {/* Resize handle at bottom */}
-                <div
-                  className={cn(
-                    "absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize group/resize",
-                    "hover:bg-white/20 transition-colors",
-                    isHovered ? "opacity-100" : "opacity-0"
-                  )}
-                  onMouseDown={(e) => handleResizeMouseDown(e, block.id)}
-                />
-              </div>
-            );
-          })}
+              );
+            })}
 
           {/* Current time indicator - only show on today */}
           {(() => {
             const now = new Date();
-            const isToday = 
+            const isToday =
               currentDate.getFullYear() === now.getFullYear() &&
               currentDate.getMonth() === now.getMonth() &&
               currentDate.getDate() === now.getDate();
-            
+
             if (!isToday) return null;
-            
+
             return (
               <div
                 className="absolute left-0 right-0 flex items-center pointer-events-none z-10 current-time-indicator"
-                style={{ 
-                  top: `${now.getHours() * HOUR_HEIGHT + (now.getMinutes() / 60) * HOUR_HEIGHT}px` 
+                style={{
+                  top: `${now.getHours() * HOUR_HEIGHT + (now.getMinutes() / 60) * HOUR_HEIGHT}px`,
                 }}
               >
                 <div className="w-16" />
@@ -1117,86 +1230,96 @@ export function MinimalCalendar({
           })()}
 
           {/* Drag selection overlay */}
-          {dragSelection && (() => {
-            const minY = Math.min(dragSelection.startY, dragSelection.endY);
-            const maxY = Math.max(dragSelection.startY, dragSelection.endY);
-            
-            // Calculate times from Y positions for overlap check
-            const startTimeInfo = yToTime(minY);
-            const endTimeInfo = yToTime(maxY);
-            
-            const actualStartHour = startTimeInfo.hour;
-            const actualStartMin = startTimeInfo.minutes;
-            const actualEndHour = endTimeInfo.hour;
-            const actualEndMin = endTimeInfo.minutes;
-            
-            const startTime = new Date(currentDate);
-            startTime.setHours(actualStartHour, actualStartMin, 0, 0);
-            
-            const endTime = new Date(currentDate);
-            endTime.setHours(actualEndHour, actualEndMin, 0, 0);
-            
-            if (endTime <= startTime) {
-              endTime.setDate(endTime.getDate() + 1);
-            }
-            
-            const isOverlapping = hasOverlap(startTime, endTime);
-            
-            return (
-              <div
-                className={cn(
-                  "absolute rounded-lg pointer-events-none transition-colors",
-                  isMobile ? "left-12 right-2" : "left-16 right-4",
-                  isOverlapping 
-                    ? "bg-red-500/20 dark:bg-red-500/10 border-2 border-red-500 dark:border-red-400" 
-                    : "bg-blue-500/30 dark:bg-blue-500/10 border-2 border-blue-500 dark:border-blue-400 border-solid"
-                )}
-                style={{
-                  top: `${minY}px`,
-                  height: `${maxY - minY}px`,
-                }}
-              >
-                <div className={cn(
-                  "px-3 py-1 text-sm font-medium",
-                  isOverlapping ? "text-red-700 dark:text-red-300" : "text-blue-700 dark:text-blue-300"
-                )}>
-                  {formatTime(actualStartHour, actualStartMin)} - {formatTime(actualEndHour, actualEndMin)}
-                  {isOverlapping && " (Occupied)"}
+          {dragSelection &&
+            (() => {
+              const minY = Math.min(dragSelection.startY, dragSelection.endY);
+              const maxY = Math.max(dragSelection.startY, dragSelection.endY);
+
+              // Calculate times from Y positions for overlap check
+              const startTimeInfo = yToTime(minY);
+              const endTimeInfo = yToTime(maxY);
+
+              const actualStartHour = startTimeInfo.hour;
+              const actualStartMin = startTimeInfo.minutes;
+              const actualEndHour = endTimeInfo.hour;
+              const actualEndMin = endTimeInfo.minutes;
+
+              const startTime = new Date(currentDate);
+              startTime.setHours(actualStartHour, actualStartMin, 0, 0);
+
+              const endTime = new Date(currentDate);
+              endTime.setHours(actualEndHour, actualEndMin, 0, 0);
+
+              if (endTime <= startTime) {
+                endTime.setDate(endTime.getDate() + 1);
+              }
+
+              const isOverlapping = hasOverlap(startTime, endTime);
+
+              return (
+                <div
+                  className={cn(
+                    'absolute rounded-lg pointer-events-none transition-colors',
+                    isMobile ? 'left-12 right-2' : 'left-16 right-4',
+                    isOverlapping
+                      ? 'bg-red-500/20 dark:bg-red-500/10 border-2 border-red-500 dark:border-red-400'
+                      : 'bg-blue-500/30 dark:bg-blue-500/10 border-2 border-blue-500 dark:border-blue-400 border-solid'
+                  )}
+                  style={{
+                    top: `${minY}px`,
+                    height: `${maxY - minY}px`,
+                  }}
+                >
+                  <div
+                    className={cn(
+                      'px-3 py-1 text-sm font-medium',
+                      isOverlapping
+                        ? 'text-red-700 dark:text-red-300'
+                        : 'text-blue-700 dark:text-blue-300'
+                    )}
+                  >
+                    {formatTime(actualStartHour, actualStartMin)} -{' '}
+                    {formatTime(actualEndHour, actualEndMin)}
+                    {isOverlapping && ' (Occupied)'}
+                  </div>
                 </div>
-              </div>
-            );
-          })()}
+              );
+            })()}
 
           {/* Ghost block for dragging */}
-          {ghostBlock && (() => {
-            const block = blocks.find(b => b.id === ghostBlock.id);
-            if (!block) return null;
-            
-            return (
-              <div
-                className={cn(
-                  "absolute rounded-lg border-2 border-solid pointer-events-none",
-                  "bg-opacity-30 dark:bg-opacity-10",
-                  isMobile ? "left-12 right-2" : "left-16 right-4"
-                )}
-                style={{
-                  top: `${ghostBlock.startY}px`,
-                  height: `${ghostBlock.height}px`,
-                  borderColor: block.color || '#60A5FA',
-                  backgroundColor: `${block.color || '#60A5FA'}30`,
-                }}
-              />
-            );
-          })()}
+          {ghostBlock &&
+            (() => {
+              const block = blocks.find((b) => b.id === ghostBlock.id);
+              if (!block) return null;
+
+              return (
+                <div
+                  className={cn(
+                    'absolute rounded-lg border-2 border-solid pointer-events-none',
+                    'bg-opacity-30 dark:bg-opacity-10',
+                    isMobile ? 'left-12 right-2' : 'left-16 right-4'
+                  )}
+                  style={{
+                    top: `${ghostBlock.startY}px`,
+                    height: `${ghostBlock.height}px`,
+                    borderColor: block.color || '#60A5FA',
+                    backgroundColor: `${block.color || '#60A5FA'}30`,
+                  }}
+                />
+              );
+            })()}
         </div>
       </ScrollArea>
 
-      
       {/* Color Palette */}
       <ColorPalette
         isOpen={showColorPalette}
         position={colorPalettePosition}
-        currentColor={selectedBlockForColor ? blocks.find(b => b.id === selectedBlockForColor)?.color : undefined}
+        currentColor={
+          selectedBlockForColor
+            ? blocks.find((b) => b.id === selectedBlockForColor)?.color
+            : undefined
+        }
         onSelectColor={(color) => {
           if (selectedBlockForColor && onUpdateColor) {
             onUpdateColor(selectedBlockForColor, color);
@@ -1209,76 +1332,99 @@ export function MinimalCalendar({
       />
 
       {/* Context menu for creating events/tasks */}
-      {showMenu && (
-        <div
-          ref={menuRef}
-          className={cn(
-            "absolute z-50 bg-background border rounded-lg shadow-lg p-2",
-            isMobile ? "min-w-[200px] max-w-[90vw]" : "min-w-[150px]",
-            "max-h-[80vh] overflow-y-auto"
-          )}
-          style={{
-            left: `${menuPosition.x}px`,
-            top: `${menuPosition.y}px`,
-          }}
-        >
-          <button
-            className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors flex items-center gap-2"
-            onClick={handleCreateEvent}
-          >
-            <Clock className="h-4 w-4" />
-            Create Event
-          </button>
-          {isSpecialUser ? (
-            <>
-              <div className="border-t my-1" />
-              <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                TASK PRESETS
-              </div>
-              {TASK_PRESETS.map((preset) => (
+      {showMenu &&
+        dragSelection &&
+        (() => {
+          const minY = Math.min(dragSelection.startY, dragSelection.endY);
+          const maxY = Math.max(dragSelection.startY, dragSelection.endY);
+          const height = maxY - minY;
+          const position = calculateCalloutPosition(minY, height);
+
+          return createPortal(
+            <div
+              ref={menuRef}
+              className={cn(
+                'fixed z-[9999] bg-background border rounded-lg shadow-2xl p-2',
+                isMobile ? 'min-w-[200px] max-w-[90vw]' : 'min-w-[200px]',
+                'max-h-[80vh] overflow-y-auto overflow-x-hidden'
+              )}
+              style={{
+                left: `${position.left}px`,
+                top: `${position.top}px`,
+              }}
+            >
+              <button
+                className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors flex items-center gap-2"
+                onClick={handleCreateEvent}
+              >
+                <Clock className="h-4 w-4" />
+                Create Event
+              </button>
+              {isSpecialUser ? (
+                <>
+                  <div className="border-t my-1" />
+                  <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                    TASK PRESETS
+                  </div>
+                  {TASK_PRESETS.map((preset) => (
+                    <button
+                      key={preset.title}
+                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3 whitespace-nowrap"
+                      onClick={() => handleCreateTask(preset.title, preset.color, preset.emoji)}
+                    >
+                      <span className="text-lg">{preset.emoji}</span>
+                      <span>{preset.title}</span>
+                      <div
+                        className="ml-auto w-3 h-3 rounded-full"
+                        style={{ backgroundColor: preset.color }}
+                      />
+                    </button>
+                  ))}
+                  <div className="border-t my-1" />
+                  <button
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
+                    onClick={() => handleCreateTask()}
+                  >
+                    <CheckSquare className="h-4 w-4 text-muted-foreground" />
+                    Custom task
+                  </button>
+                </>
+              ) : (
                 <button
-                  key={preset.title}
-                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
-                  onClick={() => handleCreateTask(preset.title, preset.color, preset.emoji)}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors flex items-center gap-2"
+                  onClick={() => handleCreateTask()}
                 >
-                  <span className="text-lg">{preset.emoji}</span>
-                  <span>{preset.title}</span>
-                  <div
-                    className="ml-auto w-3 h-3 rounded-full"
-                    style={{ backgroundColor: preset.color }}
-                  />
+                  <CheckCircle2 className="h-4 w-4" />
+                  Create Task
                 </button>
-              ))}
+              )}
               <div className="border-t my-1" />
               <button
-                className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent flex items-center gap-3"
-                onClick={() => handleCreateTask()}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors text-muted-foreground"
+                onClick={() => {
+                  setShowMenu(false);
+                  setDragSelection(null);
+                }}
               >
-                <CheckSquare className="h-4 w-4 text-muted-foreground" />
-                Custom task
+                Cancel
               </button>
-            </>
-          ) : (
-            <button
-              className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors flex items-center gap-2"
-              onClick={() => handleCreateTask()}
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Create Task
-            </button>
-          )}
-          <div className="border-t my-1" />
-          <button
-            className="w-full text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors text-muted-foreground"
-            onClick={() => {
-              setShowMenu(false);
-              setDragSelection(null);
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+
+              {/* Arrow indicator */}
+              <div
+                className={cn(
+                  'absolute top-1/2 -translate-y-1/2 w-0 h-0',
+                  position.arrowSide === 'right'
+                    ? 'right-[-8px] border-l-8 border-l-background border-y-8 border-y-transparent'
+                    : 'left-[-8px] border-r-8 border-r-background border-y-8 border-y-transparent'
+                )}
+                style={{
+                  filter: 'drop-shadow(-1px 0 0 rgba(0,0,0,0.1))',
+                }}
+              />
+            </div>,
+            document.body
+          );
+        })()}
     </div>
   );
 }
