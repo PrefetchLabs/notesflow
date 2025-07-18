@@ -74,11 +74,46 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
     }
   };
 
+  // Handle creating events
+  const handleCreateEvent = async (startTime: Date, endTime: Date) => {
+    try {
+      await createBlock({
+        title: 'New Event',
+        startTime,
+        endTime,
+        color: '#3B82F6',
+        type: 'event'
+      });
+      toast.success('Event created');
+    } catch (error) {
+      toast.error('Failed to create event');
+    }
+  };
+
+  // Handle creating tasks
+  const handleCreateTask = async (startTime: Date, endTime: Date, title?: string, color?: string, icon?: string) => {
+    try {
+      await createBlock({
+        title: title || 'New Task',
+        startTime,
+        endTime,
+        color: color || '#22C55E',
+        icon: icon,
+        type: 'task'
+      });
+      toast.success('Task created');
+    } catch (error) {
+      toast.error('Failed to create task');
+    }
+  };
+
   return (
     <aside className="calendar-sidebar relative w-[280px] h-full bg-background border-l overflow-hidden">
       <MinimalCalendar 
         currentDate={currentDate} 
         onDateChange={setCurrentDate}
+        onCreateEvent={handleCreateEvent}
+        onCreateTask={handleCreateTask}
         onUpdateBlock={handleUpdateBlock}
         onDeleteBlock={handleDeleteBlock}
         onToggleComplete={handleToggleComplete}
