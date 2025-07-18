@@ -11,16 +11,16 @@ interface ColorPaletteProps {
 }
 
 const PRESET_COLORS = [
-  { name: 'Blue', value: '#93BBFC' },
-  { name: 'Green', value: '#86EFAC' },
-  { name: 'Purple', value: '#C4B5FD' },
-  { name: 'Pink', value: '#F9A8D4' },
-  { name: 'Orange', value: '#FDBA74' },
-  { name: 'Yellow', value: '#FCD34D' },
-  { name: 'Red', value: '#FCA5A5' },
-  { name: 'Gray', value: '#D1D5DB' },
-  { name: 'Indigo', value: '#A5B4FC' },
-  { name: 'Teal', value: '#5EEAD4' },
+  { name: 'Blue', value: '#60A5FA' },
+  { name: 'Green', value: '#4ADE80' },
+  { name: 'Purple', value: '#A78BFA' },
+  { name: 'Pink', value: '#F472B6' },
+  { name: 'Orange', value: '#FB923C' },
+  { name: 'Yellow', value: '#FBBF24' },
+  { name: 'Red', value: '#F87171' },
+  { name: 'Gray', value: '#9CA3AF' },
+  { name: 'Indigo', value: '#818CF8' },
+  { name: 'Teal', value: '#2DD4BF' },
 ];
 
 export function ColorPalette({ 

@@ -13,13 +13,13 @@ import { useResponsive } from '@/hooks/useResponsive';
 const HOUR_HEIGHT = 60; // Height of each hour row
 const HOURS = Array.from({ length: 24 }, (_, i) => i); // 0-23 hours
 
-// Task presets for specific user
+// Task presets for specific user - colors work well in both light and dark modes
 const TASK_PRESETS = [
-  { title: 'Coding', emoji: '💻', color: '#93BBFC' }, // Soft Blue
-  { title: 'Research', emoji: '🔍', color: '#C4B5FD' }, // Soft Purple
-  { title: 'Break', emoji: '☕', color: '#86EFAC' }, // Soft Green
-  { title: 'Crypto', emoji: '🪙', color: '#FCD34D' }, // Soft Amber
-  { title: 'Food', emoji: '🍽️', color: '#FCA5A5' }, // Soft Red
+  { title: 'Coding', emoji: '💻', color: '#60A5FA' }, // Blue 400
+  { title: 'Research', emoji: '🔍', color: '#A78BFA' }, // Purple 400
+  { title: 'Break', emoji: '☕', color: '#4ADE80' }, // Green 400
+  { title: 'Crypto', emoji: '🪙', color: '#FBBF24' }, // Amber 400
+  { title: 'Food', emoji: '🍽️', color: '#F87171' }, // Red 400
 ];
 
 interface MinimalCalendarProps {
@@ -705,7 +705,7 @@ export function MinimalCalendar({
                   <div className="flex items-center gap-3">
                     <div 
                       className="w-2 h-2 rounded-full animate-pulse"
-                      style={{ backgroundColor: currentEvent.color || '#93BBFC' }}
+                      style={{ backgroundColor: currentEvent.color || '#60A5FA' }}
                     />
                     <div>
                       <div className="font-medium text-sm">{currentEvent.title}</div>
@@ -723,7 +723,7 @@ export function MinimalCalendar({
                 <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ backgroundColor: currentEvent.color || '#93BBFC' }}
+                    style={{ backgroundColor: currentEvent.color || '#60A5FA' }}
                     initial={{ width: 0 }}
                     animate={{ 
                       width: `${Math.min(100, Math.max(0, 
@@ -888,14 +888,19 @@ export function MinimalCalendar({
               <div
                 key={block.id}
                 className={cn(
-                  "calendar-block absolute rounded-lg p-2 text-xs text-white group cursor-move",
+                  "calendar-block absolute rounded-lg p-2 text-xs group cursor-move transition-all",
                   isMobile ? "left-12 right-2" : "left-16 right-4",
-                  "hover:shadow-lg transition-shadow"
+                  "hover:shadow-lg",
+                  // Light mode: solid background with white text
+                  "bg-opacity-100 text-white border-2 border-transparent",
+                  // Dark mode: semi-transparent background with colored border
+                  "dark:bg-opacity-20 dark:backdrop-blur-sm dark:border-opacity-40 dark:text-white"
                 )}
                 style={{
                   top: `${top}px`,
                   height: `${Math.max(30, height)}px`, // Min height for visibility
                   backgroundColor: block.color || '#93BBFC',
+                  borderColor: block.color || '#93BBFC',
                   opacity: block.isCompleted ? 0.6 : 1,
                 }}
                 onMouseDown={(e) => handleBlockMouseDown(e, block.id)}
@@ -1050,8 +1055,8 @@ export function MinimalCalendar({
                   "absolute rounded-lg pointer-events-none transition-colors",
                   isMobile ? "left-12 right-2" : "left-16 right-4",
                   isOverlapping 
-                    ? "bg-red-500/20 border-2 border-red-500" 
-                    : "bg-blue-500/30 border-2 border-blue-500 border-solid"
+                    ? "bg-red-500/20 dark:bg-red-500/10 border-2 border-red-500 dark:border-red-400" 
+                    : "bg-blue-500/30 dark:bg-blue-500/10 border-2 border-blue-500 dark:border-blue-400 border-solid"
                 )}
                 style={{
                   top: `${minY}px`,
@@ -1078,13 +1083,14 @@ export function MinimalCalendar({
               <div
                 className={cn(
                   "absolute rounded-lg border-2 border-solid pointer-events-none",
+                  "bg-opacity-30 dark:bg-opacity-10",
                   isMobile ? "left-12 right-2" : "left-16 right-4"
                 )}
                 style={{
                   top: `${ghostBlock.startY}px`,
                   height: `${ghostBlock.height}px`,
-                  borderColor: block.color || '#93BBFC',
-                  backgroundColor: `${block.color || '#93BBFC'}30`,
+                  borderColor: block.color || '#60A5FA',
+                  backgroundColor: `${block.color || '#60A5FA'}30`,
                 }}
               />
             );

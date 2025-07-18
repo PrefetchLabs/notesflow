@@ -12,6 +12,7 @@ import { TimeBlockingCalendar } from '@/components/calendar/time-blocking-calend
 import { MobileCalendarSheet } from '@/components/calendar/mobile-calendar-sheet';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { APP_VERSION } from '@/lib/config/version';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarHidden, setSidebarHidden] = useState(false);
@@ -72,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Button>
               <div className="ml-2 flex items-baseline gap-1">
                 <h1 className="text-xl font-bold text-foreground font-notes-flow whitespace-nowrap">NotesFlow</h1>
-                <span className="text-sm font-normal text-muted-foreground ml-1 hidden sm:inline">{process.env['NEXT_PUBLIC_APP_VERSION'] || 'v0.1'}</span>
+                <span className="text-sm font-normal text-muted-foreground ml-1 hidden sm:inline">{APP_VERSION}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -129,7 +130,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Button>
               <div className="flex items-baseline gap-1">
                 <h1 className="text-xl font-bold text-foreground font-notes-flow whitespace-nowrap">NotesFlow</h1>
-                <span className="text-sm font-normal text-muted-foreground ml-1 hidden sm:inline">{process.env['NEXT_PUBLIC_APP_VERSION'] || 'v0.1'}</span>
+                <span className="text-sm font-normal text-muted-foreground ml-1 hidden sm:inline">{APP_VERSION}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">

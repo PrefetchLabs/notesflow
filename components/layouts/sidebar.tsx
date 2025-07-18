@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react';
 import { useSubscription } from '@/lib/contexts/subscription-context';
 import { toast } from 'sonner';
 import { useResponsive } from '@/hooks/useResponsive';
+import { APP_VERSION } from '@/lib/config/version';
 
 interface SidebarProps {
   onToggle: () => void;
@@ -130,7 +131,7 @@ export function Sidebar({ onToggle }: SidebarProps) {
             NotesFlow
           </h1>
           <span className="text-sm font-normal text-muted-foreground ml-1 hidden sm:inline">
-            {process.env['NEXT_PUBLIC_APP_VERSION'] || 'v0.1'}
+            {APP_VERSION}
           </span>
         </div>
       </div>
