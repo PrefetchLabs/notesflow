@@ -554,7 +554,32 @@ export function MinimalCalendar({
     onInteractionStart?.();
   }, [blocks, onInteractionStart]);
 
-
+  // Handle resize start
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const block = blocks.find(b => b.id === blockId);
+    if (!block) return;
+    
+    setResizingBlock({
+      id: blockId,
+      initialEndTime: block.endTime,
+      initialMouseY: e.clientY
+    });
+    
+    // Set ghost block to show current size
+    const startY = block.startTime.getHours() * HOUR_HEIGHT + (block.startTime.getMinutes() / 60) * HOUR_HEIGHT;
+    const height = ((block.endTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
+    
+    setGhostBlock({
+      id: blockId,
+      startY: startY,
+      height: height
+    });
+    
+    onInteractionStart?.();
+  }, [blocks, onInteractionStart]);
 
   // Handle double click to edit block title
   const handleBlockDoubleClick = useCallback((e: React.MouseEvent, block: { id: string; title: string }) => {
@@ -964,6 +989,15 @@ export function MinimalCalendar({
                   )}
                 </div>
                 
+                {/* Resize handle at bottom */}
+                <div
+                  className={cn(
+                    "absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize group/resize",
+                    "hover:bg-white/20 transition-colors",
+                    isHovered ? "opacity-100" : "opacity-0"
+                  )}
+                  onMouseDown={(e) => handleResizeMouseDown(e, block.id)}
+                />
               </div>
             );
           })}
