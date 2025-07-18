@@ -142,14 +142,13 @@ export function MinimalCalendar({
       if (!gridRef.current) return { top: 0, left: 0, arrowSide: 'right' as const };
 
       const rect = gridRef.current.getBoundingClientRect();
-      const scrollTop = viewportRef.current?.scrollTop || 0;
 
       // Menu dimensions (approximate)
       const menuWidth = isSpecialUser ? 240 : 200;
       const menuHeight = isSpecialUser ? 340 : 140;
 
       // Center menu vertically on selection
-      const centerY = selectionY + scrollTop + selectionHeight / 2;
+      const centerY = selectionY + selectionHeight / 2;
       let top = rect.top + centerY - menuHeight / 2;
 
       // Position to the left of calendar with gap
@@ -404,8 +403,7 @@ export function MinimalCalendar({
       setShowColorPalette(false);
 
       const rect = gridRef.current.getBoundingClientRect();
-      const scrollTop = viewportRef.current?.scrollTop || 0;
-      const y = e.clientY - rect.top + scrollTop;
+      const y = e.clientY - rect.top;
 
       // Store initial drag position
       dragStartPositionRef.current = { x: e.clientX, y: e.clientY };
@@ -435,8 +433,7 @@ export function MinimalCalendar({
       if (!gridRef.current) return;
 
       const rect = gridRef.current.getBoundingClientRect();
-      const scrollTop = viewportRef.current?.scrollTop || 0;
-      const y = e.clientY - rect.top + scrollTop;
+      const y = e.clientY - rect.top;
 
       if (isDragging && dragSelection) {
         const time = yToTime(y);
@@ -730,7 +727,6 @@ export function MinimalCalendar({
       setShowColorPalette(false);
 
       const rect = gridRef.current.getBoundingClientRect();
-      const scrollTop = viewportRef.current?.scrollTop || 0;
 
       const block = blocks.find((b) => b.id === blockId);
       if (!block) return;
@@ -742,7 +738,7 @@ export function MinimalCalendar({
         ((block.endTime.getTime() - block.startTime.getTime()) / (1000 * 60 * 60)) * HOUR_HEIGHT;
 
       // Calculate mouse offset from block's top edge
-      const mouseY = e.clientY - rect.top + scrollTop;
+      const mouseY = e.clientY - rect.top;
       const offset = mouseY - startY;
 
       setDraggingBlock(blockId);
