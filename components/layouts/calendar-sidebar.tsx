@@ -81,7 +81,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         title: 'New Event',
         startTime,
         endTime,
-        color: '#3B82F6',
+        color: '#93BBFC',
         type: 'event'
       });
       toast.success('Event created');
@@ -97,7 +97,7 @@ export function CalendarSidebar({ onToggle }: CalendarSidebarProps) {
         title: title || 'New Task',
         startTime,
         endTime,
-        color: color || '#22C55E',
+        color: color || '#86EFAC',
         icon: icon,
         type: 'task'
       });

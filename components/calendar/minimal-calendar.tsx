@@ -15,11 +15,11 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i); // 0-23 hours
 
 // Task presets for specific user
 const TASK_PRESETS = [
-  { title: 'Coding', emoji: '💻', color: '#3B82F6' }, // Blue
-  { title: 'Research', emoji: '🔍', color: '#8B5CF6' }, // Purple
-  { title: 'Break', emoji: '☕', color: '#10B981' }, // Green
-  { title: 'Crypto', emoji: '🪙', color: '#F59E0B' }, // Amber
-  { title: 'Food', emoji: '🍽️', color: '#EF4444' }, // Red
+  { title: 'Coding', emoji: '💻', color: '#93BBFC' }, // Soft Blue
+  { title: 'Research', emoji: '🔍', color: '#C4B5FD' }, // Soft Purple
+  { title: 'Break', emoji: '☕', color: '#86EFAC' }, // Soft Green
+  { title: 'Crypto', emoji: '🪙', color: '#FCD34D' }, // Soft Amber
+  { title: 'Food', emoji: '🍽️', color: '#FCA5A5' }, // Soft Red
 ];
 
 interface MinimalCalendarProps {
@@ -340,22 +340,14 @@ export function MinimalCalendar({
       const durationMinutes = ((maxY - minY) / HOUR_HEIGHT) * 60;
       
       if (durationMinutes >= 15) { // At least 15 minutes
-        // Parse times to check for overlap
-        const [startHour, startMin] = dragSelection.startTime.split(':').map(s => parseInt(s) || 0);
-        const [endHour, endMin] = dragSelection.endTime.split(':').map(s => parseInt(s) || 0);
+        // Calculate times from Y positions instead of parsing formatted strings
+        const startTimeInfo = yToTime(minY);
+        const endTimeInfo = yToTime(maxY);
         
-        // Ensure start is before end
-        let actualStartHour = startHour;
-        let actualStartMin = startMin;
-        let actualEndHour = endHour;
-        let actualEndMin = endMin;
-        
-        if (dragSelection.endY < dragSelection.startY) {
-          actualStartHour = endHour;
-          actualStartMin = endMin;
-          actualEndHour = startHour;
-          actualEndMin = startMin;
-        }
+        const actualStartHour = startTimeInfo.hour;
+        const actualStartMin = startTimeInfo.minutes;
+        const actualEndHour = endTimeInfo.hour;
+        const actualEndMin = endTimeInfo.minutes;
         
         const startTime = new Date(currentDate);
         startTime.setHours(actualStartHour, actualStartMin, 0, 0);
@@ -461,20 +453,16 @@ export function MinimalCalendar({
   const handleCreateEvent = useCallback(() => {
     if (!dragSelection || !onCreateEvent) return;
     
-    const [startHour, startMin] = dragSelection.startTime.split(':').map(s => parseInt(s) || 0);
-    const [endHour, endMin] = dragSelection.endTime.split(':').map(s => parseInt(s) || 0);
+    // Calculate times from Y positions
+    const minY = Math.min(dragSelection.startY, dragSelection.endY);
+    const maxY = Math.max(dragSelection.startY, dragSelection.endY);
+    const startTimeInfo = yToTime(minY);
+    const endTimeInfo = yToTime(maxY);
     
-    let actualStartHour = startHour;
-    let actualStartMin = startMin;
-    let actualEndHour = endHour;
-    let actualEndMin = endMin;
-    
-    if (dragSelection.endY < dragSelection.startY) {
-      actualStartHour = endHour;
-      actualStartMin = endMin;
-      actualEndHour = startHour;
-      actualEndMin = startMin;
-    }
+    const actualStartHour = startTimeInfo.hour;
+    const actualStartMin = startTimeInfo.minutes;
+    const actualEndHour = endTimeInfo.hour;
+    const actualEndMin = endTimeInfo.minutes;
     
     const startTime = new Date(currentDate);
     startTime.setHours(actualStartHour, actualStartMin, 0, 0);
@@ -494,32 +482,28 @@ export function MinimalCalendar({
   const handleCreateTask = useCallback((title?: string, color?: string, icon?: string) => {
     if (!dragSelection || !onCreateTask) return;
     
-    const [startHour, startMin] = dragSelection.startTime.split(':').map(s => parseInt(s) || 0);
-    const [endHour, endMin] = dragSelection.endTime.split(':').map(s => parseInt(s) || 0);
+    // Calculate times from Y positions
+    const minY = Math.min(dragSelection.startY, dragSelection.endY);
+    const maxY = Math.max(dragSelection.startY, dragSelection.endY);
+    const startTimeInfo = yToTime(minY);
+    const endTimeInfo = yToTime(maxY);
     
-    let actualStartHour = startHour;
-    let actualStartMin = startMin;
-    let actualEndHour = endHour;
-    let actualEndMin = endMin;
+    const actualStartHour = startTimeInfo.hour;
+    const actualStartMin = startTimeInfo.minutes;
+    const actualEndHour = endTimeInfo.hour;
+    const actualEndMin = endTimeInfo.minutes;
     
-    if (dragSelection.endY < dragSelection.startY) {
-      actualStartHour = endHour;
-      actualStartMin = endMin;
-      actualEndHour = startHour;
-      actualEndMin = startMin;
+    const startDateTime = new Date(currentDate);
+    startDateTime.setHours(actualStartHour, actualStartMin, 0, 0);
+    
+    const endDateTime = new Date(currentDate);
+    endDateTime.setHours(actualEndHour, actualEndMin, 0, 0);
+    
+    if (endDateTime <= startDateTime) {
+      endDateTime.setDate(endDateTime.getDate() + 1);
     }
     
-    const startTime = new Date(currentDate);
-    startTime.setHours(actualStartHour, actualStartMin, 0, 0);
-    
-    const endTime = new Date(currentDate);
-    endTime.setHours(actualEndHour, actualEndMin, 0, 0);
-    
-    if (endTime <= startTime) {
-      endTime.setDate(endTime.getDate() + 1);
-    }
-    
-    onCreateTask(startTime, endTime, title, color, icon);
+    onCreateTask(startDateTime, endDateTime, title, color, icon);
     setShowMenu(false);
     setDragSelection(null);
   }, [dragSelection, onCreateTask, currentDate]);
@@ -529,6 +513,10 @@ export function MinimalCalendar({
     e.stopPropagation();
     e.preventDefault();
     if (!gridRef.current) return;
+    
+    // Close any open menus when starting new interaction
+    setShowMenu(false);
+    setShowColorPalette(false);
     
     const rect = gridRef.current.getBoundingClientRect();
     const scrollTop = scrollRef.current?.scrollTop || 0;
@@ -558,6 +546,10 @@ export function MinimalCalendar({
   const handleResizeMouseDown = useCallback((e: React.MouseEvent, blockId: string) => {
     e.stopPropagation();
     e.preventDefault();
+    
+    // Close any open menus when starting new interaction
+    setShowMenu(false);
+    setShowColorPalette(false);
     
     const block = blocks.find(b => b.id === blockId);
     if (!block) return;
@@ -713,7 +705,7 @@ export function MinimalCalendar({
                   <div className="flex items-center gap-3">
                     <div 
                       className="w-2 h-2 rounded-full animate-pulse"
-                      style={{ backgroundColor: currentEvent.color || '#3B82F6' }}
+                      style={{ backgroundColor: currentEvent.color || '#93BBFC' }}
                     />
                     <div>
                       <div className="font-medium text-sm">{currentEvent.title}</div>
@@ -731,7 +723,7 @@ export function MinimalCalendar({
                 <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ backgroundColor: currentEvent.color || '#3B82F6' }}
+                    style={{ backgroundColor: currentEvent.color || '#93BBFC' }}
                     initial={{ width: 0 }}
                     animate={{ 
                       width: `${Math.min(100, Math.max(0, 
@@ -903,7 +895,7 @@ export function MinimalCalendar({
                 style={{
                   top: `${top}px`,
                   height: `${Math.max(30, height)}px`, // Min height for visibility
-                  backgroundColor: block.color || '#3B82F6',
+                  backgroundColor: block.color || '#93BBFC',
                   opacity: block.isCompleted ? 0.6 : 1,
                 }}
                 onMouseDown={(e) => handleBlockMouseDown(e, block.id)}
@@ -1031,21 +1023,14 @@ export function MinimalCalendar({
             const minY = Math.min(dragSelection.startY, dragSelection.endY);
             const maxY = Math.max(dragSelection.startY, dragSelection.endY);
             
-            // Check if current selection overlaps
-            const [startHour, startMin] = dragSelection.startTime.split(':').map(Number);
-            const [endHour, endMin] = dragSelection.endTime.split(':').map(Number);
+            // Calculate times from Y positions for overlap check
+            const startTimeInfo = yToTime(minY);
+            const endTimeInfo = yToTime(maxY);
             
-            let actualStartHour = startHour;
-            let actualStartMin = startMin;
-            let actualEndHour = endHour;
-            let actualEndMin = endMin;
-            
-            if (dragSelection.endY < dragSelection.startY) {
-              actualStartHour = endHour;
-              actualStartMin = endMin;
-              actualEndHour = startHour;
-              actualEndMin = startMin;
-            }
+            const actualStartHour = startTimeInfo.hour;
+            const actualStartMin = startTimeInfo.minutes;
+            const actualEndHour = endTimeInfo.hour;
+            const actualEndMin = endTimeInfo.minutes;
             
             const startTime = new Date(currentDate);
             startTime.setHours(actualStartHour, actualStartMin, 0, 0);
@@ -1066,7 +1051,7 @@ export function MinimalCalendar({
                   isMobile ? "left-12 right-2" : "left-16 right-4",
                   isOverlapping 
                     ? "bg-red-500/20 border-2 border-red-500" 
-                    : "bg-blue-500/30 border-2 border-blue-500 border-dashed"
+                    : "bg-blue-500/30 border-2 border-blue-500 border-solid"
                 )}
                 style={{
                   top: `${minY}px`,
@@ -1092,14 +1077,14 @@ export function MinimalCalendar({
             return (
               <div
                 className={cn(
-                  "absolute rounded-lg border-2 border-dashed pointer-events-none",
+                  "absolute rounded-lg border-2 border-solid pointer-events-none",
                   isMobile ? "left-12 right-2" : "left-16 right-4"
                 )}
                 style={{
                   top: `${ghostBlock.startY}px`,
                   height: `${ghostBlock.height}px`,
-                  borderColor: block.color || '#3B82F6',
-                  backgroundColor: `${block.color || '#3B82F6'}30`,
+                  borderColor: block.color || '#93BBFC',
+                  backgroundColor: `${block.color || '#93BBFC'}30`,
                 }}
               />
             );
