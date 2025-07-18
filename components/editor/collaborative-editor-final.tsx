@@ -60,12 +60,124 @@ export function CollaborativeEditorFinal({
   enableDragToCalendar = false,
   onTextDragStart,
 }: CollaborativeEditorFinalProps) {
-  // Ensure we have valid initial content
+  // Ensure we have valid initial content with proper BlockNote structure
   const safeInitialContent = useMemo(() => {
     if (!initialContent || !Array.isArray(initialContent) || initialContent.length === 0) {
-      return [{ type: "paragraph", content: "" }];
+      return [{
+        type: "paragraph",
+        props: {
+          textColor: "default",
+          backgroundColor: "default",
+          textAlignment: "left"
+        },
+        content: [],
+        children: []
+      }];
     }
-    return initialContent;
+    
+    // Validate and clean each block to match BlockNote structure
+    const validatedContent = initialContent.map((block: any) => {
+      // Ensure block has required structure
+      if (!block || typeof block !== 'object') {
+        return {
+          type: "paragraph",
+          props: {
+            textColor: "default",
+            backgroundColor: "default",
+            textAlignment: "left"
+          },
+          content: [],
+          children: []
+        };
+      }
+      
+      // Ensure block has a valid type
+      const validTypes = ['paragraph', 'heading', 'bulletListItem', 'numberedListItem', 
+                         'checkListItem', 'table', 'image', 'quote'];
+      const blockType = block.type && typeof block.type === 'string' && validTypes.includes(block.type) 
+                       ? block.type : 'paragraph';
+      
+      // Ensure props exist with default values
+      const props = {
+        textColor: "default",
+        backgroundColor: "default",
+        textAlignment: "left",
+        ...(block.props || {})
+      };
+      
+      // Handle content based on block type
+      let content: any = [];
+      
+      // Text-based blocks
+      if (['paragraph', 'heading', 'bulletListItem', 'numberedListItem', 'checkListItem', 'quote'].includes(blockType)) {
+        if (typeof block.content === 'string') {
+          // Convert string to inline content format
+          content = block.content ? [{
+            type: "text",
+            text: block.content,
+            styles: {}
+          }] : [];
+        } else if (Array.isArray(block.content)) {
+          // Validate inline content array
+          content = block.content.map((inline: any) => {
+            if (typeof inline === 'string') {
+              return {
+                type: "text",
+                text: inline,
+                styles: {}
+              };
+            } else if (inline && typeof inline === 'object' && inline.type === 'text') {
+              return {
+                type: "text",
+                text: inline.text || "",
+                styles: inline.styles || {}
+              };
+            }
+            return {
+              type: "text",
+              text: "",
+              styles: {}
+            };
+          });
+        } else {
+          content = [];
+        }
+      } else if (blockType === 'table' && block.content) {
+        // Handle table content
+        content = block.content;
+      } else if (blockType === 'image') {
+        // Images don't have content
+        content = undefined;
+      }
+      
+      // Ensure children is an array
+      const children = Array.isArray(block.children) ? block.children : [];
+      
+      // Return validated block
+      return {
+        ...(block.id ? { id: block.id } : {}), // Only include id if it exists
+        type: blockType,
+        props,
+        content,
+        children
+      };
+    });
+    
+    // Ensure we have at least one valid block
+    if (validatedContent.length === 0) {
+      return [{
+        type: "paragraph",
+        props: {
+          textColor: "default",
+          backgroundColor: "default",
+          textAlignment: "left"
+        },
+        content: [],
+        children: []
+      }];
+    }
+    
+    return validatedContent;
   }, [initialContent]);
   
   const { resolvedTheme } = useTheme();
@@ -171,7 +283,7 @@ export function CollaborativeEditorFinal({
   const persistence = useMemo(() => {
     if (!isShared) return null;
     return new IndexeddbPersistence(`notesflow-${noteId}`, ydoc);
-  }, [noteId, isShared]);
+  }, [noteId, isShared, ydoc]);
   
   // Clean up IndexedDB when note becomes non-shared
   useEffect(() => {
@@ -253,8 +365,9 @@ export function CollaborativeEditorFinal({
 
   // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
-    // Always provide initial content - Y.js will sync it properly
-    initialContent: safeInitialContent,
+    // Only provide initial content for non-collaborative mode
+    // For collaborative mode, content comes from Y.js provider
+    initialContent: isShared ? undefined : safeInitialContent,
     dictionary: {
       ...en,
       ai: aiEn
@@ -353,7 +466,7 @@ export function CollaborativeEditorFinal({
       },
       showCursorLabels: "activity",
     } : undefined,
-  }, [provider, hasAIAccess, resolvedTheme]); // Recreate when provider, AI access, or theme changes
+  }, [hasAIAccess, resolvedTheme, isShared]); // Recreate when AI access, theme, or sharing status changes
 
   // Handle text selection for drag to calendar
   const { selection } = useBlockNoteSelection({
@@ -365,13 +478,16 @@ export function CollaborativeEditorFinal({
     onTextDragStart?.(text);
   }, [onTextDragStart]);
   
-  // Initialize content for non-collaborative mode
+  // Initialize content for non-collaborative mode  
   useEffect(() => {
-    if (!editor || !safeInitialContent || provider) return;
+    if (!editor || !safeInitialContent || provider || isShared) return;
     
     // For non-collaborative mode, content is already set via initialContent
-    // This effect is no longer needed since we always pass initialContent to editor
-  }, [provider, editor, safeInitialContent]);
+    // This effect ensures content is set if editor was created without it
+    if (editor.document && editor.document.length === 0) {
+      editor.replaceBlocks(editor.document, safeInitialContent);
+    }
+  }, [provider, editor, safeInitialContent, isShared]);
   
   // Initialize Y.js document with initial content when collaboration starts
   useEffect(() => {
@@ -381,14 +497,19 @@ export function CollaborativeEditorFinal({
     
     // Check if this is the first time Y.js is being initialized
     const initializeYDoc = async () => {
-      // Wait a bit for provider to connect
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for provider to connect
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       if (!mounted) return;
       
       // Wait for persistence to be ready if it exists
       if (persistence) {
-        await persistence.whenSynced;
+        try {
+          await persistence.whenSynced;
+        } catch (error) {
+          // If persistence fails, continue anyway
+          console.warn('Persistence sync failed, continuing without it');
+        }
       }
       
       if (!mounted) return;
@@ -397,18 +518,16 @@ export function CollaborativeEditorFinal({
       const fragment = ydoc.getXmlFragment("document-store");
       
       // Check if we need to initialize content
-      // Initialize if: fragment is empty OR editor has only empty paragraph
-      const editorIsEmpty = editor.document.length === 1 && 
-                          editor.document[0].type === 'paragraph' && 
-                          (!editor.document[0].content || 
-                           (Array.isArray(editor.document[0].content) && editor.document[0].content.length === 0));
-      
-      if ((fragment.length === 0 || editorIsEmpty) && safeInitialContent.length > 0) {
-        // This means we're initializing collaboration for the first time or content is empty
+      // Initialize if: fragment is empty AND we have initial content
+      if (fragment.length === 0 && safeInitialContent.length > 0 && editor.document) {
+        // This is the first time sharing - initialize with content
         // Use a transaction to ensure atomic update
         ydoc.transact(() => {
           editor.replaceBlocks(editor.document, safeInitialContent);
-        });
+        }, 'initial-content');
+      } else if (fragment.length > 0 && editor.document && editor.document.length === 0) {
+        // Fragment has content but editor is empty - Y.js will sync automatically
+        // Just wait for sync to happen
       }
     };
     
