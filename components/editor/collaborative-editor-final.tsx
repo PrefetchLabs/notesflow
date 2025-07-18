@@ -167,10 +167,28 @@ export function CollaborativeEditorFinal({
     };
   }, [provider]);
   
-  // Create IndexedDB persistence
+  // Create IndexedDB persistence only for shared notes
   const persistence = useMemo(() => {
+    if (!isShared) return null;
     return new IndexeddbPersistence(`notesflow-${noteId}`, ydoc);
-  }, [noteId]); // Remove ydoc dependency
+  }, [noteId, isShared]);
+  
+  // Clean up IndexedDB when note becomes non-shared
+  useEffect(() => {
+    if (!isShared && typeof window !== 'undefined') {
+      // Clear any stale IndexedDB data for non-shared notes
+      const dbName = `y-indexeddb-notesflow-${noteId}`;
+      const deleteRequest = window.indexedDB.deleteDatabase(dbName);
+      
+      deleteRequest.onsuccess = () => {
+        // Database deleted successfully
+      };
+      
+      deleteRequest.onerror = () => {
+        // Ignore errors - database might not exist
+      };
+    }
+  }, [isShared, noteId]);
   
   // Set awareness state when provider is connected
   useEffect(() => {
@@ -235,8 +253,8 @@ export function CollaborativeEditorFinal({
 
   // Create editor with collaboration when provider is available
   const editor = useCreateBlockNote({
-    // Don't set initial content here if we have a provider - we'll handle it after
-    initialContent: provider ? undefined : safeInitialContent,
+    // Always provide initial content - Y.js will sync it properly
+    initialContent: safeInitialContent,
     dictionary: {
       ...en,
       ai: aiEn
@@ -347,14 +365,12 @@ export function CollaborativeEditorFinal({
     onTextDragStart?.(text);
   }, [onTextDragStart]);
   
-  // Initialize content for both collaborative and non-collaborative modes
+  // Initialize content for non-collaborative mode
   useEffect(() => {
-    if (!editor || !safeInitialContent) return;
+    if (!editor || !safeInitialContent || provider) return;
     
-    // For non-collaborative mode, set content directly
-    if (!provider && editor.document.length === 0) {
-      editor.replaceBlocks(editor.document, safeInitialContent);
-    }
+    // For non-collaborative mode, content is already set via initialContent
+    // This effect is no longer needed since we always pass initialContent to editor
   }, [provider, editor, safeInitialContent]);
   
   // Initialize Y.js document with initial content when collaboration starts
@@ -370,8 +386,10 @@ export function CollaborativeEditorFinal({
       
       if (!mounted) return;
       
-      // Wait for persistence to be ready
-      await persistence.whenSynced;
+      // Wait for persistence to be ready if it exists
+      if (persistence) {
+        await persistence.whenSynced;
+      }
       
       if (!mounted) return;
       
@@ -379,9 +397,14 @@ export function CollaborativeEditorFinal({
       const fragment = ydoc.getXmlFragment("document-store");
       
       // Check if we need to initialize content
-      // Fragment length 0 means no collaborative content exists yet
-      if (fragment.length === 0 && safeInitialContent.length > 0 && editor.document.length === 0) {
-        // This means we're the author initializing collaboration for the first time
+      // Initialize if: fragment is empty OR editor has only empty paragraph
+      const editorIsEmpty = editor.document.length === 1 && 
+                          editor.document[0].type === 'paragraph' && 
+                          (!editor.document[0].content || 
+                           (Array.isArray(editor.document[0].content) && editor.document[0].content.length === 0));
+      
+      if ((fragment.length === 0 || editorIsEmpty) && safeInitialContent.length > 0) {
+        // This means we're initializing collaboration for the first time or content is empty
         // Use a transaction to ensure atomic update
         ydoc.transact(() => {
           editor.replaceBlocks(editor.document, safeInitialContent);
