@@ -181,6 +181,12 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
       const originalBlock = blocks.find((b) => b.id === id);
       if (!originalBlock) return;
 
+      // Don't update temporary blocks that haven't been saved yet
+      if (id.startsWith('temp-')) {
+        console.warn('Cannot update temporary block that hasn\'t been saved yet');
+        return;
+      }
+
       // Optimistically update
       const optimisticBlock = {
         ...originalBlock,
@@ -205,7 +211,15 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
           }),
         });
 
-        if (!response.ok) throw new Error('Failed to update time block');
+        if (!response.ok) {
+          if (response.status === 404) {
+            // Block doesn't exist on server, remove from local state
+            setBlocks((prev) => prev.filter((b) => b.id !== id));
+            toast.error('Time block no longer exists');
+            return;
+          }
+          throw new Error('Failed to update time block');
+        }
 
         const { block } = await response.json();
         const updatedBlock = {
@@ -245,6 +259,13 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
     const originalBlock = blocks.find((b) => b.id === id);
     if (!originalBlock) return;
 
+    // Don't delete temporary blocks that haven't been saved yet
+    if (id.startsWith('temp-')) {
+      console.warn('Cannot delete temporary block that hasn\'t been saved yet');
+      setBlocks((prev) => prev.filter((b) => b.id !== id));
+      return;
+    }
+
     // Optimistically delete
     setBlocks((prev) => prev.filter((b) => b.id !== id));
 
@@ -254,7 +275,16 @@ export function useTimeBlocks(currentWeek: Date, isInteracting = false) {
         credentials: 'same-origin',
       });
 
-      if (!response.ok) throw new Error('Failed to delete time block');
+      if (!response.ok) {
+        if (response.status === 404) {
+          // Block already deleted, just update the cache
+          lastFetchRef.current = JSON.stringify(
+            blocks.filter((b) => b.id !== id)
+          );
+          return; // Success - block is gone
+        }
+        throw new Error('Failed to delete time block');
+      }
 
       // Update lastFetchRef to prevent sync from overwriting
       lastFetchRef.current = JSON.stringify(
